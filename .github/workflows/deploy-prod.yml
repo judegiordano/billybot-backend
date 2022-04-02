@@ -1,0 +1,38 @@
+name: Deploy Prod
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn lint
+
+      - run: yarn build
+
+      # - name: Serverless Stack Deploy
+      #   run: |
+      #     set -euxo pipefail
+      #     yarn deploy prod
+      #   env:
+      #     STAGE: prod
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      #     VERSION: ${{ secrets.VERSION }}
+      #     MONGO_URI: ${{ secrets.MONGO_URI }}
