@@ -51,4 +51,51 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		}, {});
 		return dictionary;
 	});
+	app.post<{
+		Body: {
+			server_id: string
+			user_id: string
+		}
+	}>("/bucks/allowance", {
+		schema: {
+			body: {
+				type: "object",
+				required: [
+					"server_id",
+					"user_id",
+				],
+				additionalProperties: false,
+				properties: {
+					server_id: { type: "string" },
+					user_id: { type: "string" }
+				}
+			}
+		},
+	}, async (req) => {
+		const { server_id, user_id } = req.body;
+		const member = await users.findOne({ user_id, server_id });
+		if (!member) throw new NotFoundError("user not found");
+		const now = new Date();
+		const lastAllowance = new Date(member.last_allowance);
+		const utc1 = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+		const utc2 = Date.UTC(lastAllowance.getFullYear(), lastAllowance.getMonth(), lastAllowance.getDate());
+		const diff = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
+		if (diff <= 7) {
+			const readableDay = lastAllowance.toLocaleDateString();
+			const readableTime = lastAllowance.toLocaleTimeString();
+			throw new BadRequestError(`you've already gotten a weekly allowance on ${readableDay} at ${readableTime}`);
+		}
+		const updated = await users.findOneAndUpdate({
+			_id: member._id
+		}, {
+			$inc: { billy_bucks: 200 },
+			last_allowance: new Date().toISOString()
+		}, { new: true });
+		return {
+			[updated?.user_id as string]: {
+				username: updated?.username,
+				billy_bucks: updated?.billy_bucks,
+			}
+		};
+	});
 };

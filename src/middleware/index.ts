@@ -49,6 +49,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 				discriminator: { type: "string" },
 				avatar_hash: { type: "string" },
 				last_allowance: { type: "string" },
+				has_lottery_ticket: { type: "boolean" },
 				metrics: {
 					type: "object",
 					properties: {
