@@ -48,13 +48,14 @@ export const userRouter = async function (app: FastifyInstance) {
 		const inserted = await users.insertMany(req.body);
 		return inserted ?? [];
 	});
-	app.get<{ Params: { user_id: string } }>("/user/:user_id", {
+	app.get<{ Querystring: { user_id: string, server_id: string } }>("/user", {
 		schema: {
-			params: {
+			querystring: {
 				type: "object",
-				required: ["user_id"],
+				required: ["user_id", "server_id"],
 				properties: {
-					user_id: { type: "string" }
+					user_id: { type: "string", minLength: 1 },
+					server_id: { type: "string", minLength: 1 },
 				}
 			},
 			response: {
@@ -62,7 +63,8 @@ export const userRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		const user = await users.findOne({ user_id: req.params.user_id });
+		const { server_id, user_id } = req.query;
+		const user = await users.findOne({ user_id, server_id });
 		return user ?? {};
 	});
 	app.get<{ Params: { server_id: string } }>("/users/server/:server_id", {

@@ -28,9 +28,6 @@ export const bucksRouter = async function (app: FastifyInstance) {
 					recipient_id: { type: "string" },
 					sender_id: { type: "string" }
 				}
-			},
-			response: {
-				200: { $ref: "userArray#" }
 			}
 		},
 	}, async (req) => {
@@ -45,6 +42,13 @@ export const bucksRouter = async function (app: FastifyInstance) {
 			users.findOneAndUpdate({ user_id: recipient_id, server_id }, { $inc: { billy_bucks: amount } }),
 			users.findOneAndUpdate({ user_id: sender_id, server_id }, { $inc: { billy_bucks: -amount } }),
 		]);
-		return updatedUsers;
+		const dictionary = updatedUsers.reduce((acc, user) => {
+			acc[user?.user_id as string] = {
+				username: user?.username,
+				billy_bucks: user?.billy_bucks
+			};
+			return acc;
+		}, {});
+		return dictionary;
 	});
 };
