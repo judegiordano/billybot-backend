@@ -2,6 +2,7 @@ import Fastify, { FastifyError, FastifyRequest, FastifyReply } from "fastify";
 import helmet from "fastify-helmet";
 
 import { schemas } from "../middleware";
+import { onRequest } from "../hooks";
 import { CommonError } from "../types";
 
 export const app = Fastify({
@@ -15,6 +16,7 @@ export const app = Fastify({
 });
 app.register(schemas);
 app.register(helmet);
+app.addHook("onRequest", onRequest);
 app.setErrorHandler(async (error: FastifyError | CommonError, req: FastifyRequest, res: FastifyReply) => {
 	req.log.error(error, error.stack);
 	if (error instanceof CommonError) {

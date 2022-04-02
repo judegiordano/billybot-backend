@@ -1,4 +1,4 @@
-import { Stack, App, StackProps, Api } from "@serverless-stack/resources";
+import { Stack, App, StackProps, Api, Function } from "@serverless-stack/resources";
 
 export class ApiStack extends Stack {
 	constructor(scope: App, id: string, props?: StackProps) {
@@ -11,6 +11,10 @@ export class ApiStack extends Stack {
 			routes: {
 				"$default": "src/handlers/index.run",
 			}
+		});
+
+		new Function(this, "create-token", {
+			handler: "src/handlers/functions/createToken",
 		});
 
 		this.addOutputs({
