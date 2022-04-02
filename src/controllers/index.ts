@@ -3,10 +3,12 @@ import { FastifyPluginCallback } from "fastify";
 import { app, config } from "../services";
 import { developerRouter } from "./developer";
 import { userRouter } from "./user";
+import { bucksRouter } from "./bucks";
 
 const routers = [
 	developerRouter,
-	userRouter
+	userRouter,
+	bucksRouter
 ] as unknown as FastifyPluginCallback[];
 
 for (const router of routers) {

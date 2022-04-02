@@ -4,9 +4,7 @@ import { users, IUser } from "../../models";
 import { BadRequestError } from "../../types/errors";
 
 export const userRouter = async function (app: FastifyInstance) {
-	app.post<{
-		Body: IUser[]
-	}>("/users", {
+	app.post<{ Body: IUser[] }>("/users", {
 		schema: {
 			body: {
 				type: "array",
