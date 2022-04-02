@@ -14,11 +14,11 @@ export class ApiStack extends Stack {
 		});
 
 		new Function(this, "create-token", {
-			handler: "src/handlers/functions/createToken",
+			handler: "src/handlers/functions.createToken",
 		});
 
 		this.addOutputs({
-			endpoint: process.env.IS_LOCAL ? api.url : "https://*******/.execute-api.us-east-1.amazonaws.com/api"
+			endpoint: process.env.IS_LOCAL ? api.url : "https://*******/.execute-api.us-east-1.amazonaws.com/api/v*/"
 		});
 	}
 }

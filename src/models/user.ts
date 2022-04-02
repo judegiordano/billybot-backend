@@ -23,6 +23,7 @@ export const users = mongoose.model<IUser>("User",
 	new mongoose.Schema({
 		billy_bucks: {
 			type: Number,
+			default: 500,
 			index: true
 		},
 		server_id: {
