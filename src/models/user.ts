@@ -16,6 +16,7 @@ export interface IUser extends mongoose.IModel {
 	discriminator: string
 	avatar_hash: string
 	last_allowance: Date
+	has_lottery_ticket: boolean
 	metrics: IUserMetrics
 }
 
@@ -40,6 +41,10 @@ export const users = mongoose.model<IUser>("User",
 		last_allowance: {
 			type: String,
 			default: new Date().toISOString()
+		},
+		has_lottery_ticket: {
+			type: Boolean,
+			default: false
 		},
 		metrics: {
 			required: false,
