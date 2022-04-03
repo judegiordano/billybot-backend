@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 
 import { users, IUserMetrics } from "../../models";
+import { NotFoundError } from "../../types";
 
 export const metricsRouter = async function (app: FastifyInstance) {
 	app.put<{
@@ -59,5 +60,44 @@ export const metricsRouter = async function (app: FastifyInstance) {
 			return acc;
 		}, {});
 		return dictionary;
+	});
+	app.get<{
+		Params: {
+			server_id: string
+		},
+		Querystring: Partial<IUserMetrics>
+	}>("/metrics/:server_id", {
+		schema: {
+			params: {
+				type: "object",
+				additionalProperties: false,
+				required: ["server_id"],
+				properties: {
+					server_id: { type: "string" },
+				}
+			},
+			querystring: {
+				type: "object",
+				additionalProperties: false,
+				properties: {
+					posts: { type: "number", enum: [1, -1] },
+					reactions_used: { type: "number", enum: [1, -1] },
+					reactions_received: { type: "number", enum: [1, -1] },
+					mentions: { type: "number", enum: [1, -1] },
+					average_reactions_per_post: { type: "number", enum: [1, -1] }
+				}
+			},
+			response: {
+				200: { $ref: "userArray#" }
+			}
+		}
+	}, async (req) => {
+		const sort = Object.keys(req.query).reduce((acc, key) => {
+			acc[`metrics.${key}`] = req.query[key];
+			return acc;
+		}, {});
+		const members = await users.find({ server_id: req.params.server_id }, {}, { sort });
+		if (!members || members.length === 0) throw new NotFoundError("no members found");
+		return members;
 	});
 };
