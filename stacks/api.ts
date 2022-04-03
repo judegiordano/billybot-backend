@@ -5,8 +5,10 @@ export class ApiStack extends Stack {
 		super(scope, id, props);
 
 		const api = new Api(this, "api", {
+			defaultThrottlingRateLimit: 2000,
+			defaultThrottlingBurstLimit: 100,
 			cors: {
-				allowHeaders: ["Authorization"]
+				allowHeaders: ["Authorization", "x-api-timestamp"]
 			},
 			routes: {
 				"$default": "src/handlers/index.run",
