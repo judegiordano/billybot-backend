@@ -15,8 +15,7 @@ export const userRouter = async function (app: FastifyInstance) {
 						"server_id",
 						"user_id",
 						"username",
-						"discriminator",
-						"avatar_hash"
+						"discriminator"
 					],
 					additionalProperties: false,
 					properties: {
@@ -48,7 +47,7 @@ export const userRouter = async function (app: FastifyInstance) {
 		const inserted = await users.insertMany(req.body);
 		return inserted ?? [];
 	});
-	app.get<{ Querystring: { user_id: string, server_id: string } }>("/user", {
+	app.get<{ Querystring: { user_id: string, server_id: string } }>("/users", {
 		schema: {
 			querystring: {
 				type: "object",

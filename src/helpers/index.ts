@@ -1,5 +1,8 @@
-export function buildAvatarUrl(userId: string, avatarHash: string) {
-	return `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.png`;
+import { IUser } from "../models";
+
+export function buildAvatarUrl(user: IUser) {
+	if (!user.avatar_hash) return "https://discord.com/assets/c09a43a372ba81e3018c3151d4ed4773.png";
+	return `https://cdn.discordapp.com/avatars/${user.user_id}/${user.avatar_hash}.png`;
 }
 
 export function readableDate(date: Date) {

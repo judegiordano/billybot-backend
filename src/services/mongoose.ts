@@ -3,7 +3,7 @@ import mongoose, { Schema as BaseSchema, SchemaDefinition, SchemaOptions, connec
 
 import { MONGO_URI } from "./config";
 
-const nanoid = customAlphabet("1234567890", 20);
+const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 20);
 
 const connection = {
 	isConnected: 0
@@ -26,7 +26,7 @@ export async function closeConnection() {
 }
 
 export interface IModel {
-	_id: string
+	_id: number
 	created_at: Date
 	updated_at: Date
 }
