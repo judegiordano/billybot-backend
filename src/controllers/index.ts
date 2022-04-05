@@ -5,12 +5,14 @@ import { developerRouter } from "./developer";
 import { userRouter } from "./user";
 import { bucksRouter } from "./bucks";
 import { metricsRouter } from "./metrics";
+import { lotteryRouter } from "./lottery";
 
 const routers = [
 	developerRouter,
 	userRouter,
 	bucksRouter,
-	metricsRouter
+	metricsRouter,
+	lotteryRouter
 ] as unknown as FastifyPluginCallback[];
 
 for (const router of routers) {
