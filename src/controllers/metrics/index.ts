@@ -66,7 +66,7 @@ export const metricsRouter = async function (app: FastifyInstance) {
 			server_id: string
 		},
 		Querystring: Partial<IUserMetrics>
-	}>("/metrics/:server_id", {
+	}>("/metrics/server/:server_id", {
 		schema: {
 			params: {
 				type: "object",
