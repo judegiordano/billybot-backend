@@ -43,6 +43,7 @@ export const lotteryRouter = async function (app: FastifyInstance) {
 			new: true
 		});
 		return {
+			ticket_cost: LOTTERY_COST,
 			[updated?.user_id as string]: {
 				username: updated?.username,
 				billy_bucks: updated?.billy_bucks
