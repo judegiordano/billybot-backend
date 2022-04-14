@@ -40,8 +40,8 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		if (!recipient || !sender) throw new NotFoundError("one or more users not found");
 		if (amount > sender.billy_bucks) throw new BadRequestError(`user ${sender.user_id} only has ${sender.billy_bucks} bucks!`);
 		const updatedUsers = await Promise.all([
-			users.findOneAndUpdate({ user_id: recipient_id, server_id }, { $inc: { billy_bucks: amount } }),
-			users.findOneAndUpdate({ user_id: sender_id, server_id }, { $inc: { billy_bucks: -amount } }),
+			users.findOneAndUpdate({ user_id: recipient_id, server_id }, { $inc: { billy_bucks: amount } }, { new: true }),
+			users.findOneAndUpdate({ user_id: sender_id, server_id }, { $inc: { billy_bucks: -amount } }, { new: true }),
 		]);
 		const dictionary = updatedUsers.reduce((acc, user) => {
 			acc[user?.user_id as string] = {
