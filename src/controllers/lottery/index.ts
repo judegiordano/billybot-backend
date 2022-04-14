@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 
 import { users } from "../../models";
 import { BadRequestError, NotFoundError } from "../../types/errors";
+import { LOTTERY_COST } from "../../services/config";
 
 export const lotteryRouter = async function (app: FastifyInstance) {
 	app.post<{
@@ -30,13 +31,13 @@ export const lotteryRouter = async function (app: FastifyInstance) {
 		if (!member) throw new NotFoundError("user not found");
 		if (member.has_lottery_ticket)
 			throw new BadRequestError("You have already bought a ticket for this week's lottery!");
-		if (member.billy_bucks < 50)
+		if (member.billy_bucks < LOTTERY_COST)
 			throw new BadRequestError(`You only have ${member.billy_bucks} bucks!`);
 		const updated = await users.findOneAndUpdate({
 			user_id,
 			server_id
 		}, {
-			$inc: { billy_bucks: -50 },
+			$inc: { billy_bucks: -LOTTERY_COST },
 			has_lottery_ticket: true
 		}, {
 			new: true
@@ -72,7 +73,8 @@ export const lotteryRouter = async function (app: FastifyInstance) {
 			sort: { username: 1 }
 		});
 		return {
-			jackpot: (entrants.length * 50) + 200,
+			ticket_cost: LOTTERY_COST,
+			jackpot: (entrants.length * LOTTERY_COST) + 200,
 			entrants
 		};
 	});
