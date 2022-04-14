@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 
 import { users, IUser } from "../../models";
-import { BadRequestError } from "../../types/errors";
 
 export const userRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IUser[] }>("/users", {
@@ -33,18 +32,20 @@ export const userRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		await Promise.all(
-			req.body.map(async ({ user_id, server_id }) => {
+		const notFound = await Promise.all(
+			req.body.map(async (user) => {
 				const count = await users.findOne({
 					$and: [
-						{ user_id },
-						{ server_id },
+						{ user_id: user.user_id },
+						{ server_id: user.server_id },
 					],
 				}).count();
-				if (count >= 1) throw new BadRequestError(`user with user_id ${user_id} and server_id ${server_id} already exists`);
+				if (count >= 1) return;
+				return user;
 			})
 		);
-		const inserted = await users.insertMany(req.body);
+		const operations = notFound.filter(a => !!a);
+		const inserted = await users.insertMany(operations);
 		return inserted ?? [];
 	});
 	app.get<{ Querystring: { user_id: string, server_id: string } }>("/users", {
