@@ -76,8 +76,8 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		const { server_id, user_id } = req.body;
 		const member = await users.findOne({ user_id, server_id });
 		if (!member) throw new NotFoundError("user not found");
-		const diff = diffInDays(new Date(), new Date(member.last_allowance));
-		if (diff >= 7) throw new BadRequestError(`you've already gotten a weekly allowance on ${readableDate(new Date(member.last_allowance))}`);
+		const diff = diffInDays(new Date(member.last_allowance), new Date());
+		if (diff <= 7) throw new BadRequestError(`you've already gotten a weekly allowance on ${readableDate(new Date(member.last_allowance))}`);
 		const updated = await users.findOneAndUpdate({
 			_id: member._id
 		}, {
