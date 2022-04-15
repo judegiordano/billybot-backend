@@ -6,7 +6,7 @@ export class ApiStack extends Stack {
 
 		new Cron(this, "lottery-cron", {
 			// fires at 12:00pm FRI (UTC -> EST)
-			schedule: "cron(0 17 ? * FRI *)",
+			schedule: "cron(0 16 ? * FRI *)",
 			job: "src/handlers/cron.pickLotteryWinner",
 		});
 
