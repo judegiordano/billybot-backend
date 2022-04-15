@@ -48,6 +48,40 @@ export const userRouter = async function (app: FastifyInstance) {
 		const inserted = await users.insertMany(operations);
 		return inserted ?? [];
 	});
+	app.put<{ Body: IUser[] }>("/users", {
+		schema: {
+			body: {
+				type: "array",
+				uniqueItems: true,
+				items: {
+					type: "object",
+					required: [
+						"server_id",
+						"user_id"
+					],
+					additionalProperties: false,
+					properties: {
+						server_id: { type: "string" },
+						user_id: { type: "string" },
+						billy_bucks: { type: "number" },
+						username: { type: "string" },
+						discriminator: { type: "string" },
+						avatar_hash: { type: "string" },
+						has_lottery_ticket: { type: "boolean" }
+					}
+				}
+			}
+		},
+	}, async (req) => {
+		const operations = req.body.map((user) => {
+			return users.findOneAndUpdate({
+				user_id: user.user_id,
+				server_id: user.server_id
+			}, user, { new: true });
+		});
+		const updates = await Promise.all(operations);
+		return updates ?? [];
+	});
 	app.get<{ Querystring: { user_id: string, server_id: string } }>("/users", {
 		schema: {
 			querystring: {
