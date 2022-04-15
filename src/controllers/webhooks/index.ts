@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 
 import { webhooks, IWebhook } from "../../models";
 import { NotFoundError } from "../../types/errors";
-import { rest } from "../../services";
+import { discord } from "../../services";
 
 export const webhooksRouter = async function (app: FastifyInstance) {
 	app.post<{
@@ -65,7 +65,7 @@ export const webhooksRouter = async function (app: FastifyInstance) {
 		});
 		if (!webhook) throw new NotFoundError("no webhook found");
 
-		const { data } = await rest.webhooks.post(`${webhook.webhook_id}/${webhook.webhook_token}`, {
+		const { data } = await discord.webhooks.post(`${webhook.webhook_id}/${webhook.webhook_token}`, {
 			content: req.body.content,
 			username: webhook.username,
 			avatar_url: webhook.avatar_url

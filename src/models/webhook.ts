@@ -19,6 +19,7 @@ export const webhooks = mongoose.model<IWebhook>("Webhook",
 		},
 		channel_name: {
 			type: String,
+			index: true,
 			required: true
 		},
 		webhook_id: {

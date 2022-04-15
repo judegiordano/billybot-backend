@@ -1,8 +1,14 @@
-import { Stack, App, StackProps, Api, Function } from "@serverless-stack/resources";
+import { Stack, App, StackProps, Api, Function, Cron } from "@serverless-stack/resources";
 
 export class ApiStack extends Stack {
 	constructor(scope: App, id: string, props?: StackProps) {
 		super(scope, id, props);
+
+		new Cron(this, "lottery-cron", {
+			// fires at 12:00pm FRI (UTC -> EST)
+			schedule: "cron(0 17 ? * FRI *)",
+			job: "src/handlers/cron.pickLotteryWinner",
+		});
 
 		const api = new Api(this, "api", {
 			defaultThrottlingRateLimit: 2000,

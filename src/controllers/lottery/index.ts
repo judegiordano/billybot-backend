@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 
 import { users } from "../../models";
 import { BadRequestError, NotFoundError } from "../../types/errors";
-import { LOTTERY_COST } from "../../services/config";
+import { LOTTERY_COST, BASE_LOTTERY_JACKPOT } from "../../services/config";
 
 export const lotteryRouter = async function (app: FastifyInstance) {
 	app.post<{
@@ -75,7 +75,7 @@ export const lotteryRouter = async function (app: FastifyInstance) {
 		});
 		return {
 			ticket_cost: LOTTERY_COST,
-			jackpot: (entrants.length * LOTTERY_COST) + 200,
+			jackpot: (entrants.length * LOTTERY_COST) + BASE_LOTTERY_JACKPOT,
 			entrants
 		};
 	});
