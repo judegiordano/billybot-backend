@@ -5,6 +5,8 @@ import { LOTTERY_COST, BASE_LOTTERY_JACKPOT } from "../services/config";
 import { discord, mongoose } from "../services";
 
 const chance = new Chance();
+// TODO: move to s3
+const rockAndRollMp4 = "https://cdn.discordapp.com/attachments/689463899073806396/963060853589028864/rockandroll.mp4";
 
 async function pickWinner(webhook: IWebhook) {
 	const { server_id, webhook_id, webhook_token, username, avatar_url } = webhook;
@@ -38,11 +40,41 @@ export async function pickLotteryWinner() {
 		return {
 			statusCode: 200,
 			headers: { "Content-Type": "application/json" },
-			body: "no webhooks found",
+			body: "no webhooks found for general",
 		};
 	}
 	const operations = generalWebhooks.map((webhook) => {
 		return pickWinner(webhook);
+	});
+	await Promise.all(operations);
+	return {
+		statusCode: 200,
+		headers: { "Content-Type": "application/json" },
+		body: "done",
+	};
+}
+
+export async function goodMorning() {
+	await mongoose.createConnection();
+	const memHooks = await webhooks.find({ channel_name: "mems" });
+	if (memHooks.length <= 0) {
+		return {
+			statusCode: 200,
+			headers: { "Content-Type": "application/json" },
+			body: "no webhooks found for mems",
+		};
+	}
+	const operations = memHooks.map(({
+		webhook_id,
+		webhook_token,
+		username,
+		avatar_url
+	}) => {
+		return discord.webhooks.post(`${webhook_id}/${webhook_token}`, {
+			content: `Good Morning!\n${rockAndRollMp4}`,
+			username,
+			avatar_url
+		});
 	});
 	await Promise.all(operations);
 	return {

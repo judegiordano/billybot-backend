@@ -7,7 +7,13 @@ export class ApiStack extends Stack {
 		new Cron(this, "lottery-cron", {
 			// fires at 12:00pm FRI (UTC -> EST)
 			schedule: "cron(0 16 ? * FRI *)",
-			job: "src/handlers/cron.pickLotteryWinner",
+			job: "src/handlers/cron.pickLotteryWinner"
+		});
+
+		new Cron(this, "good-morning-cron", {
+			// fires at 9:00am MON (UTC -> EST)
+			schedule: "cron(0 13 ? * MON *)",
+			job: "src/handlers/cron.goodMorning"
 		});
 
 		const api = new Api(this, "api", {
@@ -22,7 +28,7 @@ export class ApiStack extends Stack {
 		});
 
 		new Function(this, "create-token", {
-			handler: "src/handlers/functions.createToken",
+			handler: "src/handlers/functions.createToken"
 		});
 
 		this.addOutputs({
