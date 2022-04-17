@@ -1,8 +1,14 @@
-import { Stack, App, StackProps, Api, Function, Cron } from "@serverless-stack/resources";
+import { Stack, App, StackProps, Api, Function, Cron, Bucket } from "@serverless-stack/resources";
 
 export class ApiStack extends Stack {
 	constructor(scope: App, id: string, props?: StackProps) {
 		super(scope, id, props);
+
+		const mediaBucket = new Bucket(this, "media", {
+			s3Bucket: {
+				publicReadAccess: true
+			}
+		});
 
 		new Cron(this, "lottery-cron", {
 			// fires at 12:00pm FRI (UTC -> EST)
@@ -13,7 +19,15 @@ export class ApiStack extends Stack {
 		new Cron(this, "good-morning-cron", {
 			// fires at 9:00am MON (UTC -> EST)
 			schedule: "cron(0 13 ? * MON *)",
-			job: "src/handlers/cron.goodMorning"
+			job: {
+				function: {
+					handler: "src/handlers/cron.goodMorning",
+					permissions: [mediaBucket],
+					environment: {
+						MEDIA_BUCKET: mediaBucket.bucketName
+					}
+				}
+			}
 		});
 
 		const api = new Api(this, "api", {

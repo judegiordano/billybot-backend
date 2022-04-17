@@ -2,11 +2,11 @@ import Chance from "chance";
 
 import { webhooks, users, IWebhook } from "../models";
 import { LOTTERY_COST, BASE_LOTTERY_JACKPOT } from "../services/config";
-import { discord, mongoose } from "../services";
+import { discord, mongoose, config } from "../services";
 
 const chance = new Chance();
-// TODO: move to s3
-const rockAndRollMp4 = "https://cdn.discordapp.com/attachments/689463899073806396/963060853589028864/rockandroll.mp4";
+const bucket = config.MEDIA_BUCKET;
+const key = "rockandroll.mp4";
 
 async function pickWinner(webhook: IWebhook) {
 	const { server_id, webhook_id, webhook_token, username, avatar_url } = webhook;
@@ -64,6 +64,7 @@ export async function goodMorning() {
 			body: "no webhooks found for mems",
 		};
 	}
+	const image = `https://${bucket}.s3.amazonaws.com/${key}`;
 	const operations = memHooks.map(({
 		webhook_id,
 		webhook_token,
@@ -71,7 +72,7 @@ export async function goodMorning() {
 		avatar_url
 	}) => {
 		return discord.webhooks.post(`${webhook_id}/${webhook_token}`, {
-			content: `Good Morning!\n${rockAndRollMp4}`,
+			content: `Good Morning!\n${image}`,
 			username,
 			avatar_url
 		});
