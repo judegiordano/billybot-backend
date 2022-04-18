@@ -4,7 +4,7 @@ import { ApiStack } from "./api";
 
 const stage = process.env.STAGE ?? "local" as string;
 
-export default function main(app: App): void {
+export default function main(app: App) {
 	app.setDefaultFunctionProps({
 		environment: {
 			STAGE: stage,

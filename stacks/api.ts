@@ -1,6 +1,7 @@
 import { Stack, App, StackProps, Api, Function, Cron, Bucket } from "@serverless-stack/resources";
 
 export class ApiStack extends Stack {
+
 	constructor(scope: App, id: string, props?: StackProps) {
 		super(scope, id, props);
 

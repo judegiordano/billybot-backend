@@ -1,24 +1,26 @@
 import { customAlphabet } from "nanoid";
-import mongoose, { Schema as BaseSchema, SchemaDefinition, SchemaOptions, connect, model as BaseModel } from "mongoose";
+import mongoose, { Schema as BaseSchema, Connection, SchemaDefinition, SchemaOptions, connect, model as BaseModel } from "mongoose";
 
 import { MONGO_URI } from "./config";
 
 const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 20);
 
-const connection = {
-	isConnected: 0
-};
+let cachedConnection: Connection | null = null;
 
 export async function createConnection() {
-	if (connection.isConnected === 1) return;
-	const { connections } = await connect(MONGO_URI, {
+	if (cachedConnection) {
+		return cachedConnection;
+	}
+	const { connection } = await connect(MONGO_URI, {
 		autoCreate: true,
 		autoIndex: true,
 		keepAlive: true,
-		socketTimeoutMS: 2000000,
+		maxIdleTimeMS: 3000,
+		socketTimeoutMS: 30000,
+		serverSelectionTimeoutMS: 5000,
 		maxPoolSize: 5,
 	});
-	connection.isConnected = connections[0].readyState;
+	cachedConnection = connection;
 }
 
 export async function closeConnection() {

@@ -7,7 +7,7 @@ import { mongoose } from "../services";
 const handler = serverless(controllers as Application);
 
 export async function run(event: APIGatewayEvent, context: Context) {
-	await mongoose.createConnection();
 	context.callbackWaitsForEmptyEventLoop = false;
+	await mongoose.createConnection();
 	return await handler(event, context);
 }
