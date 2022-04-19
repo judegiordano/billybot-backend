@@ -23,7 +23,9 @@ export const userRouter = async function (app: FastifyInstance) {
 						billy_bucks: { type: "number", default: 500, minimum: 0 },
 						username: { type: "string" },
 						discriminator: { type: "string" },
-						avatar_hash: { type: "string" }
+						avatar_hash: { type: "string" },
+						has_lottery_ticket: { type: "boolean" },
+						is_admin: { type: "boolean" },
 					}
 				}
 			},
@@ -67,7 +69,8 @@ export const userRouter = async function (app: FastifyInstance) {
 						username: { type: "string" },
 						discriminator: { type: "string" },
 						avatar_hash: { type: "string" },
-						has_lottery_ticket: { type: "boolean" }
+						has_lottery_ticket: { type: "boolean" },
+						is_admin: { type: "boolean" },
 					}
 				}
 			}

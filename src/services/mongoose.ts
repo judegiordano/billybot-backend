@@ -28,7 +28,7 @@ export async function closeConnection() {
 }
 
 export interface IModel {
-	_id: number
+	_id: string
 	created_at: Date
 	updated_at: Date
 }

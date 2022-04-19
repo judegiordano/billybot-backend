@@ -21,6 +21,8 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			discriminator: { type: "string" },
 			avatar_hash: { type: "string" },
 			last_allowance: { type: "string" },
+			has_lottery_ticket: { type: "boolean" },
+			is_admin: { type: "boolean" },
 			metrics: {
 				type: "object",
 				properties: {
@@ -38,31 +40,6 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 	app.addSchema({
 		$id: "userArray",
 		type: "array",
-		items: {
-			type: "object",
-			properties: {
-				_id: { type: "string" },
-				billy_bucks: { type: "number" },
-				server_id: { type: "string" },
-				user_id: { type: "string" },
-				username: { type: "string" },
-				discriminator: { type: "string" },
-				avatar_hash: { type: "string" },
-				last_allowance: { type: "string" },
-				has_lottery_ticket: { type: "boolean" },
-				metrics: {
-					type: "object",
-					properties: {
-						posts: { type: "number" },
-						reactions_used: { type: "number" },
-						reactions_received: { type: "number" },
-						average_reactions_per_post: { type: "number" },
-						mentions: { type: "number" }
-					}
-				},
-				created_at: { type: "string" },
-				updated_at: { type: "string" }
-			}
-		}
+		items: { $ref: "user#" }
 	});
 });
