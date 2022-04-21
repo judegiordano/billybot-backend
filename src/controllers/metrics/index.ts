@@ -11,6 +11,7 @@ export const metricsRouter = async function (app: FastifyInstance) {
 			metrics: Partial<IUserMetrics>
 		}[]
 	}>("/metrics", {
+		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "array",

@@ -13,6 +13,7 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 			channel_name: string
 		}
 	}>("/announcements", {
+		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "object",

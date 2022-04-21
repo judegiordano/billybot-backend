@@ -11,6 +11,7 @@ export const lotteryRouter = async function (app: FastifyInstance) {
 			user_id: string
 		}
 	}>("/lottery", {
+		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "object",

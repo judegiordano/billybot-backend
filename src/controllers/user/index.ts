@@ -4,6 +4,7 @@ import { users, IUser } from "../../models";
 
 export const userRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IUser[] }>("/users", {
+		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "array",
@@ -51,6 +52,7 @@ export const userRouter = async function (app: FastifyInstance) {
 		return inserted ?? [];
 	});
 	app.put<{ Body: IUser[] }>("/users", {
+		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "array",
@@ -122,6 +124,7 @@ export const userRouter = async function (app: FastifyInstance) {
 		return members ?? [];
 	});
 	app.delete<{ Params: { server_id: string } }>("/users/server/:server_id", {
+		preValidation: [app.restricted],
 		schema: {
 			params: {
 				type: "object",

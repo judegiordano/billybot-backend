@@ -37,7 +37,7 @@ function validateAuthToken(headers: Headers) {
 	}
 }
 
-export async function onRequest(req: FastifyRequest) {
+export async function restricted(req: FastifyRequest) {
 	validateTimestamp(req.headers);
 	validateAuthToken(req.headers);
 	return;

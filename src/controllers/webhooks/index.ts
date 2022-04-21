@@ -8,6 +8,7 @@ export const webhooksRouter = async function (app: FastifyInstance) {
 	app.post<{
 		Body: IWebhook
 	}>("/webhooks", {
+		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "object",
@@ -42,6 +43,7 @@ export const webhooksRouter = async function (app: FastifyInstance) {
 			content: string
 		}
 	}>("/webhooks/execute", {
+		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "object",

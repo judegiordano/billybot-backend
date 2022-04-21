@@ -13,6 +13,7 @@ export const bucksRouter = async function (app: FastifyInstance) {
 			sender_id: string
 		}
 	}>("/bucks/pay", {
+		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "object",
@@ -58,6 +59,7 @@ export const bucksRouter = async function (app: FastifyInstance) {
 			user_id: string
 		}
 	}>("/bucks/allowance", {
+		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "object",
