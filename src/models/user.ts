@@ -21,8 +21,8 @@ export interface IUser extends mongoose.IModel {
 	metrics: IUserMetrics
 }
 
-export const users = mongoose.model<IUser>("User",
-	new mongoose.Schema({
+export const users = mongoose.model<IUser>(
+	new mongoose.Schema("User", {
 		billy_bucks: {
 			type: Number,
 			default: 500,

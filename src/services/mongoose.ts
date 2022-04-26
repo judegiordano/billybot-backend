@@ -34,7 +34,9 @@ export interface IModel {
 }
 
 export class Schema extends BaseSchema {
-	constructor(schema: SchemaDefinition, options?: SchemaOptions) {
+	public collectionName: string;
+
+	constructor(collectionName: string, schema: SchemaDefinition, options?: SchemaOptions) {
 		super({
 			_id: {
 				type: String,
@@ -49,9 +51,10 @@ export class Schema extends BaseSchema {
 			},
 			...options
 		});
+		this.collectionName = collectionName;
 	}
 }
 
-export function model<T extends IModel>(collectionName: string, schema: Schema) {
-	return BaseModel<T>(collectionName, schema as BaseSchema);
+export function model<T extends IModel>(schema: Schema) {
+	return BaseModel<T>(schema.collectionName, schema as BaseSchema);
 }

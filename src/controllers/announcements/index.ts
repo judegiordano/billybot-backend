@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-import { announcements, users, webhooks } from "../../models";
+import { announcements, servers, users, webhooks } from "../../models";
 import { NotFoundError, UnauthorizedError } from "../../types/errors";
 import { discord } from "../../services";
 
@@ -34,6 +34,8 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id, user_id, text, channel_name } = req.body;
+		const exists = await servers.findOne({ server_id }).count();
+		if (exists <= 0) throw new NotFoundError(`server ${server_id} not found`);
 
 		const [user, webhook] = await Promise.all([
 			users.findOne({ user_id, server_id }),

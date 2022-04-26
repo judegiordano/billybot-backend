@@ -8,6 +8,7 @@ import { metricsRouter } from "./metrics";
 import { lotteryRouter } from "./lottery";
 import { webhooksRouter } from "./webhooks";
 import { announcementsRouter } from "./announcements";
+import { serversRouter } from "./servers";
 
 const routers = [
 	developerRouter,
@@ -16,7 +17,8 @@ const routers = [
 	metricsRouter,
 	lotteryRouter,
 	webhooksRouter,
-	announcementsRouter
+	announcementsRouter,
+	serversRouter
 ] as unknown as FastifyPluginCallback[];
 
 for (const router of routers) {

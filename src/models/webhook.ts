@@ -10,8 +10,8 @@ export interface IWebhook extends mongoose.IModel {
 	notes?: string
 }
 
-export const webhooks = mongoose.model<IWebhook>("Webhook",
-	new mongoose.Schema({
+export const webhooks = mongoose.model<IWebhook>(
+	new mongoose.Schema("Webhook", {
 		server_id: {
 			type: String,
 			index: true,

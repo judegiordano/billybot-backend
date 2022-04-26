@@ -9,8 +9,8 @@ export interface IAnnouncement extends mongoose.IModel {
 	channel_name: string
 }
 
-export const announcements = mongoose.model<IAnnouncement>("Announcement",
-	new mongoose.Schema({
+export const announcements = mongoose.model<IAnnouncement>(
+	new mongoose.Schema("Announcement", {
 		server_id: {
 			type: String,
 			index: true,
@@ -18,7 +18,7 @@ export const announcements = mongoose.model<IAnnouncement>("Announcement",
 		},
 		user: {
 			type: String,
-			ref: users,
+			ref: users.modelName,
 			index: true,
 			required: true
 		},

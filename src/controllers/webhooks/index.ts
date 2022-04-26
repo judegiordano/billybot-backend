@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-import { webhooks, IWebhook } from "../../models";
+import { webhooks, IWebhook, servers } from "../../models";
 import { NotFoundError } from "../../types/errors";
 import { discord } from "../../services";
 
@@ -33,6 +33,8 @@ export const webhooksRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
+		const exists = await servers.findOne({ server_id: req.body.server_id }).count();
+		if (exists <= 0) throw new NotFoundError(`server ${req.body.server_id} not found`);
 		const webhook = await webhooks.create(req.body);
 		return webhook ?? {};
 	});

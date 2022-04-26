@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 
-import { users, IUser } from "../../models";
+import { NotFoundError } from "../../types";
+import { users, servers, IUser } from "../../models";
 
 export const userRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IUser[] }>("/users", {
@@ -37,6 +38,8 @@ export const userRouter = async function (app: FastifyInstance) {
 	}, async (req) => {
 		const notFound = await Promise.all(
 			req.body.map(async (user) => {
+				const exists = await servers.findOne({ server_id: user.server_id }).count();
+				if (exists <= 0) throw new NotFoundError(`server ${user.server_id} not found`);
 				const count = await users.findOne({
 					$and: [
 						{ user_id: user.user_id },
