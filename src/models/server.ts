@@ -3,6 +3,7 @@ import { mongoose } from "../services";
 export interface IServerSettings {
 	lottery_cost: number
 	base_lottery_jackpot: number
+	allowance_rate: number
 }
 
 export interface IServer extends mongoose.IModel {
@@ -29,6 +30,10 @@ export const servers = mongoose.model<IServer>(
 				default: 50
 			},
 			base_lottery_jackpot: {
+				type: Number,
+				default: 200
+			},
+			allowance_rate: {
 				type: Number,
 				default: 200
 			}

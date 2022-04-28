@@ -1,8 +1,7 @@
 import { FastifyInstance } from "fastify";
 
-import { webhooks, IWebhook, servers } from "../../models";
-import { NotFoundError } from "../../types/errors";
-import { discord } from "../../services";
+import { IWebhook } from "../../models";
+import { serverRepo, webhookRepo } from "../../repositories";
 
 export const webhooksRouter = async function (app: FastifyInstance) {
 	app.post<{
@@ -33,10 +32,9 @@ export const webhooksRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		const exists = await servers.findOne({ server_id: req.body.server_id }).count();
-		if (exists <= 0) throw new NotFoundError(`server ${req.body.server_id} not found`);
-		const webhook = await webhooks.create(req.body);
-		return webhook ?? {};
+		await serverRepo.assertExists({ server_id: req.body.server_id });
+		const webhook = await webhookRepo.bulkInsert([req.body]);
+		return webhook[0] ?? {};
 	});
 	app.post<{
 		Body: {
@@ -63,17 +61,7 @@ export const webhooksRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		const webhook = await webhooks.findOne({
-			server_id: req.body.server_id,
-			channel_name: req.body.channel_name
-		});
-		if (!webhook) throw new NotFoundError("no webhook found");
-
-		const { data } = await discord.webhooks.post(`${webhook.webhook_id}/${webhook.webhook_token}`, {
-			content: req.body.content,
-			username: webhook.username,
-			avatar_url: webhook.avatar_url
-		});
-		return data ?? { ok: true };
+		const { server_id, channel_name, content } = req.body;
+		return await webhookRepo.executeWebhook(server_id, channel_name, content);
 	});
 };

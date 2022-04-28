@@ -1,8 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-import { users } from "../../models";
-import { BadRequestError, NotFoundError } from "../../types/errors";
-import { LOTTERY_COST, BASE_LOTTERY_JACKPOT } from "../../services/config";
+import { userRepo, serverRepo } from "../../repositories";
 
 export const lotteryRouter = async function (app: FastifyInstance) {
 	app.post<{
@@ -28,28 +26,8 @@ export const lotteryRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id, user_id } = req.body;
-		const member = await users.findOne({ user_id, server_id });
-		if (!member) throw new NotFoundError("user not found");
-		if (member.has_lottery_ticket)
-			throw new BadRequestError("You have already bought a ticket for this week's lottery!");
-		if (member.billy_bucks < LOTTERY_COST)
-			throw new BadRequestError(`You only have ${member.billy_bucks} bucks!`);
-		const updated = await users.findOneAndUpdate({
-			user_id,
-			server_id
-		}, {
-			$inc: { billy_bucks: -LOTTERY_COST },
-			has_lottery_ticket: true
-		}, {
-			new: true
-		});
-		return {
-			ticket_cost: LOTTERY_COST,
-			[updated?.user_id as string]: {
-				username: updated?.username,
-				billy_bucks: updated?.billy_bucks
-			}
-		};
+		const { settings } = await serverRepo.read({ server_id });
+		return await userRepo.purchaseLottery(server_id, user_id, settings);
 	});
 	app.get<{
 		Params: { server_id: string }
@@ -66,17 +44,16 @@ export const lotteryRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id } = req.params;
-		const entrants = await users.find({
-			server_id,
-			has_lottery_ticket: true
-		}, {
-			username: 1
-		}, {
-			sort: { username: 1 }
-		});
+		const [{ settings }, entrants] = await Promise.all([
+			serverRepo.read({ server_id }),
+			userRepo.list({
+				server_id,
+				has_lottery_ticket: true
+			}, { username: 1 }, { sort: { username: 1 } })
+		]);
 		return {
-			ticket_cost: LOTTERY_COST,
-			jackpot: (entrants.length * LOTTERY_COST) + BASE_LOTTERY_JACKPOT,
+			ticket_cost: settings.lottery_cost,
+			jackpot: (entrants.length * settings.lottery_cost) + settings.base_lottery_jackpot,
 			entrants
 		};
 	});

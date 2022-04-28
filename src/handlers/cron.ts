@@ -1,8 +1,8 @@
 import Chance from "chance";
 
-import { webhooks, users, IWebhook } from "../models";
-import { LOTTERY_COST, BASE_LOTTERY_JACKPOT } from "../services/config";
+import { IWebhook } from "../models";
 import { discord, mongoose, config } from "../services";
+import { serverRepo, userRepo, webhookRepo } from "../repositories";
 
 const chance = new Chance();
 const bucket = config.MEDIA_BUCKET;
@@ -10,7 +10,8 @@ const key = "rockandroll.mp4";
 
 async function pickWinner(webhook: IWebhook) {
 	const { server_id, webhook_id, webhook_token, username, avatar_url } = webhook;
-	const entrants = await users.find({ server_id, has_lottery_ticket: true });
+	const { settings } = await serverRepo.read({ server_id });
+	const entrants = await userRepo.list({ server_id, has_lottery_ticket: true });
 	if (entrants.length <= 0) {
 		const content = "No lottery entrants this week!\nRun ```!buylottoticket``` to buy a ticket for next week's lottery!";
 		return discord.webhooks.post(`${webhook_id}/${webhook_token}`, {
@@ -20,10 +21,10 @@ async function pickWinner(webhook: IWebhook) {
 		});
 	}
 	const winner = chance.pickone(entrants);
-	const jackpot = (entrants.length * LOTTERY_COST) + BASE_LOTTERY_JACKPOT;
+	const jackpot = (entrants.length * settings.lottery_cost) + settings.base_lottery_jackpot;
 	const [updatedWinner] = await Promise.all([
-		users.findOneAndUpdate({ user_id: winner.user_id, server_id }, { $inc: { billy_bucks: jackpot }, has_lottery_ticket: false }, { new: true }),
-		users.updateMany({ server_id, has_lottery_ticket: true }, { has_lottery_ticket: false }, { new: false })
+		userRepo.updateOne({ user_id: winner.user_id, server_id }, { $inc: { billy_bucks: jackpot }, has_lottery_ticket: false }),
+		userRepo.bulkUpdate({ server_id, has_lottery_ticket: true }, { has_lottery_ticket: false })
 	]);
 	const content = `Congratulations, <@${updatedWinner?.user_id}>!\nYou win this week's lottery and collect the jackpot of ${jackpot} BillyBucks!`;
 	return discord.webhooks.post(`${webhook_id}/${webhook_token}`, {
@@ -35,7 +36,7 @@ async function pickWinner(webhook: IWebhook) {
 
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();
-	const generalWebhooks = await webhooks.find({ channel_name: "general" });
+	const generalWebhooks = await webhookRepo.list({ channel_name: "general" });
 	if (generalWebhooks.length <= 0) {
 		return {
 			statusCode: 200,
@@ -56,7 +57,7 @@ export async function pickLotteryWinner() {
 
 export async function goodMorning() {
 	await mongoose.createConnection();
-	const memHooks = await webhooks.find({ channel_name: "mems" });
+	const memHooks = await webhookRepo.list({ channel_name: "mems" });
 	if (memHooks.length <= 0) {
 		return {
 			statusCode: 200,

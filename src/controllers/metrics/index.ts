@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 
-import { users, IUserMetrics } from "../../models";
-import { NotFoundError } from "../../types";
+import { IUserMetrics } from "../../models";
+import { userRepo } from "../../repositories";
 
 export const metricsRouter = async function (app: FastifyInstance) {
 	app.put<{
@@ -38,29 +38,7 @@ export const metricsRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		const operations = await Promise.all(
-			req.body.map(({ server_id, user_id, metrics }) => {
-				const updates = Object.keys(metrics).reduce((acc, key) => {
-					acc[`metrics.${key}`] = metrics[key];
-					return acc;
-				}, {});
-				return users.findOneAndUpdate({ server_id, user_id }, {
-					$inc: {
-						...updates,
-						// TODO calculate average reaction per post
-					},
-				}, { new: true });
-			})
-		);
-		const dictionary = operations.reduce((acc, user) => {
-			acc[user?.user_id as string] = {
-				server_id: user?.server_id,
-				username: user?.username,
-				metrics: user?.metrics
-			};
-			return acc;
-		}, {});
-		return dictionary;
+		return await userRepo.updateMetrics(req.body);
 	});
 	app.get<{
 		Params: {
@@ -97,8 +75,6 @@ export const metricsRouter = async function (app: FastifyInstance) {
 			acc[`metrics.${key}`] = req.query[key];
 			return acc;
 		}, {});
-		const members = await users.find({ server_id: req.params.server_id }, {}, { sort });
-		if (!members || members.length === 0) throw new NotFoundError("no members found");
-		return members;
+		return await userRepo.list({ server_id: req.params.server_id }, null, { sort });
 	});
 };

@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 
-import { servers, IServer, webhooks, users, announcements } from "../../models";
-import { BadRequestError, NotFoundError } from "../../types/errors";
+import { IServer } from "../../models";
+import { announcementRepo, serverRepo, userRepo, webhookRepo } from "../../repositories";
 
 export const serversRouter = async function (app: FastifyInstance) {
 	app.post<{
@@ -21,16 +21,16 @@ export const serversRouter = async function (app: FastifyInstance) {
 						properties: {
 							lottery_cost: { type: "number", default: 50 },
 							base_lottery_jackpot: { type: "number", default: 200 },
+							allowance_rate: { type: "number", default: 200 },
 						}
 					}
 				}
 			}
 		},
 	}, async (req) => {
-		const exists = await servers.findOne({ server_id: req.body.server_id });
-		if (exists) throw new BadRequestError(`server ${req.body.server_id} already exists`);
-		const newServer = await servers.create(req.body);
-		return newServer;
+		await serverRepo.assertNew({ server_id: req.body.server_id });
+		const newServer = await serverRepo.bulkInsert([req.body]);
+		return newServer[0];
 	});
 	app.get<{
 		Params: { server_id: string }
@@ -47,12 +47,17 @@ export const serversRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id } = req.params;
-		const server = await servers.findOne({ server_id });
-		if (!server) throw new NotFoundError(`server ${server_id} not found`);
+		const server = await serverRepo.read({ server_id });
 		const [serverUsers, serverWebhooks, serverAnnouncements] = await Promise.all([
-			users.find({ server_id }, null, { sort: { billy_bucks: -1 } }),
-			webhooks.find({ server_id }),
-			announcements.find({ server_id }, null, { sort: { cerated_at: -1 } })
+			userRepo.list({ server_id }, null, { sort: { billy_bucks: -1 } }),
+			webhookRepo.list({ server_id }),
+			announcementRepo.list({ server_id }, null, {
+				sort: { cerated_at: -1 },
+				populate: [{
+					path: "user",
+					select: ["username", "user_id"]
+				}]
+			})
 		]);
 		return {
 			...server.toJSON(),
