@@ -1,7 +1,7 @@
-import { mongoose } from "../services";
-import { readableDate, diffInDays } from "../helpers";
+import { mongoose, discord } from "../services";
+import { readableDate, diffInDays, chance } from "../helpers";
 import { UnauthorizedError, BadRequestError, Dictionary } from "../types";
-import { IServerSettings, IUser, IUserMetrics } from "../types/models";
+import { IServerSettings, IUser, IUserMetrics, IWebhook } from "../types/models";
 
 class Users extends mongoose.Repository<IUser> {
 	constructor() {
@@ -145,6 +145,39 @@ class Users extends mongoose.Repository<IUser> {
 				billy_bucks: updated.billy_bucks
 			}
 		};
+	}
+
+	public async pickLotteryWinner({
+		server_id,
+		webhook_id,
+		webhook_token,
+		username,
+		avatar_url
+	}: IWebhook, {
+		lottery_cost,
+		base_lottery_jackpot
+	}: IServerSettings) {
+		const entrants = await super.list({ server_id, has_lottery_ticket: true });
+		if (entrants.length <= 0) {
+			const content = "No lottery entrants this week!\nRun ```!buylottoticket``` to buy a ticket for next week's lottery!";
+			return discord.webhooks.post(`${webhook_id}/${webhook_token}`, {
+				content,
+				username,
+				avatar_url
+			});
+		}
+		const winner = chance.pickone(entrants);
+		const jackpot = (entrants.length * lottery_cost) + base_lottery_jackpot;
+		const [updatedWinner] = await Promise.all([
+			users.updateOne({ user_id: winner.user_id, server_id }, { $inc: { billy_bucks: jackpot }, has_lottery_ticket: false }),
+			users.bulkUpdate({ server_id, has_lottery_ticket: true }, { has_lottery_ticket: false })
+		]);
+		const content = `Congratulations, <@${updatedWinner?.user_id}>!\nYou win this week's lottery and collect the jackpot of ${jackpot} BillyBucks!`;
+		return discord.webhooks.post(`${webhook_id}/${webhook_token}`, {
+			content,
+			username,
+			avatar_url
+		});
 	}
 
 	public async updateMetrics(data: {
