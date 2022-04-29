@@ -1,6 +1,7 @@
+import Chance from "chance";
 import { customAlphabet } from "nanoid";
 
-import { IUser } from "../models";
+import { IUser } from "../types/models";
 
 export function buildAvatarUrl(user: IUser) {
 	if (!user.avatar_hash) return "https://discord.com/assets/c09a43a372ba81e3018c3151d4ed4773.png";
@@ -21,3 +22,5 @@ export function diffInDays(date1: Date, date2: Date) {
 }
 
 export const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 20);
+
+export const chance = new Chance();

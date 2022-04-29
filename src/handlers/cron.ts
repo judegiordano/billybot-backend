@@ -1,10 +1,8 @@
-import Chance from "chance";
-
+import { chance } from "../helpers";
 import { IWebhook } from "../types/models";
 import { discord, mongoose, config } from "../services";
 import { servers, users, webhooks } from "../models";
 
-const chance = new Chance();
 const bucket = config.MEDIA_BUCKET;
 const key = "rockandroll.mp4";
 
