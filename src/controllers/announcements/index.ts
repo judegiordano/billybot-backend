@@ -1,6 +1,8 @@
 import { FastifyInstance } from "fastify";
 
-import { announcementRepo, serverRepo, userRepo, webhookRepo } from "../../repositories";
+import { servers, users, webhooks } from "../../models";
+
+import { announcements } from "../../models/announcements";
 
 export const announcementsRouter = async function (app: FastifyInstance) {
 	app.post<{
@@ -32,12 +34,12 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id, user_id, text, channel_name } = req.body;
-		await serverRepo.assertExists({ server_id });
+		await servers.assertExists({ server_id });
 		const [user, webhook] = await Promise.all([
-			userRepo.readAdmin(user_id, server_id),
-			webhookRepo.read({ server_id, channel_name })
+			users.readAdmin(user_id, server_id),
+			webhooks.read({ server_id, channel_name })
 		]);
-		return await announcementRepo.postAnnouncement(webhook, user, server_id, channel_name, text);
+		return await announcements.postAnnouncement(webhook, user, server_id, channel_name, text);
 	});
 	app.get<{
 		Params: { server_id: string }
@@ -54,7 +56,7 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id } = req.params;
-		return await announcementRepo.list({
+		return await announcements.list({
 			server_id
 		}, null, {
 			sort: { username: 1 },

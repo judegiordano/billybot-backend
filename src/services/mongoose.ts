@@ -1,11 +1,11 @@
-import { customAlphabet } from "nanoid";
 import mongoose, {
-	Schema as BaseSchema,
+	Schema,
 	Connection,
 	SchemaDefinition,
 	SchemaOptions,
 	connect,
-	model as BaseModel,
+	Model,
+	model as BuildModel,
 	FilterQuery,
 	QueryOptions,
 	UpdateQuery
@@ -13,15 +13,8 @@ import mongoose, {
 
 import { MONGO_URI } from "./config";
 import { NotFoundError, BadRequestError } from "../types";
-
-export interface IModel {
-	_id: string
-	created_at: Date
-	updated_at: Date
-	toJSON(): { [key: string]: any }
-}
-
-const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 20);
+import { IModel } from "../types/models";
+import { nanoid } from "../helpers";
 
 let cachedConnection: Connection | null = null;
 
@@ -45,38 +38,30 @@ export async function closeConnection() {
 	return mongoose.connection.close();
 }
 
-export class Schema extends BaseSchema {
-	public collectionName: string;
+export class Repository<T extends IModel> {
 
-	constructor(collectionName: string, schema: SchemaDefinition, options?: SchemaOptions) {
-		super({
+	public model: Model<T>;
+
+	constructor(
+		collectionName: string,
+		schemaDefinition: SchemaDefinition<T>,
+		schemaOptions?: SchemaOptions
+	) {
+		const schema = new Schema({
 			_id: {
 				type: String,
 				default: () => nanoid()
 			},
-			...schema
+			...schemaDefinition
 		}, {
 			versionKey: false,
 			timestamps: {
 				createdAt: "created_at",
 				updatedAt: "updated_at"
 			},
-			...options
+			...schemaOptions
 		});
-		this.collectionName = collectionName;
-	}
-}
-
-export function model<T extends IModel>(schema: Schema) {
-	return BaseModel<T>(schema.collectionName, schema as BaseSchema);
-}
-
-export class Repository<T> {
-
-	private collectionName: string;
-
-	constructor(collectionName: string) {
-		this.collectionName = collectionName;
+		this.model = BuildModel<T>(collectionName, schema);
 	}
 
 	/**
@@ -87,8 +72,8 @@ export class Repository<T> {
 		projection?: { [key: string]: 0 | 1 } | null,
 		options?: QueryOptions | null
 	) {
-		const doc = await BaseModel(this.collectionName).findOne(filter ?? undefined, projection, options);
-		if (!doc) throw new NotFoundError(`${this.collectionName} not found`);
+		const doc = await this.model.findOne(filter ?? undefined, projection, options);
+		if (!doc) throw new NotFoundError(`${this.model.modelName} not found`);
 		return doc as unknown as T;
 	}
 
@@ -100,13 +85,13 @@ export class Repository<T> {
 		projection?: { [key: string]: 0 | 1 } | null,
 		options?: QueryOptions | null
 	) {
-		const doc = await BaseModel(this.collectionName).find(filter ?? {}, projection, options);
+		const doc = await this.model.find(filter ?? {}, projection, options);
 		if (doc.length <= 0) return [];
 		return doc as unknown as T[];
 	}
 
 	public async bulkInsert(docs: Partial<T>[]) {
-		return BaseModel(this.collectionName).insertMany(docs) as unknown as T[];
+		return this.model.insertMany(docs) as unknown as T[];
 	}
 
 	public async count(
@@ -114,7 +99,7 @@ export class Repository<T> {
 		projection?: { [key: string]: 0 | 1 } | null,
 		options?: QueryOptions | null
 	) {
-		return BaseModel(this.collectionName).findOne(filter ?? undefined, projection, options).count();
+		return this.model.findOne(filter ?? undefined, projection, options).count();
 	}
 
 	/**
@@ -127,7 +112,7 @@ export class Repository<T> {
 		options?: QueryOptions | null
 	) {
 		const count = await this.count(filter, projection, options);
-		if (count >= 1) throw new BadRequestError(`${this.collectionName} already exists`);
+		if (count >= 1) throw new BadRequestError(`${this.model.modelName} already exists`);
 	}
 
 	/**
@@ -140,7 +125,7 @@ export class Repository<T> {
 		options?: QueryOptions | null
 	) {
 		const count = await this.count(filter, projection, options);
-		if (count <= 0) throw new NotFoundError(`${this.collectionName} does not exist`);
+		if (count <= 0) throw new NotFoundError(`${this.model.modelName} does not exist`);
 	}
 
 	/**
@@ -152,14 +137,14 @@ export class Repository<T> {
 		updates: UpdateQuery<T>
 	) {
 		await this.assertExists(filter);
-		return BaseModel(this.collectionName).findOneAndUpdate(filter, updates, { new: true }) as unknown as T;
+		return this.model.findOneAndUpdate(filter, updates, { new: true }) as unknown as T;
 	}
 
 	public async bulkUpdate(
 		filter: FilterQuery<T>,
 		updates: UpdateQuery<T>
 	) {
-		return BaseModel(this.collectionName).updateMany(filter, updates, { new: true }) as unknown;
+		return this.model.updateMany(filter, updates, { new: true }) as unknown;
 	}
 
 	/**
@@ -167,7 +152,7 @@ export class Repository<T> {
 	 * removes any document matching filter
 	 */
 	public async removeMany(filter: FilterQuery<T>) {
-		return BaseModel(this.collectionName).deleteMany(filter) as unknown as {
+		return this.model.deleteMany(filter) as unknown as {
 			acknowledged: boolean;
 			deletedCount: number;
 		};

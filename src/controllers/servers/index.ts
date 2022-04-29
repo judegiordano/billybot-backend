@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 
-import { IServer } from "../../models";
-import { announcementRepo, serverRepo, userRepo, webhookRepo } from "../../repositories";
+import { IServer } from "../../types/models";
+import { servers, users, webhooks, announcements } from "../../models";
 
 export const serversRouter = async function (app: FastifyInstance) {
 	app.post<{
@@ -28,8 +28,8 @@ export const serversRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		await serverRepo.assertNew({ server_id: req.body.server_id });
-		const newServer = await serverRepo.bulkInsert([req.body]);
+		await servers.assertNew({ server_id: req.body.server_id });
+		const newServer = await servers.bulkInsert([req.body]);
 		return newServer[0];
 	});
 	app.get<{
@@ -47,11 +47,11 @@ export const serversRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id } = req.params;
-		const server = await serverRepo.read({ server_id });
+		const server = await servers.read({ server_id });
 		const [serverUsers, serverWebhooks, serverAnnouncements] = await Promise.all([
-			userRepo.list({ server_id }, null, { sort: { billy_bucks: -1 } }),
-			webhookRepo.list({ server_id }),
-			announcementRepo.list({ server_id }, null, {
+			users.list({ server_id }, null, { sort: { billy_bucks: -1 } }),
+			webhooks.list({ server_id }),
+			announcements.list({ server_id }, null, {
 				sort: { cerated_at: -1 },
 				populate: [{
 					path: "user",

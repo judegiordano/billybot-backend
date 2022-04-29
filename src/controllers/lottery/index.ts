@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-import { userRepo, serverRepo } from "../../repositories";
+import { users, servers } from "../../models";
 
 export const lotteryRouter = async function (app: FastifyInstance) {
 	app.post<{
@@ -26,8 +26,8 @@ export const lotteryRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id, user_id } = req.body;
-		const { settings } = await serverRepo.read({ server_id });
-		return await userRepo.purchaseLottery(server_id, user_id, settings);
+		const { settings } = await servers.read({ server_id });
+		return await users.purchaseLottery(server_id, user_id, settings);
 	});
 	app.get<{
 		Params: { server_id: string }
@@ -45,8 +45,8 @@ export const lotteryRouter = async function (app: FastifyInstance) {
 	}, async (req) => {
 		const { server_id } = req.params;
 		const [{ settings }, entrants] = await Promise.all([
-			serverRepo.read({ server_id }),
-			userRepo.list({
+			servers.read({ server_id }),
+			users.list({
 				server_id,
 				has_lottery_ticket: true
 			}, { username: 1 }, { sort: { username: 1 } })

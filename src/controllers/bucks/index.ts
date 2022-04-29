@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-import { serverRepo, userRepo } from "../../repositories";
+import { servers, users } from "../../models";
 
 export const bucksRouter = async function (app: FastifyInstance) {
 	app.post<{
@@ -32,7 +32,7 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id, amount, recipient_id, sender_id } = req.body;
-		return await userRepo.payBucks(server_id, amount, recipient_id, sender_id);
+		return await users.payBucks(server_id, amount, recipient_id, sender_id);
 	});
 	app.post<{
 		Body: {
@@ -57,7 +57,7 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id, user_id } = req.body;
-		const { settings } = await serverRepo.read({ server_id });
-		return await userRepo.allowance(server_id, user_id, settings);
+		const { settings } = await servers.read({ server_id });
+		return await users.allowance(server_id, user_id, settings);
 	});
 };

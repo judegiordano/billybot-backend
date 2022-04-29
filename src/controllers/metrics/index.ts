@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 
-import { IUserMetrics } from "../../models";
-import { userRepo } from "../../repositories";
+import { IUserMetrics } from "../../types/models";
+import { users } from "../../models";
 
 export const metricsRouter = async function (app: FastifyInstance) {
 	app.put<{
@@ -38,7 +38,7 @@ export const metricsRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		return await userRepo.updateMetrics(req.body);
+		return await users.updateMetrics(req.body);
 	});
 	app.get<{
 		Params: {
@@ -75,6 +75,6 @@ export const metricsRouter = async function (app: FastifyInstance) {
 			acc[`metrics.${key}`] = req.query[key];
 			return acc;
 		}, {});
-		return await userRepo.list({ server_id: req.params.server_id }, null, { sort });
+		return await users.list({ server_id: req.params.server_id }, null, { sort });
 	});
 };

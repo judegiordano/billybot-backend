@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 
-import { IWebhook } from "../../models";
-import { serverRepo, webhookRepo } from "../../repositories";
+import { IWebhook } from "../../types/models";
+import { servers, webhooks } from "../../models";
 
 export const webhooksRouter = async function (app: FastifyInstance) {
 	app.post<{
@@ -32,8 +32,8 @@ export const webhooksRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		await serverRepo.assertExists({ server_id: req.body.server_id });
-		const webhook = await webhookRepo.bulkInsert([req.body]);
+		await servers.assertExists({ server_id: req.body.server_id });
+		const webhook = await webhooks.bulkInsert([req.body]);
 		return webhook[0] ?? {};
 	});
 	app.post<{
@@ -62,6 +62,6 @@ export const webhooksRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id, channel_name, content } = req.body;
-		return await webhookRepo.executeWebhook(server_id, channel_name, content);
+		return await webhooks.executeWebhook(server_id, channel_name, content);
 	});
 };

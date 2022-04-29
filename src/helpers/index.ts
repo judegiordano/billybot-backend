@@ -1,3 +1,5 @@
+import { customAlphabet } from "nanoid";
+
 import { IUser } from "../models";
 
 export function buildAvatarUrl(user: IUser) {
@@ -17,3 +19,5 @@ export function diffInDays(date1: Date, date2: Date) {
 	const diff = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
 	return diff;
 }
+
+export const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 20);

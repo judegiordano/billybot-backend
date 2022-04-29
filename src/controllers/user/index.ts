@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 
-import { IUser } from "../../models";
-import { serverRepo, userRepo } from "../../repositories";
+import { IUser } from "../../types/models";
+import { servers, users } from "../../models";
 
 export const userRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IUser[] }>("/users", {
@@ -38,8 +38,8 @@ export const userRouter = async function (app: FastifyInstance) {
 	}, async (req) => {
 		const notFound = await Promise.all(
 			req.body.map(async (user) => {
-				await serverRepo.assertExists({ server_id: user.server_id });
-				const count = await userRepo.count({
+				await servers.assertExists({ server_id: user.server_id });
+				const count = await users.count({
 					$and: [
 						{ user_id: user.user_id },
 						{ server_id: user.server_id },
@@ -50,7 +50,7 @@ export const userRouter = async function (app: FastifyInstance) {
 			})
 		);
 		const operations = notFound.filter(a => !!a) as IUser[];
-		const inserted = await userRepo.bulkInsert(operations);
+		const inserted = await users.bulkInsert(operations);
 		return inserted ?? [];
 	});
 	app.put<{ Body: IUser[] }>("/users", {
@@ -81,7 +81,7 @@ export const userRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const operations = req.body.map((user) => {
-			return userRepo.updateOne({ user_id: user.user_id, server_id: user.server_id }, user);
+			return users.updateOne({ user_id: user.user_id, server_id: user.server_id }, user);
 		});
 		const updates = await Promise.all(operations);
 		return updates ?? [];
@@ -102,7 +102,7 @@ export const userRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id, user_id } = req.query;
-		return await userRepo.read({ user_id, server_id });
+		return await users.read({ user_id, server_id });
 	});
 	app.get<{ Params: { server_id: string } }>("/users/server/:server_id", {
 		schema: {
@@ -118,7 +118,8 @@ export const userRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		return await userRepo.list({ server_id: req.params.server_id }, {}, { sort: { billy_bucks: -1 } });
+		await servers.assertExists({ server_id: req.params.server_id });
+		return await users.list({ server_id: req.params.server_id }, {}, { sort: { billy_bucks: -1 } });
 	});
 	app.delete<{ Params: { server_id: string } }>("/users/server/:server_id", {
 		preValidation: [app.restricted],
@@ -132,6 +133,6 @@ export const userRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		return await userRepo.removeMany({ server_id: req.params.server_id });
+		return await users.removeMany({ server_id: req.params.server_id });
 	});
 };
