@@ -65,6 +65,10 @@ export class Repository<T extends IModel> {
 		this.model = BuildModel<T>(collectionName, schema);
 	}
 
+	public async read(filter?: FilterQuery<T>, options?: QueryOptions, projection?: Projection) {
+		return this.model.findOne(filter, projection, options) as unknown as T | null;
+	}
+
 	public async assertRead(filter?: FilterQuery<T>, options?: QueryOptions, projection?: Projection) {
 		const doc = await this.model.findOne(filter, projection, options);
 		if (!doc) throw new NotFoundError(`${this.model.modelName} not found`);

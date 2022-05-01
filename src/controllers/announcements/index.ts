@@ -3,26 +3,15 @@ import { FastifyInstance } from "fastify";
 import { servers, users, webhooks } from "../../models";
 
 import { announcements } from "../../models/announcements";
+import type { IAnnouncement, IServer } from "../../types/models";
 
 export const announcementsRouter = async function (app: FastifyInstance) {
-	app.post<{
-		Body: {
-			server_id: string
-			user_id: string
-			text: string
-			channel_name: string
-		}
-	}>("/announcements", {
+	app.post<{ Body: IAnnouncement & { user_id: string } }>("/announcements", {
 		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "object",
-				required: [
-					"server_id",
-					"user_id",
-					"text",
-					"channel_name"
-				],
+				required: ["server_id", "user_id", "text", "channel_name"],
 				additionalProperties: false,
 				properties: {
 					server_id: { type: "string" },
@@ -41,9 +30,7 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 		]);
 		return await announcements.postAnnouncement(webhook, user, server_id, channel_name, text);
 	});
-	app.get<{
-		Params: { server_id: string }
-	}>("/announcements/:server_id", {
+	app.get<{ Params: IServer }>("/announcements/:server_id", {
 		schema: { params: { $ref: "serverIdParams#" } }
 	}, async (req) => {
 		const { server_id } = req.params;

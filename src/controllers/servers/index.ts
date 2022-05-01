@@ -4,9 +4,7 @@ import { IServer } from "../../types/models";
 import { servers, users, webhooks, announcements } from "../../models";
 
 export const serversRouter = async function (app: FastifyInstance) {
-	app.post<{
-		Body: IServer
-	}>("/server", {
+	app.post<{ Body: IServer }>("/server", {
 		preValidation: [app.restricted],
 		schema: {
 			body: {
@@ -21,7 +19,7 @@ export const serversRouter = async function (app: FastifyInstance) {
 						properties: {
 							lottery_cost: { type: "number", default: 50 },
 							base_lottery_jackpot: { type: "number", default: 200 },
-							allowance_rate: { type: "number", default: 200 },
+							allowance_rate: { type: "number", default: 200 }
 						}
 					}
 				}
@@ -32,7 +30,7 @@ export const serversRouter = async function (app: FastifyInstance) {
 			server_id: req.body.server_id
 		}, req.body);
 	});
-	app.get<{ Params: { server_id: string } }>("/server/:server_id", {
+	app.get<{ Params: IServer }>("/server/:server_id", {
 		schema: { params: { $ref: "serverIdParams#" } }
 	}, async (req) => {
 		const { server_id } = req.params;

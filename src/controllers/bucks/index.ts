@@ -1,11 +1,10 @@
 import { FastifyInstance } from "fastify";
 
 import { servers, users } from "../../models";
+import type { IUser, IServer } from "../../types/models";
 
 export const bucksRouter = async function (app: FastifyInstance) {
-	app.get<{
-		Params: { server_id: string }
-	}>("/bucks/noblemen/:server_id", {
+	app.get<{ Params: IServer }>("/bucks/noblemen/:server_id", {
 		schema: {
 			params: { $ref: "serverIdParams#" },
 			response: { 200: { $ref: "userArray#" } }
@@ -16,9 +15,7 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		const sort = { billy_bucks: -1, username: 1 };
 		return await users.list({ server_id }, { sort, limit: 3 });
 	});
-	app.get<{
-		Params: { server_id: string }
-	}>("/bucks/serfs/:server_id", {
+	app.get<{ Params: IServer }>("/bucks/serfs/:server_id", {
 		schema: {
 			params: { $ref: "serverIdParams#" },
 			response: { 200: { $ref: "userArray#" } }
@@ -41,12 +38,7 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		schema: {
 			body: {
 				type: "object",
-				required: [
-					"server_id",
-					"amount",
-					"recipient_id",
-					"sender_id",
-				],
+				required: ["server_id", "amount", "recipient_id", "sender_id"],
 				additionalProperties: false,
 				properties: {
 					server_id: { type: "string" },
@@ -60,20 +52,12 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		const { server_id, amount, recipient_id, sender_id } = req.body;
 		return await users.payBucks(server_id, amount, recipient_id, sender_id);
 	});
-	app.post<{
-		Body: {
-			server_id: string
-			user_id: string
-		}
-	}>("/bucks/allowance", {
+	app.post<{ Body: IUser }>("/bucks/allowance", {
 		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "object",
-				required: [
-					"server_id",
-					"user_id",
-				],
+				required: ["server_id", "user_id"],
 				additionalProperties: false,
 				properties: {
 					server_id: { type: "string" },

@@ -1,22 +1,15 @@
 import { FastifyInstance } from "fastify";
 
 import { users, servers } from "../../models";
+import type { IServer, IUser } from "../../types/models";
 
 export const lotteryRouter = async function (app: FastifyInstance) {
-	app.post<{
-		Body: {
-			server_id: string
-			user_id: string
-		}
-	}>("/lottery", {
+	app.post<{ Body: IUser }>("/lottery", {
 		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "object",
-				required: [
-					"server_id",
-					"user_id"
-				],
+				required: ["server_id", "user_id"],
 				additionalProperties: false,
 				properties: {
 					server_id: { type: "string" },
@@ -29,9 +22,7 @@ export const lotteryRouter = async function (app: FastifyInstance) {
 		const { settings } = await servers.assertRead({ server_id });
 		return await users.purchaseLottery(server_id, user_id, settings);
 	});
-	app.get<{
-		Params: { server_id: string }
-	}>("/lottery/:server_id", {
+	app.get<{ Params: IServer }>("/lottery/:server_id", {
 		schema: { params: { $ref: "serverIdParams#" } }
 	}, async (req) => {
 		const { server_id } = req.params;

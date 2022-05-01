@@ -1,16 +1,10 @@
 import { FastifyInstance } from "fastify";
 
-import { IUserMetrics } from "../../types/models";
 import { users, servers } from "../../models";
+import type { IServer, IUser, IUserMetrics } from "../../types/models";
 
 export const metricsRouter = async function (app: FastifyInstance) {
-	app.put<{
-		Body: {
-			server_id: string
-			user_id: string
-			metrics: Partial<IUserMetrics>
-		}[]
-	}>("/metrics", {
+	app.put<{ Body: IUser[] }>("/metrics", {
 		preValidation: [app.restricted],
 		schema: {
 			body: {
@@ -40,12 +34,7 @@ export const metricsRouter = async function (app: FastifyInstance) {
 	}, async (req) => {
 		return await users.updateMetrics(req.body);
 	});
-	app.get<{
-		Params: {
-			server_id: string
-		},
-		Querystring: Partial<IUserMetrics>
-	}>("/metrics/server/:server_id", {
+	app.get<{ Params: IServer, Querystring: Partial<IUserMetrics> }>("/metrics/server/:server_id", {
 		schema: {
 			params: { $ref: "serverIdParams#" },
 			querystring: {
@@ -59,9 +48,7 @@ export const metricsRouter = async function (app: FastifyInstance) {
 					average_reactions_per_post: { type: "number", enum: [1, -1] }
 				}
 			},
-			response: {
-				200: { $ref: "userArray#" }
-			}
+			response: { 200: { $ref: "userArray#" } }
 		}
 	}, async (req) => {
 		const { server_id } = req.params;

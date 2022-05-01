@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 
-import { IUser } from "../../types/models";
 import { servers, users } from "../../models";
+import type { IServer, IUser } from "../../types/models";
 
 export const userRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IUser[] }>("/users", {
@@ -12,12 +12,7 @@ export const userRouter = async function (app: FastifyInstance) {
 				uniqueItems: true,
 				items: {
 					type: "object",
-					required: [
-						"server_id",
-						"user_id",
-						"username",
-						"discriminator"
-					],
+					required: ["server_id", "user_id", "username", "discriminator"],
 					additionalProperties: false,
 					properties: {
 						server_id: { type: "string" },
@@ -52,10 +47,7 @@ export const userRouter = async function (app: FastifyInstance) {
 				uniqueItems: true,
 				items: {
 					type: "object",
-					required: [
-						"server_id",
-						"user_id"
-					],
+					required: ["server_id", "user_id"],
 					additionalProperties: false,
 					properties: {
 						server_id: { type: "string" },
@@ -76,7 +68,7 @@ export const userRouter = async function (app: FastifyInstance) {
 		});
 		return await Promise.all(operations);
 	});
-	app.get<{ Querystring: { user_id: string, server_id: string } }>("/users", {
+	app.get<{ Querystring: IUser }>("/users", {
 		schema: {
 			querystring: {
 				type: "object",
@@ -94,7 +86,7 @@ export const userRouter = async function (app: FastifyInstance) {
 		const { server_id, user_id } = req.query;
 		return await users.assertRead({ user_id, server_id });
 	});
-	app.get<{ Params: { server_id: string } }>("/users/server/:server_id", {
+	app.get<{ Params: IServer }>("/users/server/:server_id", {
 		schema: {
 			params: { $ref: "serverIdParams#" },
 			response: { 200: { $ref: "userArray#" } }
@@ -103,13 +95,14 @@ export const userRouter = async function (app: FastifyInstance) {
 		await servers.assertExists({ server_id: req.params.server_id });
 		return await users.list({ server_id: req.params.server_id }, { sort: { billy_bucks: -1 } });
 	});
-	app.delete<{ Params: { server_id: string } }>("/users/server/:server_id", {
+	app.delete<{ Params: IServer }>("/users/server/:server_id", {
 		preValidation: [app.restricted],
 		schema: {
 			params: { $ref: "serverIdParams#" },
 			response: { 200: { $ref: "userArray#" } }
 		},
 	}, async (req) => {
-		return await users.assertDeleteMany({ server_id: req.params.server_id });
+		const { server_id } = req.params;
+		return await users.assertDeleteMany({ server_id });
 	});
 };
