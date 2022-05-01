@@ -69,6 +69,7 @@ export const userRouter = async function (app: FastifyInstance) {
 		return await Promise.all(operations);
 	});
 	app.get<{ Querystring: IUser }>("/users", {
+		preValidation: [app.restricted],
 		schema: {
 			querystring: {
 				type: "object",
@@ -87,6 +88,7 @@ export const userRouter = async function (app: FastifyInstance) {
 		return await users.assertRead({ user_id, server_id });
 	});
 	app.get<{ Params: IServer }>("/users/server/:server_id", {
+		preValidation: [app.restricted],
 		schema: {
 			params: { $ref: "serverIdParams#" },
 			response: { 200: { $ref: "userArray#" } }

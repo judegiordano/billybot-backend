@@ -35,6 +35,7 @@ export const metricsRouter = async function (app: FastifyInstance) {
 		return await users.updateMetrics(req.body);
 	});
 	app.get<{ Params: IServer, Querystring: Partial<IUserMetrics> }>("/metrics/server/:server_id", {
+		preValidation: [app.restricted],
 		schema: {
 			params: { $ref: "serverIdParams#" },
 			querystring: {

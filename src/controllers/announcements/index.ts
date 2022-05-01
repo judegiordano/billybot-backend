@@ -3,10 +3,10 @@ import { FastifyInstance } from "fastify";
 import { servers, users, webhooks } from "../../models";
 
 import { announcements } from "../../models/announcements";
-import type { IAnnouncement, IServer } from "../../types/models";
+import type { IAnnouncement, IServer, IUser } from "../../types/models";
 
 export const announcementsRouter = async function (app: FastifyInstance) {
-	app.post<{ Body: IAnnouncement & { user_id: string } }>("/announcements", {
+	app.post<{ Body: IAnnouncement & IUser }>("/announcements", {
 		preValidation: [app.restricted],
 		schema: {
 			body: {

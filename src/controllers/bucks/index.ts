@@ -5,6 +5,7 @@ import type { IUser, IServer } from "../../types/models";
 
 export const bucksRouter = async function (app: FastifyInstance) {
 	app.get<{ Params: IServer }>("/bucks/noblemen/:server_id", {
+		preValidation: [app.restricted],
 		schema: {
 			params: { $ref: "serverIdParams#" },
 			response: { 200: { $ref: "userArray#" } }
@@ -16,6 +17,7 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		return await users.list({ server_id }, { sort, limit: 3 });
 	});
 	app.get<{ Params: IServer }>("/bucks/serfs/:server_id", {
+		preValidation: [app.restricted],
 		schema: {
 			params: { $ref: "serverIdParams#" },
 			response: { 200: { $ref: "userArray#" } }
@@ -26,14 +28,7 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		const sort = { billy_bucks: 1, username: -1 };
 		return await users.list({ server_id }, { sort, limit: 3 });
 	});
-	app.post<{
-		Body: {
-			server_id: string
-			amount: number
-			recipient_id: string
-			sender_id: string
-		}
-	}>("/bucks/pay", {
+	app.post<{ Body: IServer & { amount: number, recipient_id: string, sender_id: string } }>("/bucks/pay", {
 		preValidation: [app.restricted],
 		schema: {
 			body: {
