@@ -8,7 +8,8 @@ import mongoose, {
 	model as BuildModel,
 	FilterQuery,
 	QueryOptions,
-	UpdateQuery
+	UpdateQuery,
+	ClientSession
 } from "mongoose";
 
 import { MONGO_URI } from "./config";
@@ -84,8 +85,8 @@ export class Repository<T extends IModel> {
 
 	public async createOrUpdate(filter: FilterQuery<T>, doc: Partial<T>) {
 		const exists = await this.exists(filter);
-		if (exists) return this.updateOne(filter, doc, { new: true });
-		return this.insertOne(doc);
+		if (!exists) return this.insertOne(doc);
+		return this.model.findOneAndUpdate(filter, doc, { new: true });
 	}
 
 	public async bulkInsert(docs: Partial<T>[]) {
@@ -153,5 +154,9 @@ export class Repository<T extends IModel> {
 			acknowledged: boolean;
 			deletedCount: number;
 		};
+	}
+
+	public async startSession(): Promise<ClientSession> {
+		return this.model.startSession();
 	}
 }

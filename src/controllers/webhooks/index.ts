@@ -33,8 +33,11 @@ export const webhooksRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		await servers.assertExists({ server_id: req.body.server_id });
-		const webhook = await webhooks.bulkInsert([req.body]);
-		return webhook[0] ?? {};
+		const webhook = await webhooks.createOrUpdate({
+			server_id: req.body.server_id,
+			webhook_id: req.body.webhook_id
+		}, req.body);
+		return webhook;
 	});
 	app.post<{
 		Body: {

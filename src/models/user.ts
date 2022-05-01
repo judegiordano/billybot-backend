@@ -64,10 +64,6 @@ class Users extends mongoose.Repository<IUser> {
 		});
 	}
 
-	public assertAdmin(user: IUser) {
-		if (!user.is_admin) throw new UnauthorizedError("user must be an admin");
-	}
-
 	public async readAdmin(user_id: string, server_id: string) {
 		const user = await super.read({ user_id, server_id });
 		if (!user.is_admin) throw new UnauthorizedError("user must be an admin");

@@ -28,9 +28,9 @@ export const serversRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		await servers.assertNew({ server_id: req.body.server_id });
-		const newServer = await servers.bulkInsert([req.body]);
-		return newServer[0];
+		return await servers.insertNew({
+			server_id: req.body.server_id
+		}, req.body);
 	});
 	app.get<{
 		Params: { server_id: string }
