@@ -56,6 +56,7 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id } = req.params;
+		await servers.assertExists({ server_id });
 		return await announcements.list({
 			server_id
 		}, {

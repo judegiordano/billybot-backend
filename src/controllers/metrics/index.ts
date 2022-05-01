@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 
 import { IUserMetrics } from "../../types/models";
-import { users } from "../../models";
+import { users, servers } from "../../models";
 
 export const metricsRouter = async function (app: FastifyInstance) {
 	app.put<{
@@ -71,10 +71,12 @@ export const metricsRouter = async function (app: FastifyInstance) {
 			}
 		}
 	}, async (req) => {
+		const { server_id } = req.params;
+		await servers.assertExists({ server_id });
 		const sort = Object.keys(req.query).reduce((acc, key) => {
 			acc[`metrics.${key}`] = req.query[key];
 			return acc;
 		}, {});
-		return await users.list({ server_id: req.params.server_id }, { sort });
+		return await users.assertList({ server_id }, { sort });
 	});
 };
