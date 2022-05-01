@@ -96,16 +96,8 @@ export const userRouter = async function (app: FastifyInstance) {
 	});
 	app.get<{ Params: { server_id: string } }>("/users/server/:server_id", {
 		schema: {
-			params: {
-				type: "object",
-				required: ["server_id"],
-				properties: {
-					server_id: { type: "string" }
-				}
-			},
-			response: {
-				200: { $ref: "userArray#" }
-			}
+			params: { $ref: "serverIdParams#" },
+			response: { 200: { $ref: "userArray#" } }
 		},
 	}, async (req) => {
 		await servers.assertExists({ server_id: req.params.server_id });
@@ -114,13 +106,8 @@ export const userRouter = async function (app: FastifyInstance) {
 	app.delete<{ Params: { server_id: string } }>("/users/server/:server_id", {
 		preValidation: [app.restricted],
 		schema: {
-			params: {
-				type: "object",
-				required: ["server_id"],
-				properties: {
-					server_id: { type: "string" }
-				}
-			}
+			params: { $ref: "serverIdParams#" },
+			response: { 200: { $ref: "userArray#" } }
 		},
 	}, async (req) => {
 		return await users.assertDeleteMany({ server_id: req.params.server_id });

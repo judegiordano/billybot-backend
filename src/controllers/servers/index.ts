@@ -32,19 +32,8 @@ export const serversRouter = async function (app: FastifyInstance) {
 			server_id: req.body.server_id
 		}, req.body);
 	});
-	app.get<{
-		Params: { server_id: string }
-	}>("/server/:server_id", {
-		schema: {
-			params: {
-				type: "object",
-				required: ["server_id"],
-				additionalProperties: false,
-				properties: {
-					server_id: { type: "string" }
-				}
-			}
-		},
+	app.get<{ Params: { server_id: string } }>("/server/:server_id", {
+		schema: { params: { $ref: "serverIdParams#" } }
 	}, async (req) => {
 		const { server_id } = req.params;
 		const server = await servers.assertRead({ server_id });

@@ -44,16 +44,7 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 	app.get<{
 		Params: { server_id: string }
 	}>("/announcements/:server_id", {
-		schema: {
-			params: {
-				type: "object",
-				required: ["server_id"],
-				additionalProperties: false,
-				properties: {
-					server_id: { type: "string" }
-				}
-			}
-		},
+		schema: { params: { $ref: "serverIdParams#" } }
 	}, async (req) => {
 		const { server_id } = req.params;
 		await servers.assertExists({ server_id });

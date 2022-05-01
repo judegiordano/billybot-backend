@@ -10,6 +10,15 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		}
 	});
 	app.addSchema({
+		$id: "serverIdParams",
+		type: "object",
+		additionalProperties: false,
+		required: ["server_id"],
+		properties: {
+			server_id: { type: "string" },
+		}
+	});
+	app.addSchema({
 		$id: "user",
 		type: "object",
 		properties: {

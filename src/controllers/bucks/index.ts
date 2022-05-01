@@ -7,14 +7,8 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		Params: { server_id: string }
 	}>("/bucks/noblemen/:server_id", {
 		schema: {
-			params: {
-				type: "object",
-				additionalProperties: false,
-				required: ["server_id"],
-				properties: {
-					server_id: { type: "string" },
-				}
-			}
+			params: { $ref: "serverIdParams#" },
+			response: { 200: { $ref: "userArray#" } }
 		}
 	}, async (req) => {
 		const { server_id } = req.params;
@@ -26,14 +20,8 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		Params: { server_id: string }
 	}>("/bucks/serfs/:server_id", {
 		schema: {
-			params: {
-				type: "object",
-				additionalProperties: false,
-				required: ["server_id"],
-				properties: {
-					server_id: { type: "string" },
-				}
-			}
+			params: { $ref: "serverIdParams#" },
+			response: { 200: { $ref: "userArray#" } }
 		}
 	}, async (req) => {
 		const { server_id } = req.params;
