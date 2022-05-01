@@ -37,7 +37,7 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 		await servers.assertExists({ server_id });
 		const [user, webhook] = await Promise.all([
 			users.readAdmin(user_id, server_id),
-			webhooks.read({ server_id, channel_name })
+			webhooks.assertRead({ server_id, channel_name })
 		]);
 		return await announcements.postAnnouncement(webhook, user, server_id, channel_name, text);
 	});

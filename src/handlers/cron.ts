@@ -6,7 +6,7 @@ const bucket = config.MEDIA_BUCKET;
 const key = "rockandroll.mp4";
 
 async function pickWinner(webhook: IWebhook) {
-	const { settings } = await servers.read({ server_id: webhook.server_id });
+	const { settings } = await servers.assertRead({ server_id: webhook.server_id });
 	return users.pickLotteryWinner(webhook, settings);
 }
 

@@ -57,7 +57,7 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id, user_id } = req.body;
-		const { settings } = await servers.read({ server_id });
+		const { settings } = await servers.assertRead({ server_id });
 		return await users.allowance(server_id, user_id, settings);
 	});
 };

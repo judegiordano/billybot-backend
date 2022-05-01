@@ -65,43 +65,39 @@ export class Repository<T extends IModel> {
 		this.model = BuildModel<T>(collectionName, schema);
 	}
 
-	/**
-	 * will find one document or fail
-	 */
-	public async read(filter?: FilterQuery<T>, options?: QueryOptions, projection?: Projection) {
+	public async assertRead(filter?: FilterQuery<T>, options?: QueryOptions, projection?: Projection) {
 		const doc = await this.model.findOne(filter, projection, options);
 		if (!doc) throw new NotFoundError(`${this.model.modelName} not found`);
 		return doc as unknown as T;
 	}
 
-	/**
-	 * will find a document array or empty array
-	 */
-	public async list(filter?: FilterQuery<T>, options?: QueryOptions, projection?: Projection) {
-		const doc = await this.model.find(filter ?? {}, projection, options);
-		if (doc.length <= 0) return [];
-		return doc as unknown as T[];
+	public async list(filter?: FilterQuery<T>, options?: QueryOptions, projection?: Projection): Promise<T[] | []> {
+		const docs = await this.model.find(filter ?? {}, projection, options);
+		if (docs.length <= 0) return [];
+		return docs;
+	}
+
+	public async assertList(filter?: FilterQuery<T>, options?: QueryOptions, projection?: Projection): Promise<T[]> {
+		const docs = await this.list(filter, options, projection);
+		if (docs.length <= 0) throw new NotFoundError(`no ${this.model.modelName} documents found`);
+		return docs;
 	}
 
 	public async createOrUpdate(filter: FilterQuery<T>, doc: Partial<T>) {
 		const exists = await this.exists(filter);
 		if (!exists) return this.insertOne(doc);
-		return this.model.findOneAndUpdate(filter, doc, { new: true });
+		return this.model.findOneAndUpdate(filter, doc, { new: true }) as unknown as T;
 	}
 
-	public async bulkInsert(docs: Partial<T>[]) {
-		return this.model.insertMany(docs) as unknown as T[];
+	public async bulkInsert(docs: Partial<T>[]): Promise<T[]> {
+		return this.model.insertMany(docs);
 	}
 
-	public async insertOne(doc: Partial<T>) {
-		return this.model.create(doc) as unknown as T;
+	public async insertOne(doc: Partial<T>): Promise<T> {
+		return this.model.create(doc);
 	}
 
-	/**
-	 *
-	 * inserts one document or throws if already exists
-	 */
-	public async insertNew(filter: FilterQuery<T>, doc: Partial<T>) {
+	public async assertInsertNew(filter: FilterQuery<T>, doc: Partial<T>) {
 		await this.assertNew(filter);
 		return this.model.create(doc) as unknown as T;
 	}
@@ -114,46 +110,37 @@ export class Repository<T extends IModel> {
 		return await this.count(filter, options) >= 1;
 	}
 
-	/**
-	 *
-	 * throws if the filtered document already exists
-	 */
 	public async assertNew(filter: FilterQuery<T>, options?: QueryOptions) {
 		const count = await this.count(filter, options);
 		if (count >= 1) throw new BadRequestError(`${this.model.modelName} already exists`);
 	}
 
-	/**
-	 *
-	 * throws if the filtered document does not exist
-	 */
 	public async assertExists(filter: FilterQuery<T>, options?: QueryOptions) {
 		const count = await this.count(filter, options);
 		if (count <= 0) throw new NotFoundError(`${this.model.modelName} does not exist`);
 	}
 
-	/**
-	 *
-	 * updates one document or throws if not found
-	 */
-	public async updateOne(filter: FilterQuery<T>, updates: UpdateQuery<T>, options?: QueryOptions) {
+	public async assertUpdateOne(filter: FilterQuery<T>, updates: UpdateQuery<T>, options?: QueryOptions) {
 		await this.assertExists(filter);
 		return this.model.findOneAndUpdate(filter, updates, { new: true, ...options }) as unknown as T;
 	}
 
 	public async bulkUpdate(filter: FilterQuery<T>, updates: UpdateQuery<T>) {
-		return this.model.updateMany(filter, updates, { new: true }) as unknown;
+		return this.model.updateMany(filter, updates, { new: true }) as unknown as T[];
 	}
 
-	/**
-	 *
-	 * removes any document matching filter
-	 */
-	public async removeMany(filter: FilterQuery<T>) {
-		return this.model.deleteMany(filter) as unknown as {
-			acknowledged: boolean;
-			deletedCount: number;
-		};
+	public async assertDeleteMany(filter: FilterQuery<T>) {
+		const docs = await this.assertList(filter);
+		const operations = docs.reduce((acc, doc) => {
+			acc.push(this.model.findOneAndDelete({ _id: doc._id }) as unknown as Promise<T>);
+			return acc;
+		}, [] as Promise<T>[]);
+		return Promise.all(operations);
+	}
+
+	public async assertDeleteOne(filter: FilterQuery<T>) {
+		await this.assertExists(filter);
+		return this.model.findOneAndDelete(filter) as unknown as T;
 	}
 
 	public async startSession(): Promise<ClientSession> {

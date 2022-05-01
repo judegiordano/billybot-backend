@@ -43,7 +43,7 @@ class Webhooks extends mongoose.Repository<IWebhook> {
 		channel_name: string,
 		content: string
 	) {
-		const webhook = await super.read({ server_id, channel_name });
+		const webhook = await super.assertRead({ server_id, channel_name });
 		const { data } = await discord.webhooks.post(`${webhook.webhook_id}/${webhook.webhook_token}`, {
 			content,
 			username: webhook.username,

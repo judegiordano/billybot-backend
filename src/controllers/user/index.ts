@@ -72,10 +72,9 @@ export const userRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const operations = req.body.map((user) => {
-			return users.updateOne({ user_id: user.user_id, server_id: user.server_id }, user);
+			return users.assertUpdateOne({ user_id: user.user_id, server_id: user.server_id }, user);
 		});
-		const updates = await Promise.all(operations);
-		return updates ?? [];
+		return await Promise.all(operations);
 	});
 	app.get<{ Querystring: { user_id: string, server_id: string } }>("/users", {
 		schema: {
@@ -93,7 +92,7 @@ export const userRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id, user_id } = req.query;
-		return await users.read({ user_id, server_id });
+		return await users.assertRead({ user_id, server_id });
 	});
 	app.get<{ Params: { server_id: string } }>("/users/server/:server_id", {
 		schema: {
@@ -124,6 +123,6 @@ export const userRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		return await users.removeMany({ server_id: req.params.server_id });
+		return await users.assertDeleteMany({ server_id: req.params.server_id });
 	});
 };
