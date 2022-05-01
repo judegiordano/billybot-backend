@@ -4,10 +4,11 @@ export interface IModel {
 	_id: string
 	created_at: Date
 	updated_at: Date
-	toJSON(): { [key: string]: any }
+	toJSON<T>(): T
 }
 
 export type Ref<T extends IModel> = T["_id"]
+export type Projection = Record<string, 0 | 1>
 
 export interface IAnnouncement extends IModel {
 	server_id: string

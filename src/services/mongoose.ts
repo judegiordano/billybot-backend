@@ -13,7 +13,7 @@ import mongoose, {
 
 import { MONGO_URI } from "./config";
 import { NotFoundError, BadRequestError } from "../types";
-import { IModel } from "../types/models";
+import { IModel, Projection } from "../types/models";
 import { nanoid } from "../helpers";
 
 let cachedConnection: Connection | null = null;
@@ -67,12 +67,8 @@ export class Repository<T extends IModel> {
 	/**
 	 * will find one document or fail
 	 */
-	public async read(
-		filter?: FilterQuery<T> | null,
-		projection?: { [key: string]: 0 | 1 } | null,
-		options?: QueryOptions | null
-	) {
-		const doc = await this.model.findOne(filter ?? undefined, projection, options);
+	public async read(filter?: FilterQuery<T>, options?: QueryOptions, projection?: Projection) {
+		const doc = await this.model.findOne(filter, projection, options);
 		if (!doc) throw new NotFoundError(`${this.model.modelName} not found`);
 		return doc as unknown as T;
 	}
@@ -80,38 +76,49 @@ export class Repository<T extends IModel> {
 	/**
 	 * will find a document array or empty array
 	 */
-	public async list(
-		filter?: FilterQuery<T> | null,
-		projection?: { [key: string]: 0 | 1 } | null,
-		options?: QueryOptions | null
-	) {
+	public async list(filter?: FilterQuery<T>, options?: QueryOptions, projection?: Projection) {
 		const doc = await this.model.find(filter ?? {}, projection, options);
 		if (doc.length <= 0) return [];
 		return doc as unknown as T[];
+	}
+
+	public async createOrUpdate(filter: FilterQuery<T>, doc: Partial<T>) {
+		const exists = await this.exists(filter);
+		if (exists) return this.updateOne(filter, doc, { new: true });
+		return this.insertOne(doc);
 	}
 
 	public async bulkInsert(docs: Partial<T>[]) {
 		return this.model.insertMany(docs) as unknown as T[];
 	}
 
-	public async count(
-		filter?: FilterQuery<T> | null,
-		projection?: { [key: string]: 0 | 1 } | null,
-		options?: QueryOptions | null
-	) {
-		return this.model.findOne(filter ?? undefined, projection, options).count();
+	public async insertOne(doc: Partial<T>) {
+		return this.model.create(doc) as unknown as T;
+	}
+
+	/**
+	 *
+	 * inserts one document or throws if already exists
+	 */
+	public async insertNew(filter: FilterQuery<T>, doc: Partial<T>) {
+		await this.assertNew(filter);
+		return this.model.create(doc) as unknown as T;
+	}
+
+	public async count(filter: FilterQuery<T>, options?: QueryOptions) {
+		return this.model.findOne(filter, options).count();
+	}
+
+	public async exists(filter: FilterQuery<T>, options?: QueryOptions) {
+		return await this.count(filter, options) >= 1;
 	}
 
 	/**
 	 *
 	 * throws if the filtered document already exists
 	 */
-	public async assertNew(
-		filter: FilterQuery<T>,
-		projection?: { [key: string]: 0 | 1 } | null,
-		options?: QueryOptions | null
-	) {
-		const count = await this.count(filter, projection, options);
+	public async assertNew(filter: FilterQuery<T>, options?: QueryOptions) {
+		const count = await this.count(filter, options);
 		if (count >= 1) throw new BadRequestError(`${this.model.modelName} already exists`);
 	}
 
@@ -119,12 +126,8 @@ export class Repository<T extends IModel> {
 	 *
 	 * throws if the filtered document does not exist
 	 */
-	public async assertExists(
-		filter: FilterQuery<T>,
-		projection?: { [key: string]: 0 | 1 } | null,
-		options?: QueryOptions | null
-	) {
-		const count = await this.count(filter, projection, options);
+	public async assertExists(filter: FilterQuery<T>, options?: QueryOptions) {
+		const count = await this.count(filter, options);
 		if (count <= 0) throw new NotFoundError(`${this.model.modelName} does not exist`);
 	}
 
@@ -132,18 +135,12 @@ export class Repository<T extends IModel> {
 	 *
 	 * updates one document or throws if not found
 	 */
-	public async updateOne(
-		filter: FilterQuery<T>,
-		updates: UpdateQuery<T>
-	) {
+	public async updateOne(filter: FilterQuery<T>, updates: UpdateQuery<T>, options?: QueryOptions) {
 		await this.assertExists(filter);
-		return this.model.findOneAndUpdate(filter, updates, { new: true }) as unknown as T;
+		return this.model.findOneAndUpdate(filter, updates, { new: true, ...options }) as unknown as T;
 	}
 
-	public async bulkUpdate(
-		filter: FilterQuery<T>,
-		updates: UpdateQuery<T>
-	) {
+	public async bulkUpdate(filter: FilterQuery<T>, updates: UpdateQuery<T>) {
 		return this.model.updateMany(filter, updates, { new: true }) as unknown;
 	}
 

@@ -49,9 +49,9 @@ export const serversRouter = async function (app: FastifyInstance) {
 		const { server_id } = req.params;
 		const server = await servers.read({ server_id });
 		const [serverUsers, serverWebhooks, serverAnnouncements] = await Promise.all([
-			users.list({ server_id }, null, { sort: { billy_bucks: -1 } }),
+			users.list({ server_id }, { sort: { billy_bucks: -1 } }),
 			webhooks.list({ server_id }),
-			announcements.list({ server_id }, null, {
+			announcements.list({ server_id }, {
 				sort: { cerated_at: -1 },
 				populate: [{
 					path: "user",
@@ -60,7 +60,7 @@ export const serversRouter = async function (app: FastifyInstance) {
 			})
 		]);
 		return {
-			...server.toJSON(),
+			...server.toJSON<IServer>(),
 			users: serverUsers,
 			webhooks: serverWebhooks,
 			announcements: serverAnnouncements

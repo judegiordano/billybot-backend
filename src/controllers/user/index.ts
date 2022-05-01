@@ -36,22 +36,13 @@ export const userRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		const notFound = await Promise.all(
-			req.body.map(async (user) => {
-				await servers.assertExists({ server_id: user.server_id });
-				const count = await users.count({
-					$and: [
-						{ user_id: user.user_id },
-						{ server_id: user.server_id },
-					],
-				});
-				if (count >= 1) return;
-				return user;
-			})
-		);
-		const operations = notFound.filter(a => !!a) as IUser[];
-		const inserted = await users.bulkInsert(operations);
-		return inserted ?? [];
+		const operations = req.body.map((user) => {
+			return users.createOrUpdate({
+				server_id: user.server_id,
+				user_id: user.user_id
+			}, user);
+		});
+		return await Promise.all(operations);
 	});
 	app.put<{ Body: IUser[] }>("/users", {
 		preValidation: [app.restricted],
@@ -119,7 +110,7 @@ export const userRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		await servers.assertExists({ server_id: req.params.server_id });
-		return await users.list({ server_id: req.params.server_id }, {}, { sort: { billy_bucks: -1 } });
+		return await users.list({ server_id: req.params.server_id }, { sort: { billy_bucks: -1 } });
 	});
 	app.delete<{ Params: { server_id: string } }>("/users/server/:server_id", {
 		preValidation: [app.restricted],

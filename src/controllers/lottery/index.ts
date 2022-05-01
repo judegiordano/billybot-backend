@@ -49,7 +49,9 @@ export const lotteryRouter = async function (app: FastifyInstance) {
 			users.list({
 				server_id,
 				has_lottery_ticket: true
-			}, { username: 1 }, { sort: { username: 1 } })
+			}, {
+				sort: { username: 1 }
+			}, { username: 1 })
 		]);
 		return {
 			ticket_cost: settings.lottery_cost,

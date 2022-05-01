@@ -58,7 +58,7 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 		const { server_id } = req.params;
 		return await announcements.list({
 			server_id
-		}, null, {
+		}, {
 			sort: { username: 1 },
 			populate: [{ path: "user", select: ["username", "user_id"] }]
 		});

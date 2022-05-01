@@ -29,6 +29,7 @@
 	"billybot",
 	"euxo",
 	"packageid",
-	"pipefail"
+	"pipefail",
+	"upsert"
 ]
 }

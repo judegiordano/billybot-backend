@@ -75,6 +75,6 @@ export const metricsRouter = async function (app: FastifyInstance) {
 			acc[`metrics.${key}`] = req.query[key];
 			return acc;
 		}, {});
-		return await users.list({ server_id: req.params.server_id }, null, { sort });
+		return await users.list({ server_id: req.params.server_id }, { sort });
 	});
 };
