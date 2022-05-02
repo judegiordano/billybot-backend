@@ -1,3 +1,4 @@
+import { users } from "./user";
 import { mongoose } from "../services";
 import type { IServer } from "../types/models";
 
@@ -17,6 +18,11 @@ class Servers extends mongoose.Repository<IServer> {
 			icon_hash: {
 				type: String,
 				required: true
+			},
+			mayor: {
+				type: String,
+				ref: users.model.modelName,
+				index: true
 			},
 			settings: {
 				lottery_cost: {
