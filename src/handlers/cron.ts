@@ -1,4 +1,4 @@
-import { IWebhook } from "../types/models";
+import type { IWebhook } from "../types/models";
 import { discord, mongoose, config } from "../services";
 import { servers, users, webhooks } from "../models";
 

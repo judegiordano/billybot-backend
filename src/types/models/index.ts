@@ -26,6 +26,7 @@ export interface IServerSettings {
 export interface IServer extends IModel {
 	server_id: string
 	name: string
+	icon_hash: string
 	settings: IServerSettings
 }
 

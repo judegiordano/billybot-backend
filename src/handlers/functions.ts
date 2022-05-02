@@ -1,5 +1,5 @@
 import { jwt, config } from "../services";
-import { JwtPayload } from "../types";
+import type { JwtPayload } from "../types";
 
 export async function createToken() {
 	return {

@@ -1,7 +1,7 @@
 import { mongoose, discord } from "../services";
 import { readableDate, diffInDays, chance } from "../helpers";
 import { UnauthorizedError, BadRequestError, Dictionary } from "../types";
-import { IServerSettings, IUser, IUserMetrics, IWebhook } from "../types/models";
+import type { IServerSettings, IUser, IUserMetrics, IWebhook } from "../types/models";
 
 class Users extends mongoose.Repository<IUser> {
 	constructor() {

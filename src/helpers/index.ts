@@ -1,7 +1,7 @@
 import Chance from "chance";
 import { customAlphabet } from "nanoid";
 
-import { IUser } from "../types/models";
+import type { IUser } from "../types/models";
 
 export function buildAvatarUrl(user: IUser) {
 	if (!user.avatar_hash) return "https://discord.com/assets/c09a43a372ba81e3018c3151d4ed4773.png";

@@ -1,5 +1,5 @@
 import { discord, mongoose } from "../services";
-import { IWebhook } from "../types/models";
+import type { IWebhook } from "../types/models";
 
 class Webhooks extends mongoose.Repository<IWebhook> {
 	constructor() {

@@ -1,5 +1,5 @@
 import { mongoose } from "../services";
-import { IServer } from "../types/models";
+import type { IServer } from "../types/models";
 
 class Servers extends mongoose.Repository<IServer> {
 	constructor() {
@@ -12,6 +12,10 @@ class Servers extends mongoose.Repository<IServer> {
 			name: {
 				type: String,
 				index: true,
+				required: true
+			},
+			icon_hash: {
+				type: String,
 				required: true
 			},
 			settings: {

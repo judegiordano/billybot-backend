@@ -1,6 +1,6 @@
-import { mongoose, discord } from "../services";
-import { IAnnouncement, IUser, IWebhook } from "../types/models";
 import { users } from "./user";
+import { mongoose, discord } from "../services";
+import type { IAnnouncement, IUser, IWebhook } from "../types/models";
 
 class Announcements extends mongoose.Repository<IAnnouncement> {
 	constructor() {

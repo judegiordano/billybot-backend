@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 
-import { IServer } from "../../types/models";
 import { servers, users, webhooks, announcements } from "../../models";
+import type { IServer } from "../../types/models";
 
 export const serversRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IServer }>("/server", {
@@ -14,6 +14,7 @@ export const serversRouter = async function (app: FastifyInstance) {
 				properties: {
 					server_id: { type: "string" },
 					name: { type: "string" },
+					icon_hash: { type: "string" },
 					settings: {
 						type: "object",
 						properties: {
@@ -37,7 +38,7 @@ export const serversRouter = async function (app: FastifyInstance) {
 		const { server_id } = req.params;
 		const server = await servers.assertRead({ server_id });
 		const [serverUsers, serverWebhooks, serverAnnouncements] = await Promise.all([
-			users.list({ server_id }, { sort: { billy_bucks: -1 } }),
+			users.list({ server_id }, { sort: { billy_bucks: -1, username: 1 } }),
 			webhooks.list({ server_id }),
 			announcements.list({ server_id }, {
 				sort: { cerated_at: -1 },
