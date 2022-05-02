@@ -37,7 +37,7 @@ export const serversRouter = async function (app: FastifyInstance) {
 	}, async (req) => {
 		const { server_id } = req.params;
 		const server = await servers.assertRead({ server_id });
-		const [serverUsers, serverWebhooks, serverAnnouncements] = await Promise.all([
+		const [serverUsers, serverWebhooks, serverAnnouncements, lottery] = await Promise.all([
 			users.list({ server_id }, { sort: { billy_bucks: -1, username: 1 } }),
 			webhooks.list({ server_id }),
 			announcements.list({ server_id }, {
@@ -46,13 +46,15 @@ export const serversRouter = async function (app: FastifyInstance) {
 					path: "user",
 					select: ["username", "user_id"]
 				}]
-			})
+			}),
+			users.lotteryInformation(server),
 		]);
 		return {
 			...server.toJSON<IServer>(),
 			users: serverUsers,
 			webhooks: serverWebhooks,
-			announcements: serverAnnouncements
+			announcements: serverAnnouncements,
+			lottery
 		};
 	});
 };

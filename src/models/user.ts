@@ -1,7 +1,7 @@
 import { mongoose, discord } from "../services";
 import { readableDate, diffInDays, chance } from "../helpers";
 import { UnauthorizedError, BadRequestError, Dictionary } from "../types";
-import type { IServerSettings, IUser, IUserMetrics, IWebhook } from "../types/models";
+import type { IServer, IServerSettings, IUser, IUserMetrics, IWebhook } from "../types/models";
 
 class Users extends mongoose.Repository<IUser> {
 	constructor() {
@@ -204,6 +204,26 @@ class Users extends mongoose.Repository<IUser> {
 			return acc;
 		}, {} as Dictionary<IUser>);
 		return dictionary;
+	}
+
+	public async lotteryInformation(server: IServer) {
+		const { server_id, settings } = server;
+		const entrants = await super.list({
+			server_id,
+			has_lottery_ticket: true
+		}, {
+			sort: { username: -1 }
+		}, {
+			username: 1,
+			has_lottery_ticket: 1
+		});
+		return {
+			ticket_cost: settings.lottery_cost,
+			base_lottery_jackpot: settings.base_lottery_jackpot,
+			jackpot: (entrants.length * settings.lottery_cost) + settings.base_lottery_jackpot,
+			entrants_count: entrants.length,
+			entrants
+		};
 	}
 }
 
