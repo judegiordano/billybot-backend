@@ -64,7 +64,16 @@ export const serversRouter = async function (app: FastifyInstance) {
 	});
 	app.get<{ Params: IServer }>("/server/:server_id", {
 		preValidation: [app.restricted],
-		schema: { params: { $ref: "serverIdParams#" } }
+		schema: {
+			params: {
+				$ref: "serverIdParams#"
+			},
+			response: {
+				200: {
+					$ref: "serverMetaData#"
+				}
+			}
+		}
 	}, async (req) => {
 		const { server_id } = req.params;
 		const server = await servers.assertRead({ server_id }, { populate: ["mayor"] });
@@ -73,10 +82,7 @@ export const serversRouter = async function (app: FastifyInstance) {
 			webhooks.list({ server_id }),
 			announcements.list({ server_id }, {
 				sort: { cerated_at: -1 },
-				populate: [{
-					path: "user",
-					select: ["username", "user_id"]
-				}]
+				populate: [{ path: "user" }]
 			}),
 			users.lotteryInformation(server),
 		]);
