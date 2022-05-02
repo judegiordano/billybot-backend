@@ -35,19 +35,19 @@ class Announcements extends mongoose.Repository<IAnnouncement> {
 		text: string
 	) {
 		const [message] = await Promise.all([
-			super.bulkInsert([{
+			super.insertOne({
 				server_id,
 				user: user._id,
 				text,
 				channel_name
-			}]),
+			}),
 			discord.webhooks.post(`${webhook.webhook_id}/${webhook.webhook_token}`, {
 				content: text,
 				username: webhook.username,
 				avatar_url: webhook.avatar_url
 			})
 		]);
-		return message[0];
+		return message;
 	}
 }
 
