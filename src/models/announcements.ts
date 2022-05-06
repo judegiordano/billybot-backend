@@ -1,5 +1,5 @@
 import { users } from "./user";
-import { mongoose, discord } from "../services";
+import { mongoose, discord, config } from "../services";
 import type { IAnnouncement, IUser, IWebhook } from "../types/models";
 
 class Announcements extends mongoose.Repository<IAnnouncement> {
@@ -27,24 +27,27 @@ class Announcements extends mongoose.Repository<IAnnouncement> {
 		});
 	}
 
-	public async postAnnouncement(
+	public async postAdminUpdate(
 		webhook: IWebhook,
 		user: IUser,
-		server_id: string,
-		channel_name: string,
 		text: string
 	) {
 		const [message] = await Promise.all([
 			super.insertOne({
-				server_id,
+				server_id: webhook.server_id,
 				user: user._id,
 				text,
-				channel_name
+				channel_name: webhook.channel_name
 			}),
-			discord.webhooks.post(`${webhook.webhook_id}/${webhook.webhook_token}`, {
-				content: text,
-				username: webhook.username,
-				avatar_url: webhook.avatar_url
+			discord.postSuccessEmbed(webhook, {
+				title: "Admin Update",
+				description: `[Dashboard](${config.DASHBOARD_URL}/${webhook.server_id})`,
+				fields: [
+					{
+						name: `Update From ${user.username}`,
+						value: text
+					}
+				]
 			})
 		]);
 		return message;

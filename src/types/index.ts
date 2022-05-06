@@ -3,3 +3,13 @@ export { CommonError, NotFoundError, UnauthorizedError, ForbiddenError, BadReque
 export type JwtPayload = { is_valid: boolean, stage: string }
 
 export type Dictionary<T> = { [key: string]: Partial<T> }
+
+export interface IEmbed {
+	title: string;
+	description: string;
+	color: number;
+	fields: {
+		name: string;
+		value: string;
+	}[];
+}
