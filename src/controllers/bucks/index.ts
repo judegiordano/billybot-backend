@@ -27,6 +27,7 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		return await users.list({ server_id }, { sort, limit: 3 });
 	});
 	app.post<{ Body: IServer & { amount: number, recipient_id: string, sender_id: string } }>("/bucks/pay", {
+		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "object",

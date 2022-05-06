@@ -21,8 +21,6 @@ const routers = [
 	serversRouter
 ] as unknown as FastifyPluginCallback[];
 
-for (const router of routers) {
-	app.register(router, { prefix: `/api/v${config.VERSION}` });
-}
+routers.map((router) => app.register(router, { prefix: `/api/v${config.VERSION}` }));
 
 export const controllers = app;
