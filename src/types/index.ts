@@ -6,7 +6,7 @@ export type Dictionary<T> = { [key: string]: Partial<T> }
 
 export interface IEmbed {
 	title: string;
-	description: string;
+	description?: string;
 	color: number;
 	fields: {
 		name: string;

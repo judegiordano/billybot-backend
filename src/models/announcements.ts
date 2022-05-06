@@ -1,5 +1,5 @@
 import { users } from "./user";
-import { mongoose, discord, config } from "../services";
+import { mongoose, discord } from "../services";
 import type { IAnnouncement, IUser, IWebhook } from "../types/models";
 
 class Announcements extends mongoose.Repository<IAnnouncement> {
@@ -41,7 +41,6 @@ class Announcements extends mongoose.Repository<IAnnouncement> {
 			}),
 			discord.postSuccessEmbed(webhook, {
 				title: "Admin Update",
-				description: `[Dashboard](${config.DASHBOARD_URL}/${webhook.server_id})`,
 				fields: [
 					{
 						name: `Update From ${user.username}`,

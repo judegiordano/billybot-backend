@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import { DASHBOARD_URL } from "./config";
 import type { IEmbed } from "../types";
 import type { IWebhook } from "../types/models";
 import { ColorCodes } from "../types/values";
@@ -16,9 +17,10 @@ export async function postSuccessEmbed(webhook: IWebhook, embed: Pick<IEmbed, "t
 		embeds: [
 			{
 				title: embed.title,
-				description: embed.description,
+				description: embed.description ?? `[Dashboard](${DASHBOARD_URL}/${webhook.server_id})`,
 				color: ColorCodes.green,
-				fields: embed.fields
+				fields: embed.fields,
+				timestamp: new Date().toISOString()
 			}
 		]
 	});
