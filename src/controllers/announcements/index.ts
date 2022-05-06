@@ -7,7 +7,6 @@ import type { IAnnouncement, IServer, IUser } from "../../types/models";
 
 export const announcementsRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IAnnouncement & IUser }>("/announcements", {
-		preValidation: [app.restricted],
 		schema: {
 			body: {
 				type: "object",

@@ -23,7 +23,6 @@ export const lotteryRouter = async function (app: FastifyInstance) {
 		return await users.purchaseLottery(server_id, user_id, settings);
 	});
 	app.get<{ Params: IServer }>("/lottery/:server_id", {
-		preValidation: [app.restricted],
 		schema: { params: { $ref: "serverIdParams#" } },
 	}, async (req) => {
 		const { server_id } = req.params;

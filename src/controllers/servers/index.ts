@@ -58,7 +58,6 @@ export const serversRouter = async function (app: FastifyInstance) {
 		return await servers.assertUpdateOne({ server_id }, req.body);
 	});
 	app.get<{ Params: IServer }>("/server/:server_id", {
-		preValidation: [app.restricted],
 		schema: {
 			params: {
 				$ref: "serverIdParams#"
