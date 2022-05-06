@@ -23,6 +23,7 @@ export const userRouter = async function (app: FastifyInstance) {
 						avatar_hash: { type: "string" },
 						has_lottery_ticket: { type: "boolean" },
 						is_admin: { type: "boolean" },
+						is_mayor: { type: "boolean" },
 					}
 				}
 			},
@@ -58,6 +59,7 @@ export const userRouter = async function (app: FastifyInstance) {
 						avatar_hash: { type: "string" },
 						has_lottery_ticket: { type: "boolean" },
 						is_admin: { type: "boolean" },
+						is_mayor: { type: "boolean" },
 					}
 				}
 			}

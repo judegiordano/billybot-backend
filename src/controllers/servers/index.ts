@@ -42,7 +42,6 @@ export const serversRouter = async function (app: FastifyInstance) {
 					server_id: { type: "string" },
 					name: { type: "string" },
 					icon_hash: { type: "string" },
-					mayor: { type: "string" },
 					settings: {
 						type: "object",
 						properties: {
@@ -56,10 +55,6 @@ export const serversRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id } = req.params;
-		const { mayor } = req.body;
-		if (!mayor) return await servers.assertUpdateOne({ server_id }, req.body);
-		const user = await users.assertRead({ user_id: mayor, server_id });
-		req.body.mayor = user._id;
 		return await servers.assertUpdateOne({ server_id }, req.body);
 	});
 	app.get<{ Params: IServer }>("/server/:server_id", {
@@ -76,7 +71,7 @@ export const serversRouter = async function (app: FastifyInstance) {
 		}
 	}, async (req) => {
 		const { server_id } = req.params;
-		const server = await servers.assertRead({ server_id }, { populate: ["mayor"] });
+		const server = await servers.assertRead({ server_id });
 		const [serverUsers, serverWebhooks, serverAnnouncements, lottery] = await Promise.all([
 			users.list({ server_id }, { sort: { billy_bucks: -1, username: 1 } }),
 			webhooks.list({ server_id }),

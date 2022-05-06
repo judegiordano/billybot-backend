@@ -39,6 +39,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			last_allowance: { type: "string" },
 			has_lottery_ticket: { type: "boolean" },
 			is_admin: { type: "boolean" },
+			is_mayor: { type: "boolean" },
 			metrics: {
 				type: "object",
 				properties: {
@@ -109,7 +110,6 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			name: { type: "string" },
 			server_id: { type: "string" },
 			icon_hash: { type: "string" },
-			mayor: { $ref: "user#" },
 			settings: {
 				type: "object",
 				properties: {

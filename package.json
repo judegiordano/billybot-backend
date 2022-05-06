@@ -14,7 +14,8 @@
     "build": "sst build",
     "start": "sst start --stage",
     "console": "sst console --stage",
-    "deploy": "sst deploy --stage"
+    "deploy": "sst deploy --stage",
+    "script": "ts-node --require dotenv/config -T"
   },
   "dependencies": {
     "@serverless-stack/resources": "^0.69.0",

@@ -27,7 +27,6 @@ export interface IServer extends IModel {
 	server_id: string
 	name: string
 	icon_hash: string
-	mayor: Ref<IUser>
 	settings: IServerSettings
 }
 
@@ -49,6 +48,7 @@ export interface IUser extends IModel {
 	last_allowance: string
 	has_lottery_ticket: boolean
 	is_admin: boolean
+	is_mayor: boolean
 	metrics: IUserMetrics
 }
 

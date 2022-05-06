@@ -38,6 +38,10 @@ class Users extends mongoose.Repository<IUser> {
 				type: Boolean,
 				default: false
 			},
+			is_mayor: {
+				type: Boolean,
+				default: false
+			},
 			metrics: {
 				required: false,
 				posts: {
