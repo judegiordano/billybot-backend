@@ -211,7 +211,7 @@ class Users extends mongoose.Repository<IUser> {
 			server_id,
 			has_lottery_ticket: true
 		}, {
-			sort: { username: -1 }
+			sort: { billy_bucks: -1, username: 1 }
 		}, {
 			username: 1,
 			has_lottery_ticket: 1
