@@ -38,7 +38,7 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 		return await announcements.list({
 			server_id
 		}, {
-			sort: { username: 1 },
+			sort: { created_at: -1 },
 			populate: [{ path: "user", select: ["username", "user_id"] }]
 		});
 	});

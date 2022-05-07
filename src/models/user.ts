@@ -147,16 +147,8 @@ class Users extends mongoose.Repository<IUser> {
 		};
 	}
 
-	public async pickLotteryWinner({
-		server_id,
-		webhook_id,
-		webhook_token,
-		username,
-		avatar_url
-	}: IWebhook, {
-		lottery_cost,
-		base_lottery_jackpot
-	}: IServerSettings) {
+	public async pickLotteryWinner(webhook: IWebhook, { lottery_cost, base_lottery_jackpot }: IServerSettings) {
+		const { server_id, webhook_id, webhook_token, username, avatar_url } = webhook;
 		const entrants = await super.list({ server_id, has_lottery_ticket: true });
 		if (entrants.length <= 0) {
 			const content = "No lottery entrants this week!\nRun ```!buylottoticket``` to buy a ticket for next week's lottery!";
@@ -172,12 +164,15 @@ class Users extends mongoose.Repository<IUser> {
 			users.assertUpdateOne({ user_id: winner.user_id, server_id }, { $inc: { billy_bucks: jackpot }, has_lottery_ticket: false }),
 			users.bulkUpdate({ server_id, has_lottery_ticket: true }, { has_lottery_ticket: false })
 		]);
-		const content = `Congratulations, <@${updatedWinner?.user_id}>!\nYou win this week's lottery and collect the jackpot of ${jackpot} BillyBucks!`;
-		return discord.webhooks.post(`${webhook_id}/${webhook_token}`, {
-			content,
-			username,
-			avatar_url
-		});
+		return discord.postSuccessEmbed(webhook, {
+			title: "Weekly Lottery",
+			fields: [
+				{
+					name: `+${jackpot}`,
+					value: `You win this week's lottery!\nYou now have ${updatedWinner.billy_bucks} BillyBucks!`
+				}
+			]
+		}, `Congratulations, <@${updatedWinner.user_id}>!`);
 	}
 
 	public async updateMetrics(data: {

@@ -1,3 +1,6 @@
+import axios from "axios";
+import FormData from "form-data";
+
 import type { IWebhook } from "../types/models";
 import { discord, mongoose, config } from "../services";
 import { servers, users, webhooks } from "../models";
@@ -20,7 +23,7 @@ export async function pickLotteryWinner() {
 			body: "no webhooks found for general",
 		};
 	}
-	const operations = generalWebhooks.map((webhook) => {
+	const operations = generalWebhooks.map((webhook: IWebhook) => {
 		return pickWinner(webhook);
 	});
 	await Promise.all(operations);
@@ -42,17 +45,15 @@ export async function goodMorning() {
 		};
 	}
 	const image = `https://${bucket}.s3.amazonaws.com/${key}`;
-	const operations = memHooks.map(({
-		webhook_id,
-		webhook_token,
-		username,
-		avatar_url
-	}) => {
-		return discord.webhooks.post(`${webhook_id}/${webhook_token}`, {
-			content: `Good Morning!\n${image}`,
-			username,
-			avatar_url
-		});
+	const formData = new FormData();
+	formData.append("content", "Good Morning!");
+	const stream = await axios.get(image, { responseType: "stream" });
+	formData.append("file1", stream.data, key);
+	// post to all channels
+	const operations = memHooks.map((webhook: IWebhook) => {
+		formData.append("username", webhook.username);
+		formData.append("avatar_url", webhook.avatar_url);
+		return discord.postGoodMorningEmbed(webhook, formData);
 	});
 	await Promise.all(operations);
 	return {

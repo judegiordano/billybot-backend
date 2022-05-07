@@ -1,4 +1,5 @@
-export { FilterQuery, QueryOptions, UpdateQuery } from "mongoose";
+import { QueryOptions, PopulateOptions } from "mongoose";
+export { FilterQuery, UpdateQuery } from "mongoose";
 
 export interface IModel {
 	_id: string
@@ -9,6 +10,15 @@ export interface IModel {
 
 export type Ref<T extends IModel> = T["_id"]
 export type Projection = Record<string, 0 | 1>
+export interface Options<T extends IModel> extends QueryOptions {
+	sort?: {
+		[k in keyof Partial<T>]: 1 | -1 | number
+	}
+	populate?: PopulateOptions[]
+	limit?: number
+	skip?: number
+	new?: boolean
+}
 
 export interface IAnnouncement extends IModel {
 	server_id: string
