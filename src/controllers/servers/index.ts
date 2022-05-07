@@ -75,7 +75,7 @@ export const serversRouter = async function (app: FastifyInstance) {
 			users.list({ server_id }, { sort: { billy_bucks: -1, username: 1 } }),
 			webhooks.list({ server_id }),
 			announcements.list({ server_id }, {
-				sort: { cerated_at: -1 },
+				sort: { created_at: -1 },
 				populate: [{ path: "user" }]
 			}),
 			users.lotteryInformation(server),

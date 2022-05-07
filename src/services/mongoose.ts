@@ -12,10 +12,10 @@ import mongoose, {
 	ClientSession
 } from "mongoose";
 
+import { nanoid } from "../helpers";
 import { MONGO_URI } from "./config";
 import { NotFoundError, BadRequestError } from "../types";
 import { IModel, Projection } from "../types/models";
-import { nanoid } from "../helpers";
 
 let cachedConnection: Connection | null = null;
 
