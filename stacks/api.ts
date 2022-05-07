@@ -35,6 +35,7 @@ export class ApiStack extends Stack {
 			defaultThrottlingRateLimit: 2000,
 			defaultThrottlingBurstLimit: 100,
 			cors: {
+				allowOrigins: ["*"],
 				allowHeaders: ["Authorization", "x-api-timestamp"]
 			},
 			routes: {

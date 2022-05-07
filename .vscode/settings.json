@@ -30,6 +30,7 @@
 	"euxo",
 	"packageid",
 	"pipefail",
-	"upsert"
+	"upsert",
+	"vercel"
 ]
 }
