@@ -2,10 +2,10 @@ import axios from "axios";
 import FormData from "form-data";
 
 import type { IWebhook } from "../types/models";
-import { discord, mongoose, config } from "../services";
+import { discord, mongoose } from "../services";
+import { buildMediaUrl } from "../helpers";
 import { servers, users, webhooks } from "../models";
 
-const bucket = config.MEDIA_BUCKET;
 const key = "rockandroll.mp4";
 
 async function pickWinner(webhook: IWebhook) {
@@ -44,7 +44,7 @@ export async function goodMorning() {
 			body: "no webhooks found for mems",
 		};
 	}
-	const image = `https://${bucket}.s3.amazonaws.com/${key}`;
+	const image = buildMediaUrl(key);
 	const formData = new FormData();
 	formData.append("content", "Good Morning!");
 	const stream = await axios.get(image, { responseType: "stream" });

@@ -2,10 +2,15 @@ import Chance from "chance";
 import { customAlphabet } from "nanoid";
 
 import type { IUser } from "../types/models";
+import { MEDIA_BUCKET } from "../services/config";
 
 export function buildAvatarUrl(user: IUser) {
 	if (!user.avatar_hash) return "https://discord.com/assets/c09a43a372ba81e3018c3151d4ed4773.png";
 	return `https://cdn.discordapp.com/avatars/${user.user_id}/${user.avatar_hash}.png`;
+}
+
+export function buildMediaUrl(key: string) {
+	return `https://${MEDIA_BUCKET}.s3.amazonaws.com/${key}`;
 }
 
 export function readableDate(date: Date) {
