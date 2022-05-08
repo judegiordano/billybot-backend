@@ -230,14 +230,14 @@ class Users extends mongoose.Repository<IUser> {
 					acc[`metrics.engagement.${key}`] = metrics.engagement[key];
 					return acc;
 				}, {});
-				return super.assertUpdateOne({ server_id, user_id }, { $inc, });
+				return super.updateOne({ server_id, user_id }, { $inc, });
 			})
 		);
 		const dictionary = operations.reduce((acc, user) => {
-			acc[user.user_id as string] = {
-				server_id: user.server_id,
-				username: user.username,
-				metrics: user.metrics
+			acc[user?.user_id as string] = {
+				server_id: user?.server_id,
+				username: user?.username,
+				metrics: user?.metrics
 			};
 			return acc;
 		}, {} as Dictionary<IUser>);

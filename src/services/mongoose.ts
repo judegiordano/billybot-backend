@@ -129,6 +129,10 @@ export class Repository<T extends IModel> {
 		return this.model.findOneAndUpdate(filter, updates, { new: true, ...options }) as unknown as T;
 	}
 
+	public async updateOne(filter: FilterQuery<T>, updates: UpdateQuery<T>, options?: Options<T>) {
+		return this.model.findOneAndUpdate(filter, updates, { new: true, ...options }) as unknown as T | null;
+	}
+
 	public async bulkUpdate(filter: FilterQuery<T>, updates: UpdateQuery<T>): Promise<UpdateWriteOpResult> {
 		return this.model.updateMany(filter, updates, { new: true });
 	}
