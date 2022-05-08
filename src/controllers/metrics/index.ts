@@ -4,7 +4,7 @@ import { users, servers } from "../../models";
 import type { IServer, IUser, IUserMetrics } from "../../types/models";
 
 export const metricsRouter = async function (app: FastifyInstance) {
-	app.put<{ Body: IUser[] }>("/metrics", {
+	app.put<{ Body: IUser[] }>("/metrics/engagement", {
 		preValidation: [app.restricted],
 		schema: {
 			body: {
@@ -20,11 +20,19 @@ export const metricsRouter = async function (app: FastifyInstance) {
 						metrics: {
 							type: "object",
 							additionalProperties: false,
+							required: ["engagement"],
 							properties: {
-								posts: { type: "number", minimum: 0, default: 0 },
-								reactions_used: { type: "number", minimum: 0, default: 0 },
-								reactions_received: { type: "number", minimum: 0, default: 0 },
-								mentions: { type: "number", minimum: 0, default: 0 }
+								additionalProperties: false,
+								engagement: {
+									type: "object",
+									additionalProperties: false,
+									properties: {
+										posts: { type: "number", minimum: 0, default: 0 },
+										reactions_used: { type: "number", minimum: 0, default: 0 },
+										reactions_received: { type: "number", minimum: 0, default: 0 },
+										mentions: { type: "number", minimum: 0, default: 0 },
+									}
+								}
 							}
 						}
 					}
@@ -32,7 +40,8 @@ export const metricsRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		return await users.updateMetrics(req.body);
+		console.log({ body: req.body[0].metrics });
+		return await users.updateEngagements(req.body);
 	});
 	app.get<{ Params: IServer, Querystring: Partial<IUserMetrics> }>("/metrics/server/:server_id", {
 		schema: {

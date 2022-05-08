@@ -41,11 +41,12 @@ export interface IServer extends IModel {
 }
 
 export interface IUserMetrics {
-	posts: number
-	reactions_used: number
-	reactions_received: number
-	average_reactions_per_post: number
-	mentions: number
+	engagement: {
+		posts: number
+		reactions_used: number
+		reactions_received: number
+		mentions: number
+	}
 	gambling: {
 		roulette: {
 			spins: number

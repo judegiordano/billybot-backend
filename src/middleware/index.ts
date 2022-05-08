@@ -43,11 +43,16 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			metrics: {
 				type: "object",
 				properties: {
-					posts: { type: "number" },
-					reactions_used: { type: "number" },
-					reactions_received: { type: "number" },
-					average_reactions_per_post: { type: "number" },
-					mentions: { type: "number" },
+					engagement: {
+						type: "object",
+						properties: {
+							posts: { type: "number" },
+							reactions_used: { type: "number" },
+							reactions_received: { type: "number" },
+							average_reactions_per_post: { type: "number" },
+							mentions: { type: "number" },
+						}
+					},
 					gambling: {
 						type: "object",
 						properties: {

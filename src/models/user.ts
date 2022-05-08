@@ -45,26 +45,24 @@ class Users extends mongoose.Repository<IUser> {
 				default: false
 			},
 			metrics: {
-				required: false,
-				posts: {
-					type: Number,
-					default: 0
-				},
-				reactions_used: {
-					type: Number,
-					default: 0
-				},
-				reactions_received: {
-					type: Number,
-					default: 0
-				},
-				average_reactions_per_post: {
-					type: Number,
-					default: 0
-				},
-				mentions: {
-					type: Number,
-					default: 0
+				engagement: {
+					required: false,
+					posts: {
+						type: Number,
+						default: 0
+					},
+					reactions_used: {
+						type: Number,
+						default: 0
+					},
+					reactions_received: {
+						type: Number,
+						default: 0
+					},
+					mentions: {
+						type: Number,
+						default: 0
+					}
 				},
 				gambling: {
 					required: false,
@@ -221,23 +219,18 @@ class Users extends mongoose.Repository<IUser> {
 		}, `Congratulations, <@${updatedWinner.user_id}>!`);
 	}
 
-	public async updateMetrics(data: {
+	public async updateEngagements(data: {
 		server_id: string
 		user_id: string
-		metrics: Partial<IUserMetrics>
+		metrics: Pick<IUserMetrics, "engagement">
 	}[]) {
 		const operations = await Promise.all(
 			data.map(({ server_id, user_id, metrics }) => {
-				const updates = Object.keys(metrics).reduce((acc, key) => {
-					acc[`metrics.${key}`] = metrics[key];
+				const $inc = Object.keys(metrics.engagement).reduce((acc, key) => {
+					acc[`metrics.engagement.${key}`] = metrics.engagement[key];
 					return acc;
 				}, {});
-				return super.assertUpdateOne({ server_id, user_id }, {
-					$inc: {
-						...updates,
-						// TODO calculate average reaction per post
-					},
-				});
+				return super.assertUpdateOne({ server_id, user_id }, { $inc, });
 			})
 		);
 		const dictionary = operations.reduce((acc, user) => {
