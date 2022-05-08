@@ -15,25 +15,20 @@ export function spinColor() {
 export function getRouletteResult(bet: number, color: BlackJackColor) {
 	const winningColor = spinColor();
 	const won = color === winningColor;
-	const result = {
-		operation: {},
+	const payout = won && color === BlackJackColor.green ? (bet * 17) : won ? bet : -bet;
+	const $inc = {
+		billy_bucks: payout,
+		"metrics.gambling.roulette.spins": 1,
+		[`metrics.gambling.roulette.${color}_spins`]: 1,
+		[`metrics.gambling.roulette.${won ? "wins" : "losses"}`]: 1,
+		[`metrics.gambling.roulette.overall_${won ? "winnings" : "losings"}`]: payout
+	};
+	return {
+		operation: { $inc },
 		outcome: {
-			payout: 0,
+			payout,
 			won,
 			winning_color: winningColor
 		}
 	};
-	if (!won) {
-		result.operation = { $inc: { billy_bucks: -bet } };
-		result.outcome.payout = -bet;
-		return result;
-	}
-	if (won && color === BlackJackColor.green) {
-		result.operation = { $inc: { billy_bucks: (bet * 17) } };
-		result.outcome.payout = (bet * 17);
-		return result;
-	}
-	result.operation = { $inc: { billy_bucks: bet } };
-	result.outcome.payout = bet;
-	return result;
 }

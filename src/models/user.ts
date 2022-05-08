@@ -65,6 +65,44 @@ class Users extends mongoose.Repository<IUser> {
 				mentions: {
 					type: Number,
 					default: 0
+				},
+				gambling: {
+					required: false,
+					roulette: {
+						required: false,
+						spins: {
+							type: Number,
+							default: 0
+						},
+						red_spins: {
+							type: Number,
+							default: 0
+						},
+						black_spins: {
+							type: Number,
+							default: 0
+						},
+						green_spins: {
+							type: Number,
+							default: 0
+						},
+						wins: {
+							type: Number,
+							default: 0
+						},
+						losses: {
+							type: Number,
+							default: 0
+						},
+						overall_winnings: {
+							type: Number,
+							default: 0
+						},
+						overall_losings: {
+							type: Number,
+							default: 0
+						}
+					}
 				}
 			}
 		});

@@ -47,7 +47,25 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 					reactions_used: { type: "number" },
 					reactions_received: { type: "number" },
 					average_reactions_per_post: { type: "number" },
-					mentions: { type: "number" }
+					mentions: { type: "number" },
+					gambling: {
+						type: "object",
+						properties: {
+							roulette: {
+								type: "object",
+								properties: {
+									spins: { type: "number" },
+									red_spins: { type: "number" },
+									black_spins: { type: "number" },
+									green_spins: { type: "number" },
+									wins: { type: "number" },
+									losses: { type: "number" },
+									overall_winnings: { type: "number" },
+									overall_losings: { type: "number" }
+								}
+							}
+						}
+					}
 				}
 			},
 			created_at: { type: "string" },

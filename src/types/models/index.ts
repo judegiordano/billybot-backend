@@ -46,6 +46,18 @@ export interface IUserMetrics {
 	reactions_received: number
 	average_reactions_per_post: number
 	mentions: number
+	gambling: {
+		roulette: {
+			spins: number
+			red_spins: number
+			black_spins: number
+			green_spins: number
+			wins: number
+			losses: number
+			overall_winnings: number
+			overall_losings: number
+		}
+	}
 }
 
 export interface IUser extends IModel {
