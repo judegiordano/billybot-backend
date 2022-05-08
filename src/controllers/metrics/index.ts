@@ -40,7 +40,6 @@ export const metricsRouter = async function (app: FastifyInstance) {
 			}
 		},
 	}, async (req) => {
-		console.log({ body: req.body[0].metrics });
 		return await users.updateEngagements(req.body);
 	});
 	app.get<{ Params: IServer, Querystring: Partial<IUserMetrics> }>("/metrics/server/:server_id", {
