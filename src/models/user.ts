@@ -1,7 +1,9 @@
 import { mongoose, discord } from "../services";
 import { readableDate, diffInDays, chance } from "../helpers";
+import { getRouletteResult } from "../helpers/gambling";
 import { UnauthorizedError, BadRequestError, Dictionary } from "../types";
 import type { IServer, IServerSettings, IUser, IUserMetrics, IWebhook } from "../types/models";
+import { BlackJackColor } from "../types/values";
 
 class Users extends mongoose.Repository<IUser> {
 	constructor() {
@@ -71,6 +73,12 @@ class Users extends mongoose.Repository<IUser> {
 	public async readAdmin(user_id: string, server_id: string) {
 		const user = await super.assertRead({ user_id, server_id });
 		if (!user.is_admin) throw new UnauthorizedError("user must be an admin");
+		return user;
+	}
+
+	public async assertHasBucks(user_id: string, server_id: string, amount: number) {
+		const user = await super.assertRead({ user_id, server_id });
+		if (user.billy_bucks < amount) throw new BadRequestError(`user ${user.user_id} only has ${user.billy_bucks} bucks!`);
 		return user;
 	}
 
@@ -222,6 +230,16 @@ class Users extends mongoose.Repository<IUser> {
 			jackpot: (entrants.length * settings.lottery_cost) + settings.base_lottery_jackpot,
 			entrants_count: entrants.length,
 			entrants
+		};
+	}
+
+	public async spinRoulette(user_id: string, server_id: string, amount: number, color: BlackJackColor) {
+		await this.assertHasBucks(user_id, server_id, amount);
+		const { operation, outcome } = getRouletteResult(amount, color);
+		const updated = await users.assertUpdateOne({ user_id, server_id }, operation);
+		return {
+			outcome,
+			user: updated
 		};
 	}
 }
