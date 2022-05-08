@@ -18,18 +18,22 @@ export function getRouletteResult(bet: number, color: BlackJackColor) {
 	const result = {
 		operation: {},
 		outcome: {
+			payout: 0,
 			won,
 			winning_color: winningColor
 		}
 	};
 	if (!won) {
 		result.operation = { $inc: { billy_bucks: -bet } };
+		result.outcome.payout = -bet;
 		return result;
 	}
 	if (won && color === BlackJackColor.green) {
 		result.operation = { $inc: { billy_bucks: (bet * 17) } };
+		result.outcome.payout = (bet * 17);
 		return result;
 	}
 	result.operation = { $inc: { billy_bucks: bet } };
+	result.outcome.payout = bet;
 	return result;
 }
