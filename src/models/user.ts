@@ -2,7 +2,7 @@ import { mongoose, discord } from "../services";
 import { readableDate, diffInDays, chance } from "../helpers";
 import { getRouletteResult } from "../helpers/gambling";
 import { UnauthorizedError, BadRequestError, Dictionary } from "../types";
-import type { IServer, IServerSettings, IUser, IUserMetrics, IWebhook } from "../types/models";
+import type { IEngagementMetrics, IServer, IServerSettings, IUser, IWebhook } from "../types/models";
 import { BlackJackColor } from "../types/values";
 
 class Users extends mongoose.Repository<IUser> {
@@ -222,12 +222,12 @@ class Users extends mongoose.Repository<IUser> {
 	public async updateEngagements(data: {
 		server_id: string
 		user_id: string
-		metrics: Pick<IUserMetrics, "engagement">
+		engagement: IEngagementMetrics
 	}[]) {
 		const operations = await Promise.all(
-			data.map(({ server_id, user_id, metrics }) => {
-				const $inc = Object.keys(metrics.engagement).reduce((acc, key) => {
-					acc[`metrics.engagement.${key}`] = metrics.engagement[key];
+			data.map(({ server_id, user_id, engagement }) => {
+				const $inc = Object.keys(engagement).reduce((acc, key) => {
+					acc[`metrics.engagement.${key}`] = engagement[key];
 					return acc;
 				}, {});
 				return super.updateOne({ server_id, user_id }, { $inc, });

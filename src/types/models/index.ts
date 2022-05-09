@@ -40,25 +40,30 @@ export interface IServer extends IModel {
 	settings: IServerSettings
 }
 
+export interface IEngagementMetrics {
+	posts: number
+	reactions_used: number
+	reactions_received: number
+	average_reactions_per_post: number
+	mentions: number
+}
+
+export interface IGamblingMetrics {
+	roulette: {
+		spins: number
+		red_spins: number
+		black_spins: number
+		green_spins: number
+		wins: number
+		losses: number
+		overall_winnings: number
+		overall_losings: number
+	}
+}
+
 export interface IUserMetrics {
-	engagement: {
-		posts: number
-		reactions_used: number
-		reactions_received: number
-		mentions: number
-	}
-	gambling: {
-		roulette: {
-			spins: number
-			red_spins: number
-			black_spins: number
-			green_spins: number
-			wins: number
-			losses: number
-			overall_winnings: number
-			overall_losings: number
-		}
-	}
+	engagement: IEngagementMetrics
+	gambling: IGamblingMetrics
 }
 
 export interface IUser extends IModel {
