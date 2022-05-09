@@ -141,6 +141,8 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 					allowance_rate: { type: "number" },
 				}
 			},
+			user_count: { type: "number" },
+			user_pages: { type: "number" },
 			users: {
 				type: "array",
 				items: { $ref: "user#" }
