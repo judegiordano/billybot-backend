@@ -21,7 +21,8 @@ export function getRouletteResult(bet: number, color: BlackJackColor) {
 		"metrics.gambling.roulette.spins": 1,
 		[`metrics.gambling.roulette.${color}_spins`]: 1,
 		[`metrics.gambling.roulette.${won ? "wins" : "losses"}`]: 1,
-		[`metrics.gambling.roulette.overall_${won ? "winnings" : "losings"}`]: payout
+		...(won ? { "metrics.gambling.roulette.overall_winnings": bet } : {}),
+		...(!won ? { "metrics.gambling.roulette.overall_losings": bet } : {}),
 	};
 	return {
 		operation: { $inc },
