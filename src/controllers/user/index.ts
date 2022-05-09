@@ -24,6 +24,10 @@ export const userRouter = async function (app: FastifyInstance) {
 						has_lottery_ticket: { type: "boolean" },
 						is_admin: { type: "boolean" },
 						is_mayor: { type: "boolean" },
+						birthday: {
+							type: "string",
+							format: "date"
+						}
 					}
 				}
 			},
@@ -60,6 +64,10 @@ export const userRouter = async function (app: FastifyInstance) {
 						has_lottery_ticket: { type: "boolean" },
 						is_admin: { type: "boolean" },
 						is_mayor: { type: "boolean" },
+						birthday: {
+							type: "string",
+							format: "date"
+						}
 					}
 				}
 			}

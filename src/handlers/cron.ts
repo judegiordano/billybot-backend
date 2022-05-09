@@ -62,3 +62,22 @@ export async function goodMorning() {
 		body: "done",
 	};
 }
+
+export async function happyBirthday() {
+	await mongoose.createConnection();
+	const generalWebhooks = await webhooks.list({ channel_name: "general" });
+	if (generalWebhooks.length <= 0) {
+		return {
+			statusCode: 200,
+			headers: { "Content-Type": "application/json" },
+			body: "no webhooks found for general",
+		};
+	}
+	const operations = generalWebhooks.map((webhook: IWebhook) => users.wishBirthday(webhook));
+	await Promise.all(operations);
+	return {
+		statusCode: 200,
+		headers: { "Content-Type": "application/json" },
+		body: "done",
+	};
+}

@@ -78,6 +78,7 @@ export interface IUser extends IModel {
 	is_admin: boolean
 	is_mayor: boolean
 	metrics: IUserMetrics
+	birthday?: Date | string
 }
 
 export interface IWebhook extends IModel {
