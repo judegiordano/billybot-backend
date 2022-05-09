@@ -30,7 +30,7 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 		]);
 		return await announcements.postAdminUpdate(webhook, user, text);
 	});
-	app.get<{ Params: IServer }>("/announcements/:server_id", {
+	app.get<{ Params: IServer }>("/announcements/server/:server_id", {
 		schema: { params: { $ref: "serverIdParams#" } }
 	}, async (req) => {
 		const { server_id } = req.params;

@@ -57,14 +57,22 @@ export const serversRouter = async function (app: FastifyInstance) {
 		const { server_id } = req.params;
 		return await servers.assertUpdateOne({ server_id }, req.body);
 	});
-	app.get<{ Params: IServer, Querystring: { page: number } }>("/server/:server_id", {
+	app.get<{
+		Params: IServer, Querystring: {
+			page: number
+			username: string
+		}
+	}>("/server/:server_id", {
 		schema: {
 			params: {
 				$ref: "serverIdParams#"
 			},
 			querystring: {
 				type: "object",
-				properties: { page: { type: "number", default: 1, minimum: 1 } }
+				properties: {
+					page: { type: "number", default: 1, minimum: 1 },
+					username: { type: "string" }
+				}
 			},
 			response: {
 				200: { $ref: "serverMetaData#" }
@@ -72,9 +80,18 @@ export const serversRouter = async function (app: FastifyInstance) {
 		}
 	}, async (req) => {
 		const { server_id } = req.params;
-		const { page } = req.query;
+		const { page, username } = req.query;
 		const limit = 5;
 		const userFilter = {
+			server_id,
+			...(username ? {
+				username: {
+					$regex: username,
+					$options: "gi"
+				}
+			} : null)
+		};
+		const userOptions = {
 			skip: (page - 1) * limit,
 			limit,
 			sort: {
@@ -90,7 +107,7 @@ export const serversRouter = async function (app: FastifyInstance) {
 			lottery,
 			user_count
 		] = await Promise.all([
-			users.list({ server_id }, userFilter),
+			users.list(userFilter, userOptions),
 			webhooks.list({ server_id }),
 			announcements.list({ server_id }, {
 				sort: { created_at: -1 },
@@ -107,6 +124,28 @@ export const serversRouter = async function (app: FastifyInstance) {
 			webhooks: serverWebhooks,
 			announcements: serverAnnouncements,
 			lottery
+		};
+	});
+	app.get<{
+		Params: IServer, Querystring: {
+			page: number
+			username: string
+		}
+	}>("/server/information/:server_id", {
+		schema: {
+			params: {
+				$ref: "serverIdParams#"
+			}
+		}
+	}, async (req) => {
+		const { server_id } = req.params;
+		const [count, server] = await Promise.all([
+			users.count({ server_id }),
+			servers.assertRead({ server_id })
+		]);
+		return {
+			...server.toJSON<IServer>(),
+			user_count: count
 		};
 	});
 };
