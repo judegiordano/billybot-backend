@@ -30,6 +30,10 @@ class Servers extends mongoose.Repository<IServer> {
 				allowance_rate: {
 					type: Number,
 					default: 200
+				},
+				birthday_bucks: {
+					type: Number,
+					default: 500
 				}
 			}
 		});

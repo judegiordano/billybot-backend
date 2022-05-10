@@ -1,11 +1,18 @@
 import { discord, mongoose } from "../services";
 import type { IWebhook } from "../types/models";
+import { servers } from "./server";
 
 class Webhooks extends mongoose.Repository<IWebhook> {
 	constructor() {
 		super("Webhook", {
 			server_id: {
 				type: String,
+				index: true,
+				required: true
+			},
+			server: {
+				type: String,
+				ref: servers.model.modelName,
 				index: true,
 				required: true
 			},

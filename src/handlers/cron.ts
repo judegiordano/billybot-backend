@@ -1,21 +1,20 @@
 import axios from "axios";
 import FormData from "form-data";
 
-import type { IWebhook } from "../types/models";
+import type { IServerSettings, IWebhook } from "../types/models";
 import { discord, mongoose } from "../services";
 import { buildMediaUrl } from "../helpers";
-import { servers, users, webhooks } from "../models";
+import { users, webhooks } from "../models";
 
 const key = "rockandroll.mp4";
 
-async function pickWinner(webhook: IWebhook) {
-	const { settings } = await servers.assertRead({ server_id: webhook.server_id });
-	return users.pickLotteryWinner(webhook, settings);
-}
-
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();
-	const generalWebhooks = await webhooks.list({ channel_name: "general" });
+	const generalWebhooks = await webhooks.list({
+		channel_name: "general"
+	}, {
+		populate: [{ path: "server" }]
+	});
 	if (generalWebhooks.length <= 0) {
 		return {
 			statusCode: 200,
@@ -24,7 +23,7 @@ export async function pickLotteryWinner() {
 		};
 	}
 	const operations = generalWebhooks.map((webhook: IWebhook) => {
-		return pickWinner(webhook);
+		return users.pickLotteryWinner(webhook, webhook.server.settings as IServerSettings);
 	});
 	await Promise.all(operations);
 	return {
@@ -65,7 +64,8 @@ export async function goodMorning() {
 
 export async function happyBirthday() {
 	await mongoose.createConnection();
-	const generalWebhooks = await webhooks.list({ channel_name: "general" });
+	const generalWebhooks = await webhooks.list({ channel_name: "general" }, { populate: [{ path: "server" }] });
+	console.log({ generalWebhooks });
 	if (generalWebhooks.length <= 0) {
 		return {
 			statusCode: 200,

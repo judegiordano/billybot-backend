@@ -24,8 +24,11 @@ export const webhooksRouter = async function (app: FastifyInstance) {
 		},
 	}, async (req) => {
 		const { server_id, webhook_id } = req.body;
-		await servers.assertExists({ server_id });
-		return await webhooks.createOrUpdate({ server_id, webhook_id }, req.body);
+		const server = await servers.assertRead({ server_id });
+		return await webhooks.createOrUpdate({ server_id, webhook_id }, {
+			...req.body,
+			server: server._id
+		});
 	});
 	app.post<{ Body: IWebhook & { content: string } }>("/webhooks/execute", {
 		preValidation: [app.restricted],

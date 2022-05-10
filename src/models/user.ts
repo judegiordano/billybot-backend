@@ -279,6 +279,7 @@ class Users extends mongoose.Repository<IUser> {
 	}
 
 	public async wishBirthday(webhook: IWebhook) {
+		const { server } = webhook as unknown as { server: IServer };
 		const today = new Date();
 		const day = today.getDate();
 		const month = today.getMonth();
@@ -287,20 +288,26 @@ class Users extends mongoose.Repository<IUser> {
 			birthday: { $ne: null }
 		}) as IUser[];
 		if (found.length <= 0) return;
+
 		const operations = found.map((user) => {
 			const birthday = new Date(user.birthday as string);
 			const birthdayDay = birthday.getDate();
 			const birthdayMonth = birthday.getMonth();
 			if (birthdayMonth === month && birthdayDay === day) {
-				return super.updateOne({ _id: user._id }, { $inc: { billy_bucks: 500 } });
+				return super.updateOne({ _id: user._id }, {
+					$inc: {
+						billy_bucks: server.settings.birthday_bucks
+					}
+				});
 			}
-		}) as Promise<IUser>[];
+		});
 		const updated = await Promise.all(operations);
+		if (!updated || updated.length <= 0 || !updated?.[0]?._id) return;
 		let content = "Happy Birthday!\n";
-		for (const user of updated) {
+		for (const user of updated as IUser[]) {
 			content += `<@${user.user_id}>\n`;
 		}
-		content += "\n\nEnjoy your free `500` BillyBucks!";
+		content += `\n\nEnjoy your free \`${server.settings.birthday_bucks}\` BillyBucks!`;
 		return discord.postContent(webhook, content);
 	}
 }

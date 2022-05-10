@@ -84,6 +84,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		properties: {
 			_id: { type: "string" },
 			server_id: { type: "string" },
+			server: { $ref: "server#" },
 			channel_name: { type: "string" },
 			webhook_id: { type: "string" },
 			// webhook_token: { type: "string" }, dont expose
@@ -103,6 +104,27 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			user: { $ref: "user#" },
 			text: { type: "string" },
 			channel_name: { type: "string" },
+			created_at: { type: "string" },
+			updated_at: { type: "string" }
+		}
+	});
+	app.addSchema({
+		$id: "server",
+		type: "object",
+		properties: {
+			_id: { type: "string" },
+			name: { type: "string" },
+			server_id: { type: "string" },
+			icon_hash: { type: "string" },
+			settings: {
+				type: "object",
+				properties: {
+					lottery_cost: { type: "number" },
+					base_lottery_jackpot: { type: "number" },
+					allowance_rate: { type: "number" },
+					birthday_bucks: { type: "string" }
+				}
+			},
 			created_at: { type: "string" },
 			updated_at: { type: "string" }
 		}

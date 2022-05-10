@@ -20,7 +20,8 @@ export const serversRouter = async function (app: FastifyInstance) {
 						properties: {
 							lottery_cost: { type: "number", default: 50 },
 							base_lottery_jackpot: { type: "number", default: 200 },
-							allowance_rate: { type: "number", default: 200 }
+							allowance_rate: { type: "number", default: 200 },
+							birthday_bucks: { type: "string", default: 500 }
 						}
 					}
 				}
@@ -47,7 +48,8 @@ export const serversRouter = async function (app: FastifyInstance) {
 						properties: {
 							lottery_cost: { type: "number" },
 							base_lottery_jackpot: { type: "number" },
-							allowance_rate: { type: "number" }
+							allowance_rate: { type: "number" },
+							birthday_bucks: { type: "string" }
 						}
 					}
 				}

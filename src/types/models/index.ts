@@ -8,7 +8,7 @@ export interface IModel {
 	toJSON<T>(): T
 }
 
-export type Ref<T extends IModel> = T["_id"]
+export type Ref<T extends IModel> = Partial<T> & string
 export type Projection = Record<string, 0 | 1>
 export interface Options<T extends IModel> extends QueryOptions {
 	sort?: {
@@ -31,6 +31,7 @@ export interface IServerSettings {
 	lottery_cost: number
 	base_lottery_jackpot: number
 	allowance_rate: number
+	birthday_bucks: number
 }
 
 export interface IServer extends IModel {
@@ -83,6 +84,7 @@ export interface IUser extends IModel {
 
 export interface IWebhook extends IModel {
 	server_id: string
+	server: Ref<IServer>
 	channel_name: string
 	webhook_id: string
 	webhook_token: string
