@@ -118,7 +118,7 @@ class Users extends mongoose.Repository<IUser> {
 
 	public async assertHasBucks(user_id: string, server_id: string, amount: number) {
 		const user = await super.assertRead({ user_id, server_id });
-		if (user.billy_bucks < amount) throw new BadRequestError(`user ${user.user_id} only has ${user.billy_bucks} bucks!`);
+		if (user.billy_bucks < amount) throw new BadRequestError(`you only have ${user.billy_bucks} bucks!`);
 		return user;
 	}
 
