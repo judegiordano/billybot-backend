@@ -137,6 +137,9 @@ export const serversRouter = async function (app: FastifyInstance) {
 		schema: {
 			params: {
 				$ref: "serverIdParams#"
+			},
+			response: {
+				200: { $ref: "serverInformation#" }
 			}
 		}
 	}, async (req) => {

@@ -145,7 +145,7 @@ export const userRouter = async function (app: FastifyInstance) {
 			}
 		};
 		const [count, members] = await Promise.all([
-			users.count({ server_id }),
+			users.count(filter),
 			users.list(filter, options)
 		]);
 		return {

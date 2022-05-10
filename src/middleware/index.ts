@@ -92,7 +92,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 					lottery_cost: { type: "number" },
 					base_lottery_jackpot: { type: "number" },
 					allowance_rate: { type: "number" },
-					birthday_bucks: { type: "string" }
+					birthday_bucks: { type: "number" }
 				}
 			},
 			created_at: { type: "string" },
@@ -105,7 +105,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		properties: {
 			_id: { type: "string" },
 			server_id: { type: "string" },
-			server: {},
+			server: {}, // ref
 			channel_name: { type: "string" },
 			webhook_id: { type: "string" },
 			// webhook_token: { type: "string" }, dont expose
@@ -122,7 +122,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		properties: {
 			_id: { type: "string" },
 			server_id: { type: "string" },
-			user: { $ref: "user#" },
+			user: {}, // ref
 			text: { type: "string" },
 			channel_name: { type: "string" },
 			created_at: { type: "string" },
