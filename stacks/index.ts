@@ -6,6 +6,7 @@ const stage = process.env.STAGE ?? "local" as string;
 
 export default function main(app: App) {
 	app.setDefaultFunctionProps({
+		runtime: "nodejs14.x",
 		environment: {
 			STAGE: stage,
 			JWT_SECRET: process.env.JWT_SECRET ?? "secret",
