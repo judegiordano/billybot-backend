@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-import type { IWebhook } from "../../types/models";
+import type { IWebhook, IServer } from "../../types/models";
 import { servers, webhooks } from "../../models";
 
 export const webhooksRouter = async function (app: FastifyInstance) {
@@ -29,6 +29,21 @@ export const webhooksRouter = async function (app: FastifyInstance) {
 			...req.body,
 			server: server._id
 		});
+	});
+	app.get<{ Params: IServer }>("/webhooks/server/:server_id", {
+		schema: {
+			params: { $ref: "serverIdParams#" },
+			response: {
+				200: {
+					type: "array",
+					items: { $ref: "webhook#" }
+				}
+			}
+		},
+	}, async (req) => {
+		const { server_id } = req.params;
+		await servers.assertExists({ server_id });
+		return await webhooks.list({ server_id });
 	});
 	app.post<{ Body: IWebhook & { content: string } }>("/webhooks/execute", {
 		preValidation: [app.restricted],
