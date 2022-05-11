@@ -101,15 +101,24 @@ export const userRouter = async function (app: FastifyInstance) {
 		Querystring: {
 			page: number
 			username: string
+			is_admin?: string
+			has_lottery_ticket?: string
+			is_mayor?: string
+			billy_bucks?: number
 		}
 	}>("/users/server/:server_id", {
 		schema: {
 			params: { $ref: "serverIdParams#" },
 			querystring: {
 				type: "object",
+				additionalProperties: false,
 				properties: {
 					page: { type: "number", default: 1, minimum: 1 },
-					username: { type: "string" }
+					username: { type: "string" },
+					is_admin: { type: ["string", "null"] },
+					has_lottery_ticket: { type: ["string", "null"] },
+					is_mayor: { type: ["string", "null"] },
+					billy_bucks: { type: "number", enum: [1, -1] },
 				}
 			},
 			response: {
@@ -125,22 +134,22 @@ export const userRouter = async function (app: FastifyInstance) {
 	}, async (req) => {
 		const { server_id } = req.params;
 		await servers.assertExists({ server_id });
-		const { page, username } = req.query;
+		const { page, username, is_admin, has_lottery_ticket, is_mayor, billy_bucks } = req.query;
 		const limit = 5;
 		const filter = {
 			server_id,
 			...(username ? {
-				username: {
-					$regex: username,
-					$options: "gi"
-				}
-			} : null)
+				username: { $regex: username, $options: "gi" }
+			} : null),
+			...(is_admin === "true" ? { is_admin } : null),
+			...(is_mayor === "true" ? { is_mayor } : null),
+			...(has_lottery_ticket === "true" ? { has_lottery_ticket } : null),
 		};
 		const options = {
 			skip: (page - 1) * limit,
 			limit,
 			sort: {
-				billy_bucks: -1,
+				billy_bucks: typeof billy_bucks === "number" ? billy_bucks : -1,
 				username: 1
 			}
 		};
