@@ -64,8 +64,11 @@ export async function goodMorning() {
 
 export async function happyBirthday() {
 	await mongoose.createConnection();
-	const generalWebhooks = await webhooks.list({ channel_name: "general" }, { populate: [{ path: "server" }] });
-	console.log({ generalWebhooks });
+	const generalWebhooks = await webhooks.list({
+		channel_name: "general"
+	}, {
+		populate: [{ path: "server" }]
+	});
 	if (generalWebhooks.length <= 0) {
 		return {
 			statusCode: 200,
@@ -73,8 +76,7 @@ export async function happyBirthday() {
 			body: "no webhooks found for general",
 		};
 	}
-	const operations = generalWebhooks.map((webhook: IWebhook) => users.wishBirthday(webhook));
-	await Promise.all(operations);
+	await Promise.all(generalWebhooks.map((webhook: IWebhook) => users.wishBirthday(webhook)));
 	return {
 		statusCode: 200,
 		headers: { "Content-Type": "application/json" },

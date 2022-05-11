@@ -15,7 +15,13 @@ import mongoose, {
 import { nanoid } from "../helpers";
 import { MONGO_URI } from "./config";
 import { NotFoundError, BadRequestError } from "../types";
-import { IModel, Projection, Options } from "../types/models";
+import type {
+	IModel,
+	Projection,
+	Options,
+	PipelineStage,
+	AggregateOptions
+} from "../types/models";
 
 let cachedConnection: Connection | null = null;
 
@@ -153,5 +159,9 @@ export class Repository<T extends IModel> {
 
 	public async startSession(): Promise<ClientSession> {
 		return this.model.startSession();
+	}
+
+	public async aggregate<T>(pipeline: PipelineStage[], options?: AggregateOptions) {
+		return this.model.aggregate(pipeline, options) as unknown as T;
 	}
 }

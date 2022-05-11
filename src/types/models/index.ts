@@ -1,5 +1,6 @@
 import { QueryOptions, PopulateOptions } from "mongoose";
-export { FilterQuery, UpdateQuery } from "mongoose";
+export type { FilterQuery, UpdateQuery, PipelineStage } from "mongoose";
+export type { AggregateOptions } from "mongodb";
 
 export interface IModel {
 	_id: string

@@ -2,7 +2,7 @@ import { mongoose, discord } from "../services";
 import { readableDate, diffInDays, chance } from "../helpers";
 import { getRouletteResult } from "../helpers/gambling";
 import { UnauthorizedError, BadRequestError, Dictionary } from "../types";
-import type { IEngagementMetrics, IServer, IServerSettings, IUser, IWebhook } from "../types/models";
+import type { IEngagementMetrics, IServer, IServerSettings, IUser, IWebhook, PipelineStage } from "../types/models";
 import { BlackJackColor } from "../types/values";
 
 class Users extends mongoose.Repository<IUser> {
@@ -280,26 +280,12 @@ class Users extends mongoose.Repository<IUser> {
 
 	public async wishBirthday(webhook: IWebhook) {
 		const { server } = webhook as unknown as { server: IServer };
-		const today = new Date();
-		const day = today.getDate();
-		const month = today.getMonth();
-		const found = await super.list({
-			server_id: webhook.server_id,
-			birthday: { $ne: null }
-		}) as IUser[];
-		if (found.length <= 0) return;
-
-		const operations = found.map((user) => {
-			const birthday = new Date(user.birthday as string);
-			const birthdayDay = birthday.getDate();
-			const birthdayMonth = birthday.getMonth();
-			if (birthdayMonth === month && birthdayDay === day) {
-				return super.updateOne({ _id: user._id }, {
-					$inc: {
-						billy_bucks: server.settings.birthday_bucks
-					}
-				});
-			}
+		const match = await this.getUsersBornToday();
+		if (match.length <= 0) return;
+		const operations = match.map((user) => {
+			return super.updateOne({ _id: user._id }, {
+				$inc: { billy_bucks: server.settings.birthday_bucks }
+			});
 		});
 		const updated = await Promise.all(operations);
 		if (!updated || updated.length <= 0 || !updated?.[0]?._id) return;
@@ -307,8 +293,26 @@ class Users extends mongoose.Repository<IUser> {
 		for (const user of updated as IUser[]) {
 			content += `<@${user.user_id}>\n`;
 		}
-		content += `\n\nEnjoy your free \`${server.settings.birthday_bucks}\` BillyBucks!`;
+		content += `\nEnjoy your free \`${server.settings.birthday_bucks}\` BillyBucks!`;
 		return discord.postContent(webhook, content);
+	}
+
+	public async getUsersBornToday() {
+		const today = new Date();
+		const month = today.getMonth() + 1;
+		const day = today.getDate();
+		const pipeline = [] as PipelineStage[];
+		pipeline.push({ $match: { birthday: { $ne: null } } });
+		pipeline.push({
+			$project: {
+				username: 1,
+				user_id: 1,
+				month: { $month: "$birthday" },
+				day: { $dayOfMonth: "$birthday" }
+			}
+		});
+		pipeline.push({ $match: { month, day } });
+		return super.aggregate<Pick<IUser, "_id" | "username" | "user_id">[]>(pipeline);
 	}
 }
 
