@@ -118,7 +118,7 @@ export const userRouter = async function (app: FastifyInstance) {
 					is_admin: { type: ["string", "null"] },
 					has_lottery_ticket: { type: ["string", "null"] },
 					is_mayor: { type: ["string", "null"] },
-					billy_bucks: { type: "number", enum: [1, -1] },
+					billy_bucks: { type: "number", enum: [1, -1], default: -1 },
 				}
 			},
 			response: {
@@ -149,7 +149,7 @@ export const userRouter = async function (app: FastifyInstance) {
 			skip: (page - 1) * limit,
 			limit,
 			sort: {
-				billy_bucks: typeof billy_bucks === "number" ? billy_bucks : -1,
+				billy_bucks,
 				username: 1
 			}
 		};

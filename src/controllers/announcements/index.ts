@@ -30,16 +30,59 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 		]);
 		return await announcements.postAdminUpdate(webhook, user, text);
 	});
-	app.get<{ Params: IServer }>("/announcements/server/:server_id", {
-		schema: { params: { $ref: "serverIdParams#" } }
+	app.get<{
+		Params: IServer
+		Querystring: {
+			page: number
+			created_at: number
+		}
+	}>("/announcements/server/:server_id", {
+		schema: {
+			params: { $ref: "serverIdParams#" },
+			querystring: {
+				type: "object",
+				additionalProperties: false,
+				properties: {
+					page: { type: "number", default: 1, minimum: 1 },
+					created_at: { type: "number", enum: [1, - 1], default: -1 },
+				}
+			},
+			response: {
+				200: {
+					type: "object",
+					properties: {
+						pages: { type: "number" },
+						announcements: {
+							type: "array",
+							items: { $ref: "announcement#" }
+						}
+					}
+				}
+			}
+		}
 	}, async (req) => {
 		const { server_id } = req.params;
+		const { page, created_at } = req.query;
 		await servers.assertExists({ server_id });
-		return await announcements.list({
+		const limit = 5;
+		const filter = {
 			server_id
-		}, {
-			sort: { created_at: -1 },
+		};
+		const options = {
+			skip: (page - 1) * limit,
+			limit,
+			sort: {
+				created_at
+			},
 			populate: [{ path: "user", select: ["username", "user_id"] }]
-		});
+		};
+		const [count, msgs] = await Promise.all([
+			announcements.count(filter),
+			announcements.list(filter, options)
+		]);
+		return {
+			pages: Math.ceil(count / limit),
+			announcements: msgs
+		};
 	});
 };

@@ -4,10 +4,11 @@ export const developerRouter = async function (app: FastifyInstance) {
 	app.get("/developer/ping", {
 		schema: {
 			response: {
-				200: { $ref: "ping#" }
+				418: { $ref: "ping#" }
 			}
 		},
-	}, async () => {
-		return { ok: true };
+	}, async (_, res) => {
+		res.statusCode = 418;
+		return { ok: "🍵" };
 	});
 };

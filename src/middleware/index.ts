@@ -6,14 +6,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		$id: "ping",
 		type: "object",
 		properties: {
-			ok: { type: "boolean" }
-		}
-	});
-	app.addSchema({
-		$id: "document",
-		type: "object",
-		properties: {
-			_id: { type: "string" }
+			ok: { type: "string" }
 		}
 	});
 	app.addSchema({
@@ -122,9 +115,9 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		properties: {
 			_id: { type: "string" },
 			server_id: { type: "string" },
-			user: {}, // ref
-			text: { type: "string" },
 			channel_name: { type: "string" },
+			text: { type: "string" },
+			user: {}, // ref
 			created_at: { type: "string" },
 			updated_at: { type: "string" }
 		}
