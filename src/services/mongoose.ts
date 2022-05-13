@@ -61,7 +61,6 @@ export class Repository<T extends IModel> {
 			},
 			...schemaDefinition
 		}, {
-			versionKey: false,
 			timestamps: {
 				createdAt: "created_at",
 				updatedAt: "updated_at"

@@ -83,3 +83,21 @@ export async function happyBirthday() {
 		body: "done",
 	};
 }
+
+export async function resetAllowance() {
+	await mongoose.createConnection();
+	const found = await users.list({ allowance_available: false });
+	if (found.length <= 0) {
+		return {
+			statusCode: 200,
+			headers: { "Content-Type": "application/json" },
+			body: "no users found",
+		};
+	}
+	const result = await users.bulkUpdate({ allowance_available: false }, { allowance_available: true });
+	return {
+		statusCode: 200,
+		headers: { "Content-Type": "application/json" },
+		body: `${result.modifiedCount} allowances reset`,
+	};
+}

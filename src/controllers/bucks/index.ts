@@ -63,4 +63,23 @@ export const bucksRouter = async function (app: FastifyInstance) {
 		const { settings } = await servers.assertRead({ server_id });
 		return await users.allowance(server_id, user_id, settings);
 	});
+	app.post<{ Body: IUser }>("/bucks/taxes", {
+		preValidation: [app.restricted],
+		schema: {
+			body: {
+				type: "object",
+				required: ["server_id", "user_id"],
+				additionalProperties: false,
+				properties: {
+					server_id: { type: "string" },
+					user_id: { type: "string" }
+				}
+			}
+		},
+	}, async (req) => {
+		const { server_id, user_id } = req.body;
+		const { settings } = await servers.assertRead({ server_id });
+		const mayor = await users.readMayor(user_id, server_id);
+		return await users.collectTaxes(mayor, settings);
+	});
 };

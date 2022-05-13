@@ -5,7 +5,7 @@ export enum ColorCodes {
 	green = 58957
 }
 
-export enum BlackJackColor {
+export enum RouletteColor {
 	red = "red",
 	black = "black",
 	green = "green",

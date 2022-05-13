@@ -28,11 +28,38 @@ export interface IAnnouncement extends IModel {
 	channel_name: string
 }
 
+export enum CardSuit {
+	clubs = "clubs",
+	hearts = "hearts",
+	spades = "spades",
+	diamonds = "diamonds",
+}
+
+export interface ICard {
+	suit: CardSuit
+	value: number
+}
+
+export interface IBlackJack extends IModel {
+	server_id: string
+	wager: number
+	payout: number
+	user: Ref<IUser>
+	deck: ICard[]
+	turn: number
+	status: string
+	won: boolean
+	player_hand: ICard[]
+	dealer_hand: ICard[]
+	is_complete: boolean
+}
+
 export interface IServerSettings {
 	lottery_cost: number
 	base_lottery_jackpot: number
 	allowance_rate: number
 	birthday_bucks: number
+	tax_rate: number
 }
 
 export interface IServer extends IModel {
@@ -75,7 +102,7 @@ export interface IUser extends IModel {
 	username: string
 	discriminator: string
 	avatar_hash?: string
-	last_allowance: string
+	allowance_available: boolean
 	has_lottery_ticket: boolean
 	is_admin: boolean
 	is_mayor: boolean

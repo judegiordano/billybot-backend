@@ -1,9 +1,9 @@
 import { mongoose, discord } from "../services";
-import { readableDate, diffInDays, chance } from "../helpers";
+import { chance } from "../helpers";
 import { getRouletteResult } from "../helpers/gambling";
 import { UnauthorizedError, BadRequestError, Dictionary } from "../types";
 import type { IEngagementMetrics, IServer, IServerSettings, IUser, IWebhook, PipelineStage } from "../types/models";
-import { BlackJackColor } from "../types/values";
+import { RouletteColor } from "../types/values";
 
 class Users extends mongoose.Repository<IUser> {
 	constructor() {
@@ -28,9 +28,9 @@ class Users extends mongoose.Repository<IUser> {
 				default: null,
 				required: false
 			},
-			last_allowance: {
-				type: String,
-				default: new Date().toISOString()
+			allowance_available: {
+				type: Boolean,
+				default: true
 			},
 			has_lottery_ticket: {
 				type: Boolean,
@@ -116,6 +116,12 @@ class Users extends mongoose.Repository<IUser> {
 		return user;
 	}
 
+	public async readMayor(user_id: string, server_id: string) {
+		const user = await super.assertRead({ user_id, server_id });
+		if (!user.is_mayor) throw new UnauthorizedError("only the mayor can run this command");
+		return user;
+	}
+
 	public async assertHasBucks(user_id: string, server_id: string, amount: number) {
 		const user = await super.assertRead({ user_id, server_id });
 		if (user.billy_bucks < amount) throw new BadRequestError(`you only have ${user.billy_bucks} bucks!`);
@@ -153,13 +159,13 @@ class Users extends mongoose.Repository<IUser> {
 		settings: IServerSettings
 	) {
 		const member = await super.assertRead({ user_id, server_id });
-		const diff = diffInDays(new Date(member.last_allowance), new Date());
-		if (diff <= 7) throw new BadRequestError(`you've already gotten a weekly allowance on ${readableDate(new Date(member.last_allowance))}`);
+		if (!member.allowance_available)
+			throw new BadRequestError("you've already gotten your weekly allowance!");
 		const updated = await super.assertUpdateOne({
 			_id: member._id
 		}, {
 			$inc: { billy_bucks: settings.allowance_rate },
-			last_allowance: new Date().toISOString()
+			allowance_available: false
 		});
 		return {
 			[updated.user_id as string]: {
@@ -268,7 +274,7 @@ class Users extends mongoose.Repository<IUser> {
 		};
 	}
 
-	public async spinRoulette(user_id: string, server_id: string, amount: number, color: BlackJackColor) {
+	public async spinRoulette(user_id: string, server_id: string, amount: number, color: RouletteColor) {
 		await this.assertHasBucks(user_id, server_id, amount);
 		const { operation, outcome } = getRouletteResult(amount, color);
 		const updated = await users.assertUpdateOne({ user_id, server_id }, operation);
@@ -313,6 +319,10 @@ class Users extends mongoose.Repository<IUser> {
 		});
 		pipeline.push({ $match: { month, day } });
 		return super.aggregate<Pick<IUser, "_id" | "username" | "user_id">[]>(pipeline);
+	}
+
+	public async collectTaxes(user: IUser, settings: IServerSettings) {
+		return { user, settings };
 	}
 }
 

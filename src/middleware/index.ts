@@ -29,7 +29,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			username: { type: "string" },
 			discriminator: { type: "string" },
 			avatar_hash: { type: "string" },
-			last_allowance: { type: "string" },
+			allowance_available: { type: "boolean" },
 			has_lottery_ticket: { type: "boolean" },
 			is_admin: { type: "boolean" },
 			is_mayor: { type: "boolean" },
@@ -85,7 +85,8 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 					lottery_cost: { type: "number" },
 					base_lottery_jackpot: { type: "number" },
 					allowance_rate: { type: "number" },
-					birthday_bucks: { type: "number" }
+					birthday_bucks: { type: "number" },
+					tax_rate: { type: "number" }
 				}
 			},
 			created_at: { type: "string" },
@@ -140,42 +141,5 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		$id: "userArray",
 		type: "array",
 		items: { $ref: "user#" }
-	});
-	app.addSchema({
-		$id: "serverMetaData",
-		type: "object",
-		properties: {
-			_id: { type: "string" },
-			name: { type: "string" },
-			server_id: { type: "string" },
-			icon_hash: { type: "string" },
-			settings: {
-				type: "object",
-				properties: {
-					lottery_cost: { type: "number" },
-					base_lottery_jackpot: { type: "number" },
-					allowance_rate: { type: "number" },
-				}
-			},
-			user_count: { type: "number" },
-			user_pages: { type: "number" },
-			users: {
-				type: "array",
-				items: { $ref: "user#" }
-			},
-			announcements: {
-				type: "array",
-				items: { $ref: "announcement#" }
-			},
-			webhooks: {
-				type: "array",
-				items: { $ref: "webhook#" }
-			},
-			lottery: {
-				$ref: "lotteryDictionary#"
-			},
-			created_at: { type: "string" },
-			updated_at: { type: "string" }
-		}
 	});
 });
