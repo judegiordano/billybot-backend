@@ -79,6 +79,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			name: { type: "string" },
 			server_id: { type: "string" },
 			icon_hash: { type: "string" },
+			taxes_collected: { type: "boolean" },
 			settings: {
 				type: "object",
 				properties: {

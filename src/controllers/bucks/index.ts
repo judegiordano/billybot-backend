@@ -74,12 +74,25 @@ export const bucksRouter = async function (app: FastifyInstance) {
 					server_id: { type: "string" },
 					user_id: { type: "string" }
 				}
+			},
+			response: {
+				200: {
+					type: "object",
+					properties: {
+						payout: { type: "number" },
+						tax_rate: { type: "number" },
+						charged_users: { type: "number" },
+						user: { $ref: "user#" }
+					}
+				}
 			}
-		},
+		}
 	}, async (req) => {
 		const { server_id, user_id } = req.body;
-		const { settings } = await servers.assertRead({ server_id });
+		const server = await servers.assertRead({ server_id });
 		const mayor = await users.readMayor(user_id, server_id);
-		return await users.collectTaxes(mayor, settings);
+		const operation = await users.collectTaxes(mayor, server);
+		await servers.updateOne({ _id: server._id }, { taxes_collected: true });
+		return operation;
 	});
 };

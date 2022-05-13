@@ -321,8 +321,22 @@ class Users extends mongoose.Repository<IUser> {
 		return super.aggregate<Pick<IUser, "_id" | "username" | "user_id">[]>(pipeline);
 	}
 
-	public async collectTaxes(user: IUser, settings: IServerSettings) {
-		return { user, settings };
+	public async collectTaxes(user: IUser, server: IServer) {
+		if (server.taxes_collected) throw new BadRequestError("Taxes have already been collected this week!");
+		// get middle class citizens
+		const lookup = { billy_bucks: { $gte: server.settings.tax_rate }, is_mayor: false };
+		const matches = await super.count(lookup);
+		if (matches <= 0) throw new BadRequestError("The population is too poor to collect taxes this week!");
+		await users.bulkUpdate(lookup, { $inc: { billy_bucks: -server.settings.tax_rate } });
+		// payout mayor
+		const payout = (server.settings.tax_rate * matches);
+		const updated = await super.assertUpdateOne({ _id: user._id }, { $inc: { billy_bucks: payout } });
+		return {
+			payout,
+			tax_rate: server.settings.tax_rate,
+			charged_users: matches,
+			user: updated
+		};
 	}
 }
 

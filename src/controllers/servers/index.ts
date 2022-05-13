@@ -43,6 +43,7 @@ export const serversRouter = async function (app: FastifyInstance) {
 					server_id: { type: "string" },
 					name: { type: "string" },
 					icon_hash: { type: "string" },
+					taxes_collected: { type: "boolean" },
 					settings: {
 						type: "object",
 						properties: {

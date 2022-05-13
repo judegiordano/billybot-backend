@@ -18,6 +18,11 @@ class Servers extends mongoose.Repository<IServer> {
 				type: String,
 				required: true
 			},
+			taxes_collected: {
+				type: Boolean,
+				default: false,
+				required: true
+			},
 			settings: {
 				lottery_cost: {
 					type: Number,
