@@ -72,7 +72,7 @@ export const serversRouter = async function (app: FastifyInstance) {
 				$ref: "serverIdParams#"
 			},
 			response: {
-				200: { $ref: "serverInformation#" }
+				200: { $ref: "server#" }
 			}
 		}
 	}, async (req) => {

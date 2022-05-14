@@ -33,12 +33,7 @@ export const webhooksRouter = async function (app: FastifyInstance) {
 	app.get<{ Params: IServer }>("/webhooks/server/:server_id", {
 		schema: {
 			params: { $ref: "serverIdParams#" },
-			response: {
-				200: {
-					type: "array",
-					items: { $ref: "webhook#" }
-				}
-			}
+			response: { 200: { $ref: "webhookArray#" } }
 		},
 	}, async (req) => {
 		const { server_id } = req.params;

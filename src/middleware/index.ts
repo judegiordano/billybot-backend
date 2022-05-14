@@ -2,13 +2,7 @@ import { FastifyInstance } from "fastify";
 import plugin from "fastify-plugin";
 
 export const schemas = plugin(async function (app: FastifyInstance) {
-	app.addSchema({
-		$id: "ping",
-		type: "object",
-		properties: {
-			ok: { type: "string" }
-		}
-	});
+	// requests
 	app.addSchema({
 		$id: "serverIdParams",
 		type: "object",
@@ -16,6 +10,14 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		required: ["server_id"],
 		properties: {
 			server_id: { type: "string" },
+		}
+	});
+	// responses
+	app.addSchema({
+		$id: "ping",
+		type: "object",
+		properties: {
+			ok: { type: "string" }
 		}
 	});
 	app.addSchema({
@@ -72,7 +74,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		}
 	});
 	app.addSchema({
-		$id: "serverInformation",
+		$id: "server",
 		type: "object",
 		properties: {
 			_id: { type: "string" },
@@ -124,23 +126,20 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			updated_at: { type: "string" }
 		}
 	});
-	app.addSchema({
-		$id: "lotteryDictionary",
-		type: "object",
-		properties: {
-			ticket_cost: { type: "number" },
-			base_lottery_jackpot: { type: "number" },
-			jackpot: { type: "number" },
-			entrants_count: { type: "number" },
-			entrants: {
-				type: "array",
-				items: { $ref: "user#" }
-			}
-		}
-	});
+	// arrays
 	app.addSchema({
 		$id: "userArray",
 		type: "array",
 		items: { $ref: "user#" }
+	});
+	app.addSchema({
+		$id: "announcementArray",
+		type: "array",
+		items: { $ref: "announcement#" }
+	});
+	app.addSchema({
+		$id: "webhookArray",
+		type: "array",
+		items: { $ref: "webhook#" }
 	});
 });

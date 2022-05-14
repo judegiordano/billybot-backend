@@ -52,10 +52,7 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 					type: "object",
 					properties: {
 						pages: { type: "number" },
-						announcements: {
-							type: "array",
-							items: { $ref: "announcement#" }
-						}
+						announcements: { $ref: "announcementArray#" }
 					}
 				}
 			}
