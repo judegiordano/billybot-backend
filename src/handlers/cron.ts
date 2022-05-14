@@ -4,7 +4,7 @@ import FormData from "form-data";
 import type { IServerSettings, IWebhook } from "../types/models";
 import { discord, mongoose } from "../services";
 import { buildMediaUrl } from "../helpers";
-import { users, webhooks } from "../models";
+import { users, webhooks, servers } from "../models";
 
 const key = "rockandroll.mp4";
 
@@ -84,20 +84,16 @@ export async function happyBirthday() {
 	};
 }
 
-export async function resetAllowance() {
+// anything job that needs to happen every Friday
+export async function houseCleaning() {
 	await mongoose.createConnection();
-	const found = await users.list({ allowance_available: false });
-	if (found.length <= 0) {
-		return {
-			statusCode: 200,
-			headers: { "Content-Type": "application/json" },
-			body: "no users found",
-		};
-	}
-	const result = await users.bulkUpdate({ allowance_available: false }, { allowance_available: true });
+	await Promise.all([
+		users.resetAllowance(),
+		servers.resetTaxCollection()
+	]);
 	return {
 		statusCode: 200,
 		headers: { "Content-Type": "application/json" },
-		body: `${result.modifiedCount} allowances reset`,
+		body: "operations complete",
 	};
 }

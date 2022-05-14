@@ -17,10 +17,10 @@ export class ApiStack extends Stack {
 			job: "src/handlers/cron.pickLotteryWinner"
 		});
 
-		new Cron(this, "allowance-cron", {
-			// fires at 10:00am MON-FRI (UTC -> EST)
-			schedule: "cron(0 14 * * ? *)",
-			job: "src/handlers/cron.resetAllowance"
+		new Cron(this, "house-cleaning-cron", {
+			// fires at 10:00am FRI (UTC -> EST)
+			schedule: "cron(0 14 ? * FRI *)",
+			job: "src/handlers/cron.houseCleaning"
 		});
 
 		new Cron(this, "birthday-cron", {

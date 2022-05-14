@@ -338,6 +338,12 @@ class Users extends mongoose.Repository<IUser> {
 			user: updated
 		};
 	}
+
+	public async resetAllowance() {
+		const found = await super.count({ allowance_available: false });
+		if (found <= 0) return;
+		return super.bulkUpdate({ allowance_available: false }, { allowance_available: true });
+	}
 }
 
 export const users = new Users();

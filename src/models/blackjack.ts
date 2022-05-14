@@ -1,7 +1,8 @@
 import { chance } from "../helpers";
 import { users } from "./user";
 import { mongoose } from "../services";
-import { CardSuit, IBlackJack, ICard, IUser } from "../types/models";
+import type { IBlackJack, ICard, IUser } from "../types/models";
+import { CardSuit } from "../types/values";
 import { BadRequestError } from "../types";
 
 export const suitLookup: Record<CardSuit, string> = {
@@ -114,6 +115,36 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 		return chance.shuffle(cards);
 	}
 
+	public normalizeHands(game: IBlackJack) {
+		const json = game.toJSON<IBlackJack>();
+		const hideLast = json.dealer_hand.slice(0, json.dealer_hand.length - 1);
+		return {
+			...json,
+			deck: [],
+			dealer_hand: hideLast
+		};
+	}
+
+	public countHand(hand: ICard[]) {
+		const count = hand.reduce((acc, { value }) => {
+			if (value >= 2 && value <= 9) {
+				acc.softCount += value;
+				acc.hardCount += value;
+				return acc;
+			}
+			if (value >= 10 && value <= 13) {
+				acc.softCount += 10;
+				acc.hardCount += 10;
+				return acc;
+			}
+			acc.aceCount++;
+			acc.hardCount++;
+			return acc;
+		}, { softCount: 0, hardCount: 0, aceCount: 0 });
+		if (count.aceCount > 0) count.softCount += 10 + count.aceCount;
+		return count;
+	}
+
 	public async assertHasActiveGame(user: IUser) {
 		const { _id, server_id } = user;
 		const activeGame = await super.read({ server_id, user: _id, is_complete: false });
@@ -140,16 +171,6 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 			player_hand: playerHand,
 			dealer_hand: dealerHand
 		});
-	}
-
-	public normalizeHands(game: IBlackJack) {
-		const json = game.toJSON<IBlackJack>();
-		const hideLast = json.dealer_hand.slice(0, json.dealer_hand.length - 1);
-		return {
-			...json,
-			deck: [],
-			dealer_hand: hideLast
-		};
 	}
 
 	public async hit(game: IBlackJack, doubleDown = false) {
@@ -268,26 +289,6 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 			dealer_hand: hand,
 			is_complete: true
 		});
-	}
-
-	public countHand(hand: ICard[]) {
-		const count = hand.reduce((acc, { value }) => {
-			if (value >= 2 && value <= 9) {
-				acc.softCount += value;
-				acc.hardCount += value;
-				return acc;
-			}
-			if (value >= 10 && value <= 13) {
-				acc.softCount += 10;
-				acc.hardCount += 10;
-				return acc;
-			}
-			acc.aceCount++;
-			acc.hardCount++;
-			return acc;
-		}, { softCount: 0, hardCount: 0, aceCount: 0 });
-		if (count.aceCount > 0) count.softCount += 10 + count.aceCount;
-		return count;
 	}
 }
 

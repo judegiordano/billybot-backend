@@ -10,3 +10,10 @@ export enum RouletteColor {
 	black = "black",
 	green = "green",
 }
+
+export enum CardSuit {
+	clubs = "clubs",
+	hearts = "hearts",
+	spades = "spades",
+	diamonds = "diamonds",
+}

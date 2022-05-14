@@ -47,6 +47,12 @@ class Servers extends mongoose.Repository<IServer> {
 			}
 		});
 	}
+
+	public async resetTaxCollection() {
+		const found = await super.count({ taxes_collected: true });
+		if (found <= 0) return;
+		return super.bulkUpdate({ taxes_collected: true }, { taxes_collected: false });
+	}
 }
 
 export const servers = new Servers();

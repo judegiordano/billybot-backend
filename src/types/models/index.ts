@@ -2,6 +2,8 @@ import { QueryOptions, PopulateOptions } from "mongoose";
 export type { FilterQuery, UpdateQuery, PipelineStage } from "mongoose";
 export type { AggregateOptions } from "mongodb";
 
+import { CardSuit } from "../values";
+
 export interface IModel {
 	_id: string
 	created_at: Date
@@ -28,24 +30,19 @@ export interface IAnnouncement extends IModel {
 	channel_name: string
 }
 
-export enum CardSuit {
-	clubs = "clubs",
-	hearts = "hearts",
-	spades = "spades",
-	diamonds = "diamonds",
-}
-
 export interface ICard {
 	suit: CardSuit
 	value: number
 }
+
+export type Deck = ICard[]
 
 export interface IBlackJack extends IModel {
 	server_id: string
 	wager: number
 	payout: number
 	user: Ref<IUser>
-	deck: ICard[]
+	deck: Deck
 	turn: number
 	status: string
 	won: boolean
