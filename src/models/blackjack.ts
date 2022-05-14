@@ -1,36 +1,13 @@
 import { chance } from "../helpers";
 import { users } from "./user";
 import { mongoose } from "../services";
-import type { IBlackJack, ICard, IUser } from "../types/models";
+import type { IBlackJack, ICard, IHandCount, IUser } from "../types/models";
 import { CardSuit } from "../types/values";
 import { BadRequestError } from "../types";
 
-export const suitLookup: Record<CardSuit, string> = {
-	[CardSuit.clubs]: "♣️",
-	[CardSuit.hearts]: "♥️",
-	[CardSuit.spades]: "♠️",
-	[CardSuit.diamonds]: "♦️"
-};
-
-export const valueLookup: Record<number, string> = {
-	1: "A",
-	2: "2",
-	3: "3",
-	4: "4",
-	5: "5",
-	6: "6",
-	7: "7",
-	8: "8",
-	9: "9",
-	10: "10",
-	11: "J",
-	12: "Q",
-	13: "K"
-};
-
 class BlackjackGames extends mongoose.Repository<IBlackJack> {
 	constructor() {
-		super("BlackJackGame", {
+		super("BlackJack_Game", {
 			server_id: {
 				type: String,
 				index: true,
@@ -50,11 +27,18 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 				type: Number,
 				default: 0
 			},
+			double_down: {
+				type: Boolean,
+				default: false
+			},
 			turn: {
 				type: Number,
 				default: 0
 			},
-			status: String,
+			status: {
+				type: String,
+				default: "Your turn!"
+			},
 			won: {
 				type: Boolean,
 				default: false
@@ -117,10 +101,13 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 
 	public normalizeHands(game: IBlackJack) {
 		const json = game.toJSON<IBlackJack>();
-		const hideLast = json.dealer_hand.slice(0, json.dealer_hand.length - 1);
+		const { playerCount, dealerCount } = this.countBothHands(json);
+		const hideLast = !json.is_complete ? json.dealer_hand.slice(0, json.dealer_hand.length - 1) : json.dealer_hand;
 		return {
 			...json,
 			deck: [],
+			player_count: this.calculateCount(playerCount),
+			dealer_count: this.calculateCount(dealerCount),
 			dealer_hand: hideLast
 		};
 	}
@@ -140,7 +127,7 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 			acc.aceCount++;
 			acc.hardCount++;
 			return acc;
-		}, { softCount: 0, hardCount: 0, aceCount: 0 });
+		}, { softCount: 0, hardCount: 0, aceCount: 0 } as IHandCount);
 		if (count.aceCount > 0) count.softCount += 10 + count.aceCount;
 		return count;
 	}
@@ -163,7 +150,7 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 		dealerHand.push(deck.shift() as ICard);
 		playerHand.push(deck.shift() as ICard);
 		dealerHand.push(deck.shift() as ICard);
-		return super.insertOne({
+		const game = await super.insertOne({
 			server_id,
 			user: user._id,
 			wager,
@@ -171,70 +158,69 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 			player_hand: playerHand,
 			dealer_hand: dealerHand
 		});
+		const { playerCount, dealerCount } = this.countBothHands(game);
+		if (playerCount.softCount === 21) {
+			if (dealerCount.softCount === 21) {
+				return super.assertUpdateOne({ _id: game._id }, {
+					won: false,
+					is_complete: true,
+					payout: game.wager,
+					status: "Blackjack! Dealer also has blackjack, so the hand is a push.",
+				});
+			}
+			return super.assertUpdateOne({ _id: game._id }, {
+				won: true,
+				is_complete: true,
+				payout: Math.floor(game.wager * 2.5),
+				status: `Blackjack! You collect a 3:2 payout of ${Math.floor(game.wager * 1.5)} on your bet of ${game.wager} BillyBucks!`
+			});
+		}
+		if (dealerCount.softCount === 21) {
+			return super.assertUpdateOne({ _id: game._id }, {
+				won: false,
+				is_complete: true,
+				payout: 0,
+				status: `Dealer has Blackjack! You lose your bet of ${game.wager} BillyBucks!`,
+			});
+		}
+		return game;
 	}
 
 	public async hit(game: IBlackJack, doubleDown = false) {
 		const { _id } = game;
-		if (doubleDown && game.turn !== 0)
-			throw new BadRequestError("Cannot double down! Doubling down is only allowed on your first two cards.");
 		const state = await this.assertUpdateOne({ _id }, {
+			double_down: doubleDown,
 			$pop: { deck: -1 },
 			$addToSet: { player_hand: game.deck[0] },
 			...(doubleDown ? { $inc: { wager: game.wager } } : null),
 		});
 		const playerCount = this.countHand(state.player_hand);
-		const dealerCount = this.countHand(state.dealer_hand);
 		if (playerCount.hardCount > 21) {
 			return super.updateOne({ _id }, {
 				won: false,
 				is_complete: true,
-				payout: -state.wager,
+				payout: 0,
 				$inc: { turn: 1 },
-				status: `Busted! You lose your bet of ${state.wager} BillyBucks!\n\n`,
+				status: `Busted! You lose your bet of ${state.wager} BillyBucks!`,
 			});
 		}
-		if (playerCount.hardCount === 21 || playerCount.softCount === 21) {
-			if (dealerCount.softCount === 21 && state.turn === 1) {
-				return super.updateOne({ _id }, {
-					won: false,
-					is_complete: true,
-					payout: state.wager,
-					$inc: { turn: 1 },
-					status: "Blackjack! Dealer also has blackjack, so the hand is a push.\n\n",
-				});
-			}
-			return super.updateOne({ _id }, {
-				won: true,
-				is_complete: true,
-				payout: Math.floor(state.wager * 1.5),
-				$inc: { turn: 1 },
-				status: `Blackjack! You collect a 3:2 payout of ${Math.floor(state.wager * 1.5)} on your bet of ${state.wager} BillyBucks!\n\n`
-			});
+		if (playerCount.hardCount === 21 || playerCount.softCount === 21 || doubleDown) {
+			return this.stand(state);
 		}
-		if (dealerCount.softCount === 21 && state.turn === 1) {
-			return super.updateOne({ _id }, {
-				won: false,
-				is_complete: true,
-				payout: -state.wager,
-				$inc: { turn: 1 },
-				status: `Dealer has Blackjack! You lose your bet of ${state.wager} BillyBucks!\n\n`,
-			});
-		}
-		return super.updateOne({ _id }, { is_complete: false, status: "Your turn!\n\n", $inc: { turn: 1 } });
+		return super.updateOne({ _id }, { is_complete: false, status: "Your turn!", $inc: { turn: 1 } });
 	}
 
 	public async stand(game: IBlackJack) {
 		const { _id } = game;
 		const state = await this.dealerHitRecursive(game);
-		const playerCount = this.countHand(state.player_hand);
-		const dealerCount = this.countHand(state.dealer_hand);
+		const { playerCount, dealerCount } = this.countBothHands(state);
 
 		if (dealerCount.hardCount > 21) {
 			return super.updateOne({ _id }, {
 				is_complete: true,
 				won: true,
 				payout: (state.wager * 2),
-				status: `Dealer busted! You collect a 1:1 payout on your bet of ${state.wager} BillyBucks!\n\n`,
+				status: `Dealer busted! You collect a 1:1 payout on your bet of ${state.wager} BillyBucks!`,
 				$inc: { turn: 1 }
 			});
 		}
@@ -246,16 +232,16 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 				is_complete: true,
 				won: true,
 				payout: (state.wager * 2),
-				status: `You win! You collect a 1:1 payout on your bet of ${state.wager} BillyBucks!\n\n`,
+				status: `You win! You collect a 1:1 payout on your bet of ${state.wager} BillyBucks!`,
 				$inc: { turn: 1 }
 			});
 		}
-		if (playerFinalCount < dealerFinalCount) {
+		if (dealerFinalCount > playerFinalCount) {
 			return super.updateOne({ _id }, {
 				is_complete: true,
 				won: false,
-				payout: -state.wager,
-				status: `You lose your bet of ${state.wager} BillyBucks!\n\n`,
+				payout: 0,
+				status: `You lose your bet of ${state.wager} BillyBucks!`,
 				$inc: { turn: 1 }
 			});
 		}
@@ -263,7 +249,7 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 			is_complete: true,
 			won: true,
 			payout: state.wager,
-			status: "It's a push!\n\n",
+			status: "It's a push!",
 			$inc: { turn: 1 }
 		});
 	}
@@ -275,20 +261,37 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 		let iterations = 0;
 		while (hit) {
 			const { hardCount, softCount } = this.countHand(hand);
-			if (softCount > 17 || (hardCount > 17 && softCount < 21)) {
+			if ((softCount >= 17 && softCount <= 21) || hardCount >= 17) {
 				hit = false;
 				break;
 			}
 			iterations++;
 			hand.push(deck.shift() as ICard);
 		}
+		iterations > 0 && game.deck.slice(0, iterations);
 		return this.assertUpdateOne({
 			_id: game._id
 		}, {
-			...(iterations > 0 ? { $pull: { deck: -iterations } } : null),
+			deck,
 			dealer_hand: hand,
 			is_complete: true
 		});
+	}
+
+	public countBothHands(game: IBlackJack) {
+		const playerCount = this.countHand(game.player_hand);
+		const dealerCount = this.countHand(game.dealer_hand);
+		return {
+			playerCount,
+			dealerCount
+		};
+	}
+
+	public calculateCount(count: IHandCount) {
+		// does'nt matter which is returned; they're equal
+		if (count.softCount === count.hardCount) return count.hardCount.toString();
+		if (count.softCount <= 21) return `soft ${count.softCount}`;
+		return `hard ${count.hardCount}`;
 	}
 }
 

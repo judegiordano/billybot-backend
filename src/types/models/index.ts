@@ -41,6 +41,7 @@ export interface IBlackJack extends IModel {
 	server_id: string
 	wager: number
 	payout: number
+	double_down: boolean
 	user: Ref<IUser>
 	deck: Deck
 	turn: number
@@ -49,6 +50,11 @@ export interface IBlackJack extends IModel {
 	player_hand: ICard[]
 	dealer_hand: ICard[]
 	is_complete: boolean
+}
+export interface IHandCount {
+	softCount: number;
+	hardCount: number;
+	aceCount: number;
 }
 
 export interface IServerSettings {
