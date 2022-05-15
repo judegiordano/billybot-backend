@@ -64,6 +64,18 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 									overall_winnings: { type: "number" },
 									overall_losings: { type: "number" }
 								}
+							},
+							blackjack: {
+								type: "object",
+								properties: {
+									games: { type: "number" },
+									wins: { type: "number" },
+									losses: { type: "number" },
+									double_downs: { type: "number" },
+									overall_winnings: { type: "number" },
+									overall_losings: { type: "number" },
+									last_hand: {}
+								}
 							}
 						}
 					}

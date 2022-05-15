@@ -51,7 +51,7 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 		]);
 		await users.updateOne({ _id: user._id }, { $inc: { billy_bucks: -wager } });
 		const game = await blackjackGames.startGame(user, wager);
-		const updated = game.is_complete ? await users.updateOne({ _id: user._id }, { $inc: { billy_bucks: game.payout } }) : null;
+		const updated = game.is_complete ? await users.updateBlackjackMetrics(user._id, game) : null;
 		const state = blackjackGames.normalizeHands(game);
 		return {
 			...state,
@@ -84,7 +84,7 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 			await users.updateOne({ _id: user._id }, { $inc: { billy_bucks: -game.wager } });
 		}
 		const turn = await blackjackGames.hit(game, double_down) as IBlackJack;
-		const updated = turn.is_complete ? await users.updateOne({ _id: user._id }, { $inc: { billy_bucks: turn.payout } }) : null;
+		const updated = turn.is_complete ? await users.updateBlackjackMetrics(user._id, turn) : null;
 		const state = blackjackGames.normalizeHands(turn);
 		return {
 			...state,
@@ -110,7 +110,7 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 		const user = await users.assertRead({ server_id, user_id });
 		const game = await blackjackGames.assertHasActiveGame(user);
 		const turn = await blackjackGames.stand(game) as IBlackJack;
-		const updated = await users.updateOne({ _id: user._id }, { $inc: { billy_bucks: turn.payout } });
+		const updated = await users.updateBlackjackMetrics(user._id, turn);
 		const state = blackjackGames.normalizeHands(turn);
 		return {
 			...state,

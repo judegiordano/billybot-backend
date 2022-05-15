@@ -1,9 +1,9 @@
 import { mongoose, discord } from "../services";
 import { chance } from "../helpers";
-import { getRouletteResult } from "../helpers/gambling";
+import { getRouletteResult, buildBlackJackMetrics } from "../helpers/gambling";
 import { UnauthorizedError, BadRequestError, Dictionary } from "../types";
-import type { IEngagementMetrics, IServer, IServerSettings, IUser, IWebhook, PipelineStage } from "../types/models";
-import { RouletteColor } from "../types/values";
+import type { IBlackJack, IEngagementMetrics, IServer, IServerSettings, IUser, IWebhook, PipelineStage } from "../types/models";
+import { CardSuit, RouletteColor } from "../types/values";
 
 class Users extends mongoose.Repository<IUser> {
 	constructor() {
@@ -99,6 +99,48 @@ class Users extends mongoose.Repository<IUser> {
 						overall_losings: {
 							type: Number,
 							default: 0
+						}
+					},
+					blackjack: {
+						required: false,
+						games: {
+							type: Number,
+							default: 0
+						},
+						wins: {
+							type: Number,
+							default: 0
+						},
+						losses: {
+							type: Number,
+							default: 0
+						},
+						double_downs: {
+							type: Number,
+							default: 0
+						},
+						overall_winnings: {
+							type: Number,
+							default: 0
+						},
+						overall_losings: {
+							type: Number,
+							default: 0
+						},
+						last_hand: {
+							required: false,
+							won: Boolean,
+							hand: {
+								type: [{
+									_id: false,
+									suit: {
+										type: String,
+										enum: Object.values(CardSuit),
+										required: false
+									},
+									value: Number
+								}]
+							}
 						}
 					}
 				}
@@ -252,6 +294,20 @@ class Users extends mongoose.Repository<IUser> {
 			return acc;
 		}, {} as Dictionary<IUser>);
 		return dictionary;
+	}
+
+	public async updateBlackjackMetrics(_id: string, game: IBlackJack) {
+		const { $inc } = buildBlackJackMetrics(game);
+		return super.updateOne({ _id }, {
+			$inc: {
+				billy_bucks: game.payout,
+				...$inc
+			},
+			"metrics.gambling.blackjack.last_hand": {
+				won: game.won,
+				hand: game.player_hand
+			}
+		}) as Promise<IUser>;
 	}
 
 	public async lotteryInformation(server: IServer) {

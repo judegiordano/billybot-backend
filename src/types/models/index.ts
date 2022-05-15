@@ -92,6 +92,18 @@ export interface IGamblingMetrics {
 		overall_winnings: number
 		overall_losings: number
 	}
+	blackjack: {
+		games: number
+		wins: number
+		losses: number
+		double_downs: number
+		overall_winnings: number
+		overall_losings: number
+		last_hand?: {
+			won: boolean
+			hand: ICard[]
+		}
+	}
 }
 
 export interface IUserMetrics {

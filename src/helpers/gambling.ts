@@ -1,5 +1,6 @@
 import { chance } from ".";
 import { RouletteColor } from "../types/values";
+import type { IBlackJack } from "../types/models";
 
 export function spinColor() {
 	// produces random int 0 thru 37 inclusive (38 total distinct outcomes)
@@ -32,4 +33,16 @@ export function getRouletteResult(bet: number, color: RouletteColor) {
 			winning_color: winningColor
 		}
 	};
+}
+
+export function buildBlackJackMetrics(game: IBlackJack) {
+	const { won, payout, wager, double_down } = game;
+	const $inc = {
+		"metrics.gambling.blackjack.games": 1,
+		[`metrics.gambling.blackjack.${won ? "wins" : "losses"}`]: 1,
+		"metrics.gambling.blackjack.double_downs": double_down ? 1 : 0,
+		...(won ? { "metrics.gambling.blackjack.overall_winnings": payout } : {}),
+		...(!won ? { "metrics.gambling.blackjack.overall_losings": wager } : {})
+	};
+	return { $inc };
 }
