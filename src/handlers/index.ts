@@ -1,8 +1,8 @@
 import { APIGatewayEvent, Context } from "aws-lambda";
 import serverless, { Application } from "serverless-http";
 
-import { controllers } from "../controllers";
-import { mongoose } from "../services";
+import { controllers } from "@controllers";
+import { mongoose } from "@services";
 
 const handler = serverless(controllers as Application);
 

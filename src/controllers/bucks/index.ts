@@ -1,7 +1,7 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 
-import { servers, users } from "../../models";
-import type { IUser, IServer } from "../../types/models";
+import { servers, users } from "@models";
+import type { IUser, IServer } from "@interfaces";
 
 export const bucksRouter = async function (app: FastifyInstance) {
 	app.get<{ Params: IServer }>(

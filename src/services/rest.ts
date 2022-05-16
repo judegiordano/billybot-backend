@@ -1,10 +1,9 @@
 import axios from "axios";
 import type FormData from "form-data";
 
-import { DASHBOARD_URL } from "./config";
-import type { IEmbed } from "../types";
-import type { IWebhook } from "../types/models";
-import { ColorCodes } from "../types/values";
+import { DASHBOARD_URL } from "@config";
+import { ColorCodes } from "@enums";
+import type { IWebhook, IEmbed } from "@interfaces";
 
 export const webhooks = axios.create({
 	baseURL: "https://discord.com/api/v8/webhooks"

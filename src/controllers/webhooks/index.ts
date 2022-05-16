@@ -1,7 +1,7 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 
-import type { IWebhook, IServer } from "../../types/models";
-import { servers, webhooks } from "../../models";
+import { servers, webhooks } from "@models";
+import type { IWebhook, IServer } from "@interfaces";
 
 export const webhooksRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IWebhook }>(

@@ -144,3 +144,16 @@ export interface IMediaFile extends IModel {
 	key: string;
 	notes?: string;
 }
+
+export interface IEmbed {
+	title: string;
+	description?: string;
+	color: number;
+	image: {
+		url: string;
+	};
+	fields: {
+		name: string;
+		value: string;
+	}[];
+}

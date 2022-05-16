@@ -1,7 +1,7 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 
-import { mediaFiles } from "../../models";
-import type { IMediaFile } from "../../types/models";
+import { mediaFiles } from "@models";
+import type { IMediaFile } from "@interfaces";
 
 export const mediaRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IMediaFile }>(

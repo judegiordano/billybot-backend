@@ -1,5 +1,5 @@
-import { FastifyInstance } from "fastify";
 import plugin from "fastify-plugin";
+import type { FastifyInstance } from "fastify";
 
 export const schemas = plugin(async function (app: FastifyInstance) {
 	// requests

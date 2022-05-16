@@ -1,7 +1,8 @@
-import { FastifyRequest, RawRequestDefaultExpression } from "fastify";
+import type { FastifyRequest, RawRequestDefaultExpression } from "fastify";
 
-import { UnauthorizedError, ForbiddenError, JwtPayload } from "../types";
-import { jwt, config } from "../services";
+import { UnauthorizedError, ForbiddenError } from "@errors";
+import type { JwtPayload } from "@types";
+import { jwt, config } from "@services";
 
 const timestampDrift = 60 * 1000;
 

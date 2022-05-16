@@ -1,7 +1,6 @@
-import { mongoose, discord } from "../services";
-import { chance } from "../helpers";
-import { getRouletteResult, buildBlackJackMetrics } from "../helpers/gambling";
-import { UnauthorizedError, BadRequestError, Dictionary } from "../types";
+import { mongoose, discord } from "@services";
+import { getRouletteResult, buildBlackJackMetrics, chance } from "@helpers";
+import { UnauthorizedError, BadRequestError } from "@errors";
 import type {
 	IBlackJack,
 	IEngagementMetrics,
@@ -10,8 +9,9 @@ import type {
 	IUser,
 	IWebhook,
 	PipelineStage
-} from "../types/models";
-import { CardSuit, RouletteColor } from "../types/values";
+} from "@interfaces";
+import { CardSuit, RouletteColor } from "@enums";
+import { Dictionary } from "@types";
 
 class Users extends mongoose.Repository<IUser> {
 	constructor() {

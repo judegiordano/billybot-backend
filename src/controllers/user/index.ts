@@ -1,7 +1,7 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 
-import { servers, users } from "../../models";
-import type { IServer, IUser } from "../../types/models";
+import { servers, users } from "@models";
+import type { IServer, IUser } from "@interfaces";
 
 export const userRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IUser[] }>(
@@ -26,10 +26,7 @@ export const userRouter = async function (app: FastifyInstance) {
 							has_lottery_ticket: { type: "boolean" },
 							is_admin: { type: "boolean" },
 							is_mayor: { type: "boolean" },
-							birthday: {
-								type: "string",
-								format: "date"
-							}
+							birthday: { type: "string" }
 						}
 					}
 				},

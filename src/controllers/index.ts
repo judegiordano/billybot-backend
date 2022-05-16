@@ -1,6 +1,7 @@
 import { FastifyPluginCallback } from "fastify";
 
-import { app, config } from "../services";
+import { app, config } from "@services";
+// import routes
 import { developerRouter } from "./developer";
 import { userRouter } from "./user";
 import { bucksRouter } from "./bucks";

@@ -63,7 +63,45 @@
     "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
     "types": [
       "node"
-    ]
+    ],
+    "paths": {
+      "@src/*": [
+        "src/*"
+      ],
+      "@controllers": [
+        "src/controllers"
+      ],
+      "@models": [
+        "src/models"
+      ],
+      "@services": [
+        "src/services"
+      ],
+      "@helpers": [
+        "src/helpers"
+      ],
+      "@middleware": [
+        "src/middleware"
+      ],
+      "@hooks": [
+        "src/hooks"
+      ],
+      "@config": [
+        "src/services/config"
+      ],
+      "@types": [
+        "src/types"
+      ],
+      "@errors": [
+        "src/types/errors"
+      ],
+      "@enums": [
+        "src/types/values"
+      ],
+      "@interfaces": [
+        "src/types/models"
+      ]
+    }
   },
   "include": [
     "src",

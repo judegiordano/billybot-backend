@@ -1,5 +1,5 @@
-import { mongoose } from "../services";
-import type { IServer } from "../types/models";
+import { mongoose } from "@services";
+import type { IServer } from "@interfaces";
 
 class Servers extends mongoose.Repository<IServer> {
 	constructor() {

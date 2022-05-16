@@ -1,7 +1,7 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 
-import { servers, users } from "../../models";
-import type { IServer } from "../../types/models";
+import { servers, users } from "@models";
+import type { IServer } from "@interfaces";
 
 export const serversRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IServer }>(

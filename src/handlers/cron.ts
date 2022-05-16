@@ -1,8 +1,8 @@
 import FormData from "form-data";
 
-import type { IServerSettings, IWebhook } from "../types/models";
-import { discord, mongoose } from "../services";
-import { users, webhooks, servers, mediaFiles } from "../models";
+import { discord, mongoose } from "@services";
+import { users, webhooks, servers, mediaFiles } from "@models";
+import type { IServerSettings, IWebhook } from "@interfaces";
 
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();

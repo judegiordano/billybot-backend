@@ -1,9 +1,9 @@
-import { chance } from "../helpers";
 import { users } from "./user";
-import { mongoose } from "../services";
-import type { IBlackJack, ICard, IHandCount, IUser } from "../types/models";
-import { CardSuit } from "../types/values";
-import { BadRequestError } from "../types";
+import { chance } from "@helpers";
+import { mongoose } from "@services";
+import { CardSuit } from "@enums";
+import { BadRequestError } from "@errors";
+import type { IBlackJack, ICard, IHandCount, IUser } from "@interfaces";
 
 class BlackjackGames extends mongoose.Repository<IBlackJack> {
 	constructor() {

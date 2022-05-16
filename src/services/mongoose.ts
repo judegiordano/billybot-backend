@@ -1,21 +1,19 @@
-import mongoose, {
-	Schema,
+import mongoose, { Schema, connect, model as BuildModel } from "mongoose";
+import type {
 	Connection,
 	SchemaDefinition,
 	SchemaOptions,
-	connect,
 	Model,
-	model as BuildModel,
 	FilterQuery,
 	UpdateQuery,
-	ClientSession,
-	UpdateWriteOpResult
+	UpdateWriteOpResult,
+	ClientSession
 } from "mongoose";
 
-import { nanoid } from "../helpers";
-import { MONGO_URI } from "./config";
-import { NotFoundError, BadRequestError } from "../types";
-import type { IModel, Projection, Options, PipelineStage, AggregateOptions } from "../types/models";
+import { nanoid } from "@helpers";
+import { MONGO_URI } from "@config";
+import { NotFoundError, BadRequestError } from "@errors";
+import type { IModel, Projection, Options, PipelineStage, AggregateOptions } from "@interfaces";
 
 let cachedConnection: Connection | null = null;
 

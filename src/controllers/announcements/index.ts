@@ -1,9 +1,7 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 
-import { servers, users, webhooks } from "../../models";
-
-import { announcements } from "../../models/announcements";
-import type { IAnnouncement, IServer, IUser } from "../../types/models";
+import { servers, users, webhooks, announcements } from "@models";
+import type { IAnnouncement, IServer, IUser } from "@interfaces";
 
 export const announcementsRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IAnnouncement & IUser }>(

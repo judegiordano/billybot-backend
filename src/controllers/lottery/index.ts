@@ -1,7 +1,7 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 
-import { users, servers } from "../../models";
-import type { IServer, IUser } from "../../types/models";
+import { users, servers } from "@models";
+import type { IServer, IUser } from "@interfaces";
 
 export const lotteryRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IUser }>(

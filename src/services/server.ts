@@ -1,9 +1,10 @@
-import Fastify, { FastifyError, FastifyRequest, FastifyReply } from "fastify";
+import Fastify from "fastify";
 import helmet from "fastify-helmet";
+import type { FastifyError, FastifyRequest, FastifyReply } from "fastify";
 
-import { schemas } from "../middleware";
-import { restricted } from "../hooks";
-import { CommonError } from "../types";
+import { schemas } from "@middleware";
+import { restricted } from "@hooks";
+import { CommonError } from "@errors";
 
 export const app = Fastify({
 	logger: true,

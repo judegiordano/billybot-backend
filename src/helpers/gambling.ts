@@ -1,6 +1,6 @@
 import { chance } from ".";
-import { RouletteColor } from "../types/values";
-import type { IBlackJack } from "../types/models";
+import { RouletteColor } from "@enums";
+import type { IBlackJack } from "@interfaces";
 
 export function spinColor() {
 	// produces random int 0 thru 37 inclusive (38 total distinct outcomes)

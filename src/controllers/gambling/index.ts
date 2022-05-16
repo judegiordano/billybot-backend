@@ -1,9 +1,9 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 
-import { users, servers, blackjackGames } from "../../models";
-import { RouletteColor } from "../../types/values";
-import type { IBlackJack, IServer, IUser } from "../../types/models";
-import { BadRequestError } from "../../types";
+import { users, servers, blackjackGames } from "@models";
+import type { IBlackJack, IServer, IUser } from "@interfaces";
+import { BadRequestError } from "@errors";
+import { RouletteColor } from "@enums";
 
 export const gamblingRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IServer & IUser & { color: RouletteColor; amount: number } }>(
