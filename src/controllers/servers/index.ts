@@ -31,12 +31,8 @@ export const serversRouter = async function (app: FastifyInstance) {
 			}
 		},
 		async (req) => {
-			return await servers.assertInsertNew(
-				{
-					server_id: req.body.server_id
-				},
-				req.body
-			);
+			const { server_id } = req.body;
+			return await servers.assertInsertNew({ server_id }, req.body);
 		}
 	);
 	app.put<{ Params: IServer; Body: Partial<IServer> }>(

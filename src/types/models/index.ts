@@ -2,13 +2,14 @@ import { QueryOptions, PopulateOptions } from "mongoose";
 export type { FilterQuery, UpdateQuery, PipelineStage } from "mongoose";
 export type { AggregateOptions } from "mongodb";
 
-import { CardSuit } from "../values";
+import { CardSuit, Extension } from "../values";
 
 export interface IModel {
 	_id: string;
 	created_at: Date;
 	updated_at: Date;
 	toJSON<T>(): T;
+	// _v: number; version key virtual exists on document
 }
 
 export type Ref<T extends IModel> = Partial<T> & string;
@@ -134,5 +135,12 @@ export interface IWebhook extends IModel {
 	webhook_token: string;
 	avatar_url: string;
 	username: string;
+	notes?: string;
+}
+
+export interface IMediaFile extends IModel {
+	file_name: string;
+	extension: Extension;
+	key: string;
 	notes?: string;
 }

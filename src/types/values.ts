@@ -17,3 +17,14 @@ export enum CardSuit {
 	spades = "spades",
 	diamonds = "diamonds"
 }
+
+export enum Extension {
+	mp4 = "mp4",
+	mp3 = "mp3",
+	jpeg = "jpeg",
+	jpg = "jpg",
+	png = "png",
+	svg = "svg",
+	pdf = "pdf",
+	ico = "ico"
+}

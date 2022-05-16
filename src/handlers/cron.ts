@@ -1,12 +1,8 @@
-import axios from "axios";
 import FormData from "form-data";
 
 import type { IServerSettings, IWebhook } from "../types/models";
 import { discord, mongoose } from "../services";
-import { buildMediaUrl } from "../helpers";
-import { users, webhooks, servers } from "../models";
-
-const key = "rockandroll.mp4";
+import { users, webhooks, servers, mediaFiles } from "../models";
 
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();
@@ -38,7 +34,8 @@ export async function pickLotteryWinner() {
 
 export async function goodMorning() {
 	await mongoose.createConnection();
-	const memHooks = await webhooks.list({ channel_name: "mems" });
+	const memHooks = await webhooks.list({ channel_name: "bot-testing" });
+	// const memHooks = await webhooks.list({ channel_name: "mems" });
 	if (memHooks.length <= 0) {
 		return {
 			statusCode: 200,
@@ -46,11 +43,10 @@ export async function goodMorning() {
 			body: "no webhooks found for mems"
 		};
 	}
-	const image = buildMediaUrl(key);
+	const { file, key } = await mediaFiles.getMedia("rockandroll");
 	const formData = new FormData();
 	formData.append("content", "Good Morning!");
-	const stream = await axios.get(image, { responseType: "stream" });
-	formData.append("file1", stream.data, key);
+	formData.append("file1", file.Body, key);
 	// post to all channels
 	const operations = memHooks.map((webhook: IWebhook) => {
 		formData.append("username", webhook.username);

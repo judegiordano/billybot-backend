@@ -51,6 +51,11 @@ export class ApiStack extends Stack {
 			},
 			routes: {
 				$default: "src/handlers/index.run"
+			},
+			defaultFunctionProps: {
+				environment: {
+					MEDIA_BUCKET: mediaBucket.bucketName
+				}
 			}
 		});
 
@@ -61,7 +66,8 @@ export class ApiStack extends Stack {
 		this.addOutputs({
 			endpoint: process.env.IS_LOCAL
 				? api.url
-				: "https://*******/.execute-api.us-east-1.amazonaws.com/api/v*/"
+				: "https://*******/.execute-api.us-east-1.amazonaws.com/api/v*/",
+			bucket: process.env.IS_LOCAL ? mediaBucket.bucketName : "*******"
 		});
 	}
 }
