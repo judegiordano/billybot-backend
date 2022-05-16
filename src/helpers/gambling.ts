@@ -16,14 +16,14 @@ export function spinColor() {
 export function getRouletteResult(bet: number, color: RouletteColor) {
 	const winningColor = spinColor();
 	const won = color === winningColor;
-	const payout = won && color === RouletteColor.green ? (bet * 17) : won ? bet : -bet;
+	const payout = won && color === RouletteColor.green ? bet * 17 : won ? bet : -bet;
 	const $inc = {
 		billy_bucks: payout,
 		"metrics.gambling.roulette.spins": 1,
 		[`metrics.gambling.roulette.${color}_spins`]: 1,
 		[`metrics.gambling.roulette.${won ? "wins" : "losses"}`]: 1,
 		...(won ? { "metrics.gambling.roulette.overall_winnings": bet } : {}),
-		...(!won ? { "metrics.gambling.roulette.overall_losings": bet } : {}),
+		...(!won ? { "metrics.gambling.roulette.overall_losings": bet } : {})
 	};
 	return {
 		operation: { $inc },

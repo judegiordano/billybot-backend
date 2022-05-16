@@ -5,7 +5,7 @@ import { jwt, config } from "../services";
 
 const timestampDrift = 60 * 1000;
 
-type Headers = RawRequestDefaultExpression["headers"]
+type Headers = RawRequestDefaultExpression["headers"];
 
 function validateTimestamp(headers: Headers) {
 	const timestamp = headers["x-api-timestamp"];
@@ -14,8 +14,7 @@ function validateTimestamp(headers: Headers) {
 	const requestTimestamp = parseInt(timestamp);
 
 	const serverTimestamp = Date.now();
-	if (isNaN(requestTimestamp))
-		throw new ForbiddenError("invalid request timestamp");
+	if (isNaN(requestTimestamp)) throw new ForbiddenError("invalid request timestamp");
 
 	if (Math.abs(serverTimestamp - requestTimestamp) > timestampDrift) {
 		const requestDate = new Date(requestTimestamp).toISOString();

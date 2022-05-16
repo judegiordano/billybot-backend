@@ -10,6 +10,6 @@ export async function createConnection() {
 		maxIdleTimeMS: 3000,
 		socketTimeoutMS: 30000,
 		serverSelectionTimeoutMS: 5000,
-		maxPoolSize: 5,
+		maxPoolSize: 5
 	});
 }

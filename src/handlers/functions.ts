@@ -5,6 +5,6 @@ export async function createToken() {
 	return {
 		statusCode: 200,
 		headers: { "Content-Type": "application/json" },
-		body: jwt.sign<JwtPayload>({ is_valid: true, stage: config.STAGE }),
+		body: jwt.sign<JwtPayload>({ is_valid: true, stage: config.STAGE })
 	};
 }

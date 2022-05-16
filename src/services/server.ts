@@ -17,20 +17,22 @@ export const app = Fastify({
 app.register(schemas);
 app.register(helmet);
 app.decorate("restricted", restricted);
-app.setErrorHandler(async (error: FastifyError | CommonError, req: FastifyRequest, res: FastifyReply) => {
-	req.log.error(error, error.stack);
-	if (error instanceof CommonError) {
-		const { message, status } = error.toJSON();
-		res.statusCode = status;
+app.setErrorHandler(
+	async (error: FastifyError | CommonError, req: FastifyRequest, res: FastifyReply) => {
+		req.log.error(error, error.stack);
+		if (error instanceof CommonError) {
+			const { message, status } = error.toJSON();
+			res.statusCode = status;
+			return {
+				ok: false,
+				status,
+				error: message
+			};
+		}
 		return {
 			ok: false,
-			status,
-			error: message
+			status: res.statusCode ?? 500,
+			error: error.message ?? "internal server error"
 		};
 	}
-	return {
-		ok: false,
-		status: res.statusCode ?? 500,
-		error: error.message ?? "internal server error"
-	};
-});
+);

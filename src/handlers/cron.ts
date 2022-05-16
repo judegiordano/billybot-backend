@@ -10,16 +10,19 @@ const key = "rockandroll.mp4";
 
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();
-	const generalWebhooks = await webhooks.list({
-		channel_name: "general"
-	}, {
-		populate: [{ path: "server" }]
-	});
+	const generalWebhooks = await webhooks.list(
+		{
+			channel_name: "general"
+		},
+		{
+			populate: [{ path: "server" }]
+		}
+	);
 	if (generalWebhooks.length <= 0) {
 		return {
 			statusCode: 200,
 			headers: { "Content-Type": "application/json" },
-			body: "no webhooks found for general",
+			body: "no webhooks found for general"
 		};
 	}
 	const operations = generalWebhooks.map((webhook: IWebhook) => {
@@ -29,7 +32,7 @@ export async function pickLotteryWinner() {
 	return {
 		statusCode: 200,
 		headers: { "Content-Type": "application/json" },
-		body: "done",
+		body: "done"
 	};
 }
 
@@ -40,7 +43,7 @@ export async function goodMorning() {
 		return {
 			statusCode: 200,
 			headers: { "Content-Type": "application/json" },
-			body: "no webhooks found for mems",
+			body: "no webhooks found for mems"
 		};
 	}
 	const image = buildMediaUrl(key);
@@ -58,42 +61,42 @@ export async function goodMorning() {
 	return {
 		statusCode: 200,
 		headers: { "Content-Type": "application/json" },
-		body: "done",
+		body: "done"
 	};
 }
 
 export async function happyBirthday() {
 	await mongoose.createConnection();
-	const generalWebhooks = await webhooks.list({
-		channel_name: "general"
-	}, {
-		populate: [{ path: "server" }]
-	});
+	const generalWebhooks = await webhooks.list(
+		{
+			channel_name: "general"
+		},
+		{
+			populate: [{ path: "server" }]
+		}
+	);
 	if (generalWebhooks.length <= 0) {
 		return {
 			statusCode: 200,
 			headers: { "Content-Type": "application/json" },
-			body: "no webhooks found for general",
+			body: "no webhooks found for general"
 		};
 	}
 	await Promise.all(generalWebhooks.map((webhook: IWebhook) => users.wishBirthday(webhook)));
 	return {
 		statusCode: 200,
 		headers: { "Content-Type": "application/json" },
-		body: "done",
+		body: "done"
 	};
 }
 
 // anything job that needs to happen every Friday
 export async function houseCleaning() {
 	await mongoose.createConnection();
-	await Promise.all([
-		users.resetAllowance(),
-		servers.resetTaxCollection()
-	]);
+	await Promise.all([users.resetAllowance(), servers.resetTaxCollection()]);
 	return {
 		statusCode: 200,
 		headers: { "Content-Type": "application/json" },
-		body: "operations complete",
+		body: "operations complete"
 	};
 }

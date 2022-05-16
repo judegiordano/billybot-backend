@@ -2,7 +2,15 @@ import { mongoose, discord } from "../services";
 import { chance } from "../helpers";
 import { getRouletteResult, buildBlackJackMetrics } from "../helpers/gambling";
 import { UnauthorizedError, BadRequestError, Dictionary } from "../types";
-import type { IBlackJack, IEngagementMetrics, IServer, IServerSettings, IUser, IWebhook, PipelineStage } from "../types/models";
+import type {
+	IBlackJack,
+	IEngagementMetrics,
+	IServer,
+	IServerSettings,
+	IUser,
+	IWebhook,
+	PipelineStage
+} from "../types/models";
 import { CardSuit, RouletteColor } from "../types/values";
 
 class Users extends mongoose.Repository<IUser> {
@@ -131,15 +139,17 @@ class Users extends mongoose.Repository<IUser> {
 							required: false,
 							won: Boolean,
 							hand: {
-								type: [{
-									_id: false,
-									suit: {
-										type: String,
-										enum: Object.values(CardSuit),
-										required: false
-									},
-									value: Number
-								}]
+								type: [
+									{
+										_id: false,
+										suit: {
+											type: String,
+											enum: Object.values(CardSuit),
+											required: false
+										},
+										value: Number
+									}
+								]
 							}
 						}
 					}
@@ -166,7 +176,8 @@ class Users extends mongoose.Repository<IUser> {
 
 	public async assertHasBucks(user_id: string, server_id: string, amount: number) {
 		const user = await super.assertRead({ user_id, server_id });
-		if (user.billy_bucks < amount) throw new BadRequestError(`you only have ${user.billy_bucks} bucks!`);
+		if (user.billy_bucks < amount)
+			throw new BadRequestError(`you only have ${user.billy_bucks} bucks!`);
 		return user;
 	}
 
@@ -180,10 +191,19 @@ class Users extends mongoose.Repository<IUser> {
 			super.assertRead({ user_id: sender_id, server_id }),
 			super.assertRead({ user_id: recipient_id, server_id })
 		]);
-		if (amount > sender.billy_bucks) throw new BadRequestError(`user ${sender.user_id} only has ${sender.billy_bucks} bucks!`);
+		if (amount > sender.billy_bucks)
+			throw new BadRequestError(
+				`user ${sender.user_id} only has ${sender.billy_bucks} bucks!`
+			);
 		const updatedUsers = await Promise.all([
-			super.assertUpdateOne({ user_id: recipient_id, server_id }, { $inc: { billy_bucks: amount } }),
-			super.assertUpdateOne({ user_id: sender_id, server_id }, { $inc: { billy_bucks: -amount } })
+			super.assertUpdateOne(
+				{ user_id: recipient_id, server_id },
+				{ $inc: { billy_bucks: amount } }
+			),
+			super.assertUpdateOne(
+				{ user_id: sender_id, server_id },
+				{ $inc: { billy_bucks: -amount } }
+			)
 		]);
 		const dictionary = updatedUsers.reduce((acc, user) => {
 			acc[user.user_id as string] = {
@@ -195,45 +215,43 @@ class Users extends mongoose.Repository<IUser> {
 		return dictionary;
 	}
 
-	public async allowance(
-		server_id: string,
-		user_id: string,
-		settings: IServerSettings
-	) {
+	public async allowance(server_id: string, user_id: string, settings: IServerSettings) {
 		const member = await super.assertRead({ user_id, server_id });
 		if (!member.allowance_available)
 			throw new BadRequestError("you've already gotten your weekly allowance!");
-		const updated = await super.assertUpdateOne({
-			_id: member._id
-		}, {
-			$inc: { billy_bucks: settings.allowance_rate },
-			allowance_available: false
-		});
+		const updated = await super.assertUpdateOne(
+			{
+				_id: member._id
+			},
+			{
+				$inc: { billy_bucks: settings.allowance_rate },
+				allowance_available: false
+			}
+		);
 		return {
 			[updated.user_id as string]: {
 				username: updated.username,
-				billy_bucks: updated.billy_bucks,
+				billy_bucks: updated.billy_bucks
 			}
 		} as Dictionary<IUser>;
 	}
 
-	public async purchaseLottery(
-		server_id: string,
-		user_id: string,
-		settings: IServerSettings
-	) {
+	public async purchaseLottery(server_id: string, user_id: string, settings: IServerSettings) {
 		const member = await super.assertRead({ user_id, server_id });
 		if (member.has_lottery_ticket)
 			throw new BadRequestError("You have already bought a ticket for this week's lottery!");
 		if (member.billy_bucks < settings.lottery_cost)
 			throw new BadRequestError(`You only have ${member.billy_bucks} bucks!`);
-		const updated = await super.assertUpdateOne({
-			user_id,
-			server_id
-		}, {
-			$inc: { billy_bucks: -settings.lottery_cost },
-			has_lottery_ticket: true
-		});
+		const updated = await super.assertUpdateOne(
+			{
+				user_id,
+				server_id
+			},
+			{
+				$inc: { billy_bucks: -settings.lottery_cost },
+				has_lottery_ticket: true
+			}
+		);
 		return {
 			ticket_cost: settings.lottery_cost,
 			[updated.user_id]: {
@@ -243,11 +261,15 @@ class Users extends mongoose.Repository<IUser> {
 		};
 	}
 
-	public async pickLotteryWinner(webhook: IWebhook, { lottery_cost, base_lottery_jackpot }: IServerSettings) {
+	public async pickLotteryWinner(
+		webhook: IWebhook,
+		{ lottery_cost, base_lottery_jackpot }: IServerSettings
+	) {
 		const { server_id, webhook_id, webhook_token, username, avatar_url } = webhook;
 		const entrants = await super.list({ server_id, has_lottery_ticket: true });
 		if (entrants.length <= 0) {
-			const content = "No lottery entrants this week!\nRun ```!buylottoticket``` to buy a ticket for next week's lottery!";
+			const content =
+				"No lottery entrants this week!\nRun ```!buylottoticket``` to buy a ticket for next week's lottery!";
 			return discord.webhooks.post(`${webhook_id}/${webhook_token}`, {
 				content,
 				username,
@@ -255,34 +277,43 @@ class Users extends mongoose.Repository<IUser> {
 			});
 		}
 		const winner = chance.pickone(entrants);
-		const jackpot = (entrants.length * lottery_cost) + base_lottery_jackpot;
+		const jackpot = entrants.length * lottery_cost + base_lottery_jackpot;
 		const [updatedWinner] = await Promise.all([
-			users.assertUpdateOne({ user_id: winner.user_id, server_id }, { $inc: { billy_bucks: jackpot }, has_lottery_ticket: false }),
+			users.assertUpdateOne(
+				{ user_id: winner.user_id, server_id },
+				{ $inc: { billy_bucks: jackpot }, has_lottery_ticket: false }
+			),
 			users.bulkUpdate({ server_id, has_lottery_ticket: true }, { has_lottery_ticket: false })
 		]);
-		return discord.postSuccessEmbed(webhook, {
-			title: "Weekly Lottery",
-			fields: [
-				{
-					name: `+${jackpot}`,
-					value: `You win this week's lottery!\nYou now have ${updatedWinner.billy_bucks} BillyBucks!`
-				}
-			]
-		}, `Congratulations, <@${updatedWinner.user_id}>!`);
+		return discord.postSuccessEmbed(
+			webhook,
+			{
+				title: "Weekly Lottery",
+				fields: [
+					{
+						name: `+${jackpot}`,
+						value: `You win this week's lottery!\nYou now have ${updatedWinner.billy_bucks} BillyBucks!`
+					}
+				]
+			},
+			`Congratulations, <@${updatedWinner.user_id}>!`
+		);
 	}
 
-	public async updateEngagements(data: {
-		server_id: string
-		user_id: string
-		engagement: IEngagementMetrics
-	}[]) {
+	public async updateEngagements(
+		data: {
+			server_id: string;
+			user_id: string;
+			engagement: IEngagementMetrics;
+		}[]
+	) {
 		const operations = await Promise.all(
 			data.map(({ server_id, user_id, engagement }) => {
 				const $inc = Object.keys(engagement).reduce((acc, key) => {
 					acc[`metrics.engagement.${key}`] = engagement[key];
 					return acc;
 				}, {});
-				return super.updateOne({ server_id, user_id }, { $inc, });
+				return super.updateOne({ server_id, user_id }, { $inc });
 			})
 		);
 		const dictionary = operations.reduce((acc, user) => {
@@ -298,39 +329,51 @@ class Users extends mongoose.Repository<IUser> {
 
 	public async updateBlackjackMetrics(_id: string, game: IBlackJack) {
 		const { $inc } = buildBlackJackMetrics(game);
-		return super.updateOne({ _id }, {
-			$inc: {
-				billy_bucks: game.payout,
-				...$inc
-			},
-			"metrics.gambling.blackjack.last_hand": {
-				won: game.won,
-				hand: game.player_hand
+		return super.updateOne(
+			{ _id },
+			{
+				$inc: {
+					billy_bucks: game.payout,
+					...$inc
+				},
+				"metrics.gambling.blackjack.last_hand": {
+					won: game.won,
+					hand: game.player_hand
+				}
 			}
-		}) as Promise<IUser>;
+		) as Promise<IUser>;
 	}
 
 	public async lotteryInformation(server: IServer) {
 		const { server_id, settings } = server;
-		const entrants = await super.list({
-			server_id,
-			has_lottery_ticket: true
-		}, {
-			sort: { billy_bucks: -1, username: 1 }
-		}, {
-			username: 1,
-			has_lottery_ticket: 1
-		});
+		const entrants = await super.list(
+			{
+				server_id,
+				has_lottery_ticket: true
+			},
+			{
+				sort: { billy_bucks: -1, username: 1 }
+			},
+			{
+				username: 1,
+				has_lottery_ticket: 1
+			}
+		);
 		return {
 			ticket_cost: settings.lottery_cost,
 			base_lottery_jackpot: settings.base_lottery_jackpot,
-			jackpot: (entrants.length * settings.lottery_cost) + settings.base_lottery_jackpot,
+			jackpot: entrants.length * settings.lottery_cost + settings.base_lottery_jackpot,
 			entrants_count: entrants.length,
 			entrants
 		};
 	}
 
-	public async spinRoulette(user_id: string, server_id: string, amount: number, color: RouletteColor) {
+	public async spinRoulette(
+		user_id: string,
+		server_id: string,
+		amount: number,
+		color: RouletteColor
+	) {
 		await this.assertHasBucks(user_id, server_id, amount);
 		const { operation, outcome } = getRouletteResult(amount, color);
 		const updated = await users.assertUpdateOne({ user_id, server_id }, operation);
@@ -345,9 +388,12 @@ class Users extends mongoose.Repository<IUser> {
 		const match = await this.getUsersBornToday();
 		if (match.length <= 0) return;
 		const operations = match.map((user) => {
-			return super.updateOne({ _id: user._id }, {
-				$inc: { billy_bucks: server.settings.birthday_bucks }
-			});
+			return super.updateOne(
+				{ _id: user._id },
+				{
+					$inc: { billy_bucks: server.settings.birthday_bucks }
+				}
+			);
 		});
 		const updated = await Promise.all(operations);
 		if (!updated || updated.length <= 0 || !updated?.[0]?._id) return;
@@ -378,15 +424,20 @@ class Users extends mongoose.Repository<IUser> {
 	}
 
 	public async collectTaxes(user: IUser, server: IServer) {
-		if (server.taxes_collected) throw new BadRequestError("Taxes have already been collected this week!");
+		if (server.taxes_collected)
+			throw new BadRequestError("Taxes have already been collected this week!");
 		// get middle class citizens
 		const lookup = { billy_bucks: { $gte: server.settings.tax_rate }, is_mayor: false };
 		const matches = await super.count(lookup);
-		if (matches <= 0) throw new BadRequestError("The population is too poor to collect taxes this week!");
+		if (matches <= 0)
+			throw new BadRequestError("The population is too poor to collect taxes this week!");
 		await users.bulkUpdate(lookup, { $inc: { billy_bucks: -server.settings.tax_rate } });
 		// payout mayor
-		const payout = (server.settings.tax_rate * matches);
-		const updated = await super.assertUpdateOne({ _id: user._id }, { $inc: { billy_bucks: payout } });
+		const payout = server.settings.tax_rate * matches;
+		const updated = await super.assertUpdateOne(
+			{ _id: user._id },
+			{ $inc: { billy_bucks: payout } }
+		);
 		return {
 			payout,
 			tax_rate: server.settings.tax_rate,

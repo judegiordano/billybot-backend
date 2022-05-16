@@ -15,13 +15,7 @@ import mongoose, {
 import { nanoid } from "../helpers";
 import { MONGO_URI } from "./config";
 import { NotFoundError, BadRequestError } from "../types";
-import type {
-	IModel,
-	Projection,
-	Options,
-	PipelineStage,
-	AggregateOptions
-} from "../types/models";
+import type { IModel, Projection, Options, PipelineStage, AggregateOptions } from "../types/models";
 
 let cachedConnection: Connection | null = null;
 
@@ -36,7 +30,7 @@ export async function createConnection() {
 		maxIdleTimeMS: 3000,
 		socketTimeoutMS: 30000,
 		serverSelectionTimeoutMS: 5000,
-		maxPoolSize: 5,
+		maxPoolSize: 5
 	});
 	cachedConnection = connection;
 }
@@ -46,7 +40,6 @@ export async function closeConnection() {
 }
 
 export class Repository<T extends IModel> {
-
 	public model: Model<T>;
 
 	constructor(
@@ -54,39 +47,58 @@ export class Repository<T extends IModel> {
 		schemaDefinition: SchemaDefinition<T>,
 		schemaOptions?: SchemaOptions
 	) {
-		const schema = new Schema({
-			_id: {
-				type: String,
-				default: () => nanoid()
+		const schema = new Schema(
+			{
+				_id: {
+					type: String,
+					default: () => nanoid()
+				},
+				...schemaDefinition
 			},
-			...schemaDefinition
-		}, {
-			timestamps: {
-				createdAt: "created_at",
-				updatedAt: "updated_at"
-			},
-			...schemaOptions
-		});
+			{
+				timestamps: {
+					createdAt: "created_at",
+					updatedAt: "updated_at"
+				},
+				...schemaOptions
+			}
+		);
 		this.model = BuildModel<T>(collectionName, schema);
 	}
 
-	public async read(filter?: FilterQuery<T>, options?: Options<T>, projection?: Projection): Promise<T | null> {
+	public async read(
+		filter?: FilterQuery<T>,
+		options?: Options<T>,
+		projection?: Projection
+	): Promise<T | null> {
 		return this.model.findOne(filter, projection, options);
 	}
 
-	public async assertRead(filter?: FilterQuery<T>, options?: Options<T>, projection?: Projection): Promise<T> {
+	public async assertRead(
+		filter?: FilterQuery<T>,
+		options?: Options<T>,
+		projection?: Projection
+	): Promise<T> {
 		const doc = await this.model.findOne(filter, projection, options);
 		if (!doc) throw new NotFoundError(`${this.model.modelName} not found`);
 		return doc;
 	}
 
-	public async list(filter?: FilterQuery<T>, options?: Options<T>, projection?: Projection): Promise<T[] | []> {
+	public async list(
+		filter?: FilterQuery<T>,
+		options?: Options<T>,
+		projection?: Projection
+	): Promise<T[] | []> {
 		const docs = await this.model.find(filter ?? {}, projection, options);
 		if (docs.length <= 0) return [];
 		return docs;
 	}
 
-	public async assertList(filter?: FilterQuery<T>, options?: Options<T>, projection?: Projection): Promise<T[]> {
+	public async assertList(
+		filter?: FilterQuery<T>,
+		options?: Options<T>,
+		projection?: Projection
+	): Promise<T[]> {
 		const docs = await this.list(filter, options, projection);
 		if (docs.length <= 0) throw new NotFoundError(`no ${this.model.modelName} documents found`);
 		return docs;
@@ -116,7 +128,7 @@ export class Repository<T extends IModel> {
 	}
 
 	public async exists(filter: FilterQuery<T>, options?: Options<T>): Promise<boolean> {
-		return await this.count(filter, options) >= 1;
+		return (await this.count(filter, options)) >= 1;
 	}
 
 	public async assertNew(filter: FilterQuery<T>, options?: Options<T>): Promise<void> {
@@ -129,16 +141,29 @@ export class Repository<T extends IModel> {
 		if (count <= 0) throw new NotFoundError(`${this.model.modelName} does not exist`);
 	}
 
-	public async assertUpdateOne(filter: FilterQuery<T>, updates: UpdateQuery<T>, options?: Options<T>): Promise<T> {
+	public async assertUpdateOne(
+		filter: FilterQuery<T>,
+		updates: UpdateQuery<T>,
+		options?: Options<T>
+	): Promise<T> {
 		await this.assertExists(filter);
-		return this.model.findOneAndUpdate(filter, updates, { new: true, ...options }) as unknown as T;
+		return this.model.findOneAndUpdate(filter, updates, {
+			new: true,
+			...options
+		}) as unknown as T;
 	}
 
 	public async updateOne(filter: FilterQuery<T>, updates: UpdateQuery<T>, options?: Options<T>) {
-		return this.model.findOneAndUpdate(filter, updates, { new: true, ...options }) as unknown as T | null;
+		return this.model.findOneAndUpdate(filter, updates, {
+			new: true,
+			...options
+		}) as unknown as T | null;
 	}
 
-	public async bulkUpdate(filter: FilterQuery<T>, updates: UpdateQuery<T>): Promise<UpdateWriteOpResult> {
+	public async bulkUpdate(
+		filter: FilterQuery<T>,
+		updates: UpdateQuery<T>
+	): Promise<UpdateWriteOpResult> {
 		return this.model.updateMany(filter, updates, { new: true });
 	}
 

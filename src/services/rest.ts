@@ -10,10 +10,7 @@ export const webhooks = axios.create({
 	baseURL: "https://discord.com/api/v8/webhooks"
 });
 
-export async function postContent(
-	webhook: IWebhook,
-	content?: string
-) {
+export async function postContent(webhook: IWebhook, content?: string) {
 	return webhooks.post(`${webhook.webhook_id}/${webhook.webhook_token}`, {
 		content,
 		username: webhook.username,
@@ -33,7 +30,8 @@ export async function postSuccessEmbed(
 		embeds: [
 			{
 				title: embed.title,
-				description: embed.description ?? `[Dashboard](${DASHBOARD_URL}/${webhook.server_id})`,
+				description:
+					embed.description ?? `[Dashboard](${DASHBOARD_URL}/${webhook.server_id})`,
 				color: ColorCodes.green,
 				fields: embed.fields,
 				timestamp: new Date().toISOString()

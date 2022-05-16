@@ -9,7 +9,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		additionalProperties: false,
 		required: ["server_id"],
 		properties: {
-			server_id: { type: "string" },
+			server_id: { type: "string" }
 		}
 	});
 	// responses
@@ -46,7 +46,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 							reactions_used: { type: "number" },
 							reactions_received: { type: "number" },
 							average_reactions_per_post: { type: "number" },
-							mentions: { type: "number" },
+							mentions: { type: "number" }
 						}
 					},
 					gambling: {

@@ -2,7 +2,7 @@ import { App } from "@serverless-stack/resources";
 
 import { ApiStack } from "./api";
 
-const stage = process.env.STAGE ?? "local" as string;
+const stage = process.env.STAGE ?? ("local" as string);
 
 export default function main(app: App) {
 	app.setDefaultFunctionProps({

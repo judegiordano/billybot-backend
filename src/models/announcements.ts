@@ -27,11 +27,7 @@ class Announcements extends mongoose.Repository<IAnnouncement> {
 		});
 	}
 
-	public async postAdminUpdate(
-		webhook: IWebhook,
-		user: IUser,
-		text: string
-	) {
+	public async postAdminUpdate(webhook: IWebhook, user: IUser, text: string) {
 		const [message] = await Promise.all([
 			super.insertOne({
 				server_id: webhook.server_id,

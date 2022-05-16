@@ -22,15 +22,15 @@
   "eslint.validate": [
     "javascript",
     "typescript",
-],
-"cSpell.words": [
-	"appdetails",
-	"appids",
-	"billybot",
-	"euxo",
-	"packageid",
-	"pipefail",
-	"upsert",
-	"vercel"
-]
+  ],
+  "cSpell.words": [
+    "appdetails",
+    "appids",
+    "billybot",
+    "euxo",
+    "packageid",
+    "pipefail",
+    "upsert",
+    "vercel"
+  ]
 }

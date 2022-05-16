@@ -8,12 +8,12 @@ export enum ColorCodes {
 export enum RouletteColor {
 	red = "red",
 	black = "black",
-	green = "green",
+	green = "green"
 }
 
 export enum CardSuit {
 	clubs = "clubs",
 	hearts = "hearts",
 	spades = "spades",
-	diamonds = "diamonds",
+	diamonds = "diamonds"
 }
