@@ -157,3 +157,11 @@ export interface IEmbed {
 		value: string;
 	}[];
 }
+
+export interface IStock extends IModel {
+	server_id: string;
+	user: Ref<IUser>;
+	symbol: string;
+	price: number;
+	currency: string;
+}

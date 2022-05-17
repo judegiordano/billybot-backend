@@ -12,6 +12,15 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			server_id: { type: "string" }
 		}
 	});
+	app.addSchema({
+		$id: "stockSymbolParams",
+		type: "object",
+		additionalProperties: false,
+		required: ["symbol"],
+		properties: {
+			symbol: { type: "string" }
+		}
+	});
 	// responses
 	app.addSchema({
 		$id: "ping",
@@ -137,6 +146,15 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			user: {}, // ref
 			created_at: { type: "string" },
 			updated_at: { type: "string" }
+		}
+	});
+	app.addSchema({
+		$id: "stock",
+		type: "object",
+		properties: {
+			symbol: { type: "string" },
+			price: { type: "number" },
+			currency: { type: "string" }
 		}
 	});
 	// arrays
