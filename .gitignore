@@ -14,7 +14,7 @@
 
 # typescript
 *.js
-*.d.ts
+.build/*.d.ts
 
 # sst build output
 .build
