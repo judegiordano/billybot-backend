@@ -15,7 +15,7 @@
     "start": "sst start --stage",
     "console": "sst console --stage",
     "deploy": "sst deploy --stage",
-    "script": "ts-node --require dotenv/config -T"
+    "script": "ts-node -r dotenv/config -r tsconfig-paths/register -T"
   },
   "dependencies": {
     "@serverless-stack/resources": "^0.69.0",
@@ -47,6 +47,8 @@
     "eslint-plugin-prettier": "^4.0.0",
     "husky": "^7.0.4",
     "prettier": "^2.6.2",
+    "ts-node": "^10.7.0",
+    "tsconfig-paths": "^4.0.0",
     "typescript": "^4.6.2"
   }
 }

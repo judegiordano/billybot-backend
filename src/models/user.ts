@@ -153,6 +153,21 @@ class Users extends mongoose.Repository<IUser> {
 							}
 						}
 					}
+				},
+				lottery: {
+					required: false,
+					overall_winnings: {
+						type: Number,
+						default: 0
+					},
+					tickets_purchased: {
+						type: Number,
+						default: 0
+					},
+					wins: {
+						type: Number,
+						default: 0
+					}
 				}
 			},
 			birthday: {
@@ -248,7 +263,10 @@ class Users extends mongoose.Repository<IUser> {
 				server_id
 			},
 			{
-				$inc: { billy_bucks: -settings.lottery_cost },
+				$inc: {
+					billy_bucks: -settings.lottery_cost,
+					"metrics.lottery.tickets_purchased": 1
+				},
 				has_lottery_ticket: true
 			}
 		);
@@ -281,7 +299,14 @@ class Users extends mongoose.Repository<IUser> {
 		const [updatedWinner] = await Promise.all([
 			users.assertUpdateOne(
 				{ user_id: winner.user_id, server_id },
-				{ $inc: { billy_bucks: jackpot }, has_lottery_ticket: false }
+				{
+					$inc: {
+						billy_bucks: jackpot,
+						"metrics.lottery.overall_winnings": jackpot,
+						"metrics.lottery.wins": 1
+					},
+					has_lottery_ticket: false
+				}
 			),
 			users.bulkUpdate({ server_id, has_lottery_ticket: true }, { has_lottery_ticket: false })
 		]);
