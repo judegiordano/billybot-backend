@@ -2,11 +2,15 @@ import axios from "axios";
 import type FormData from "form-data";
 
 import { DASHBOARD_URL } from "@config";
-import { ColorCodes } from "@enums";
+import { ColorCodes, STOCK_API_URL } from "@enums";
 import type { IWebhook, IEmbed } from "@interfaces";
 
 export const webhooks = axios.create({
 	baseURL: "https://discord.com/api/v8/webhooks"
+});
+
+export const stockApiClient = axios.create({
+	baseURL: STOCK_API_URL
 });
 
 export async function postContent(webhook: IWebhook, content?: string) {

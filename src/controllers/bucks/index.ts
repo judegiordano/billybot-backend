@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 
-import { servers, stocks, users } from "@models";
-import type { IUser, IServer, IStock } from "@interfaces";
+import { servers, users } from "@models";
+import type { IUser, IServer } from "@interfaces";
 
 export const bucksRouter = async function (app: FastifyInstance) {
 	app.get<{ Params: IServer }>(
@@ -115,23 +115,4 @@ export const bucksRouter = async function (app: FastifyInstance) {
 			return operation;
 		}
 	);
-	app.get<{ Params: IStock }>(
-		"/bucks/stocks/price/:symbol",
-		{
-			schema: {
-				params: { $ref: "stockSymbolParams#" },
-				response: { 200: { $ref: "stock#" } }
-			}
-		},
-		async (req) => {
-			const symbol = req.params.symbol.toUpperCase();
-			return await stocks.getPrice(symbol);
-		}
-	);
-	/*
-		TODO:
-			POST	/bucks/stocks/buy		{ symbol: string, bucks: number }
-			POST	/bucks/stocks/sell		{ symbol: string }
-			GET		/bucks/stocks/portfolio
-	*/
 };

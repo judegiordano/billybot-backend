@@ -160,8 +160,10 @@ export interface IEmbed {
 
 export interface IStock extends IModel {
 	server_id: string;
-	user: Ref<IUser>;
+	user_id: string;
 	symbol: string;
 	price: number;
 	currency: string;
+	amount: number;
+	is_deleted: boolean;
 }
