@@ -381,7 +381,8 @@ class Users extends mongoose.Repository<IUser> {
 			},
 			{
 				username: 1,
-				has_lottery_ticket: 1
+				has_lottery_ticket: 1,
+				user_id: 1
 			}
 		);
 		return {
