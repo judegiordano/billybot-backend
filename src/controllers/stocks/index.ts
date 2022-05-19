@@ -149,7 +149,6 @@ export const stocksRouter = async function (app: FastifyInstance) {
 				response: {
 					200: {
 						type: "array",
-						uniqueItems: true,
 						items: {
 							type: "object",
 							properties: {

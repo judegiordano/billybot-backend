@@ -63,6 +63,15 @@ class Stocks extends mongoose.Repository<IStock> {
 		}
 	}
 
+	public async priceLookup(symbols: string[]) {
+		const prices = await Promise.all(symbols.map((symbol) => this.price(symbol)));
+		const dict = prices.reduce((acc, price) => {
+			acc[price.symbol] = price.price;
+			return acc;
+		}, {} as { [key: string]: number });
+		return dict;
+	}
+
 	public async buy(
 		server_id: string,
 		user_id: string,
@@ -105,22 +114,21 @@ class Stocks extends mongoose.Repository<IStock> {
 	}
 
 	public async portfolio(server_id: string, user_id: string) {
-		const stocks = await super.list({ server_id, user_id, is_deleted: false });
+		const stocks = (await super.list({ server_id, user_id, is_deleted: false })) as IStock[];
 		if (stocks.length === 0) throw new NotFoundError("No active investments!");
-
-		const portfolioPromises = stocks.map(async (stock: IStock) => {
+		const symbols = stocks.map(({ symbol }) => symbol);
+		const prices = await this.priceLookup(symbols);
+		return stocks.map((stock) => {
 			const { symbol, price, currency, amount } = stock;
-			const currentPrice = (await this.price(symbol)).price;
 			return {
 				symbol,
 				price_bought: price,
-				price_current: currentPrice,
+				price_current: prices[symbol],
 				currency,
 				amount,
-				amount_worth: this.getCurrentSellValue(currentPrice, price, amount)
+				amount_worth: this.getCurrentSellValue(prices[symbol], price, amount)
 			};
 		});
-		return await Promise.all(portfolioPromises);
 	}
 }
 
