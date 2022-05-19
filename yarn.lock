@@ -2396,10 +2396,10 @@ before-after-hook@^2.2.0:
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-2.2.2.tgz#a6e8ca41028d90ee2c24222f201c90956091613e"
   integrity sha512-3pZEU3NT5BFUo/AD5ERPWOgQOCZITni6iavr5AUw5AUwQjMlI0kzu5btnyD39AF0gUEsDPwJT+oY1ORBJijPjQ==
 
-billyp-types@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/billyp-types/-/billyp-types-1.0.0.tgz#ced559712764e3ccc62b3266fdf617fdf9ba0539"
-  integrity sha512-Xo49fvPBKB82yLl+ud8zu9EJbxdqAGbkMfP6QWJfHYqSgJriGYbzrEVZTyef8JHsmKz2PyubHVUHyGoNpZi1rw==
+billyp-types@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/billyp-types/-/billyp-types-1.0.2.tgz#e69805e54c739b65453c2f199decd10f71ac2f31"
+  integrity sha512-/Wo6Xf0Y6eVS5BUlS+J1EHcE71pJXr8GaaZzg7jrRUBg6+shjO6bLzTiwSbIFS9vYD4N85j/jpw02fSbNt+ZTA==
 
 binary-extensions@^2.0.0:
   version "2.2.0"
