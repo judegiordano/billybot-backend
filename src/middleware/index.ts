@@ -78,6 +78,14 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 								}
 							}
 						}
+					},
+					lottery: {
+						type: "object",
+						properties: {
+							wins: { type: "number" },
+							tickets_purchased: { type: "number" },
+							overall_winnings: { type: "number" }
+						}
 					}
 				}
 			},

@@ -107,5 +107,8 @@
     "src",
     "scripts",
     "stacks"
-  ]
+  ],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
 }

@@ -107,9 +107,16 @@ export interface IGamblingMetrics {
 	};
 }
 
+export interface ILotteryMetrics {
+	overall_winnings: number;
+	tickets_purchased: number;
+	wins: number;
+}
+
 export interface IUserMetrics {
 	engagement: IEngagementMetrics;
 	gambling: IGamblingMetrics;
+	lottery: ILotteryMetrics;
 }
 
 export interface IUser extends IModel {
