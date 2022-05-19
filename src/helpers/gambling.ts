@@ -1,6 +1,7 @@
+import { RouletteColor } from "billyp-types";
+import type { IBlackJack } from "billyp-types";
+
 import { chance } from ".";
-import { RouletteColor } from "@enums";
-import type { IBlackJack } from "@interfaces";
 
 export function spinColor() {
 	// produces random int 0 thru 37 inclusive (38 total distinct outcomes)

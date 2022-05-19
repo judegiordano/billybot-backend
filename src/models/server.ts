@@ -1,5 +1,6 @@
+import type { IServer } from "billyp-types";
+
 import { mongoose } from "@services";
-import type { IServer } from "@interfaces";
 
 class Servers extends mongoose.Repository<IServer> {
 	constructor() {

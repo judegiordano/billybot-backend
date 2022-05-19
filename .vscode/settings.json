@@ -24,13 +24,14 @@
     "typescript",
   ],
   "cSpell.words": [
-    "appdetails",
-    "appids",
-    "billybot",
-    "euxo",
-    "packageid",
-    "pipefail",
-    "upsert",
-    "vercel"
-  ]
+	"appdetails",
+	"appids",
+	"billybot",
+	"billyp",
+	"euxo",
+	"packageid",
+	"pipefail",
+	"upsert",
+	"vercel"
+]
 }

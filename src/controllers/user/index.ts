@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
+import type { IServer, IUser } from "billyp-types";
 
 import { servers, users } from "@models";
-import type { IServer, IUser } from "@interfaces";
 
 export const userRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IUser[] }>(

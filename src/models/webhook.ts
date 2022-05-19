@@ -1,5 +1,6 @@
+import type { IWebhook } from "billyp-types";
+
 import { servers } from "./server";
-import type { IWebhook } from "@interfaces";
 import { discord, mongoose } from "@services";
 
 class Webhooks extends mongoose.Repository<IWebhook> {

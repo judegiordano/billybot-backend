@@ -1,6 +1,7 @@
+import type { IMediaFile } from "billyp-types";
+import { Extension } from "billyp-types";
+
 import { aws, config, mongoose } from "@services";
-import { Extension } from "@enums";
-import type { IMediaFile } from "@interfaces";
 
 class MediaFiles extends mongoose.Repository<IMediaFile> {
 	constructor() {
