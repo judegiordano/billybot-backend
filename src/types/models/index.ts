@@ -164,3 +164,13 @@ export interface IEmbed {
 		value: string;
 	}[];
 }
+
+export interface IStock extends IModel {
+	server_id: string;
+	user_id: string;
+	symbol: string;
+	price: number;
+	currency: string;
+	amount: number;
+	is_deleted: boolean;
+}

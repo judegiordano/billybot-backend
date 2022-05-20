@@ -28,3 +28,5 @@ export enum Extension {
 	pdf = "pdf",
 	ico = "ico"
 }
+
+export const STOCK_API_URL = "https://finance.yahoo.com/quote";
