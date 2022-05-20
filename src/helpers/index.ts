@@ -1,7 +1,7 @@
 import Chance from "chance";
+import type { IUser } from "btbot-types";
 import { customAlphabet } from "nanoid";
 
-import type { IUser } from "@interfaces";
 import { MEDIA_BUCKET } from "@config";
 
 export function buildAvatarUrl(user: IUser) {

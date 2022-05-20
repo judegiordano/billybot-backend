@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
+import type { IServer } from "btbot-types";
 
 import { servers, users } from "@models";
-import type { IServer } from "@interfaces";
 
 export const serversRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IServer }>(

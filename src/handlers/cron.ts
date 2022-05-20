@@ -1,8 +1,8 @@
+import type { IServerSettings, IWebhook } from "btbot-types";
 import FormData from "form-data";
 
 import { discord, mongoose } from "@services";
 import { users, webhooks, servers, mediaFiles } from "@models";
-import type { IServerSettings, IWebhook } from "@interfaces";
 
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();

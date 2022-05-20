@@ -1,3 +1,4 @@
+import type { IModel } from "btbot-types";
 import mongoose, { Schema, connect, model as BuildModel } from "mongoose";
 import type {
 	Connection,
@@ -13,7 +14,7 @@ import type {
 import { nanoid } from "@helpers";
 import { MONGO_URI } from "@config";
 import { NotFoundError, BadRequestError } from "@errors";
-import type { IModel, Projection, Options, PipelineStage, AggregateOptions } from "@interfaces";
+import type { Projection, Options, PipelineStage, AggregateOptions } from "@interfaces";
 
 let cachedConnection: Connection | null = null;
 

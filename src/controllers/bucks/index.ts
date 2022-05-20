@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
+import type { IServer, IUser } from "btbot-types";
 
 import { servers, users } from "@models";
-import type { IUser, IServer } from "@interfaces";
 
 export const bucksRouter = async function (app: FastifyInstance) {
 	app.get<{ Params: IServer }>(

@@ -1,6 +1,7 @@
+import { RouletteColor } from "btbot-types";
+import type { IBlackJack } from "btbot-types";
+
 import { chance } from ".";
-import { RouletteColor } from "@enums";
-import type { IBlackJack } from "@interfaces";
 
 export function spinColor() {
 	// produces random int 0 thru 37 inclusive (38 total distinct outcomes)

@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
+import type { IAnnouncement, IServer, IUser } from "btbot-types";
 
 import { servers, users, webhooks, announcements } from "@models";
-import type { IAnnouncement, IServer, IUser } from "@interfaces";
 
 export const announcementsRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IAnnouncement & IUser }>(

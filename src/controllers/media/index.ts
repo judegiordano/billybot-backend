@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
+import type { IMediaFile } from "btbot-types";
 
 import { mediaFiles } from "@models";
-import type { IMediaFile } from "@interfaces";
 
 export const mediaRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IMediaFile }>(

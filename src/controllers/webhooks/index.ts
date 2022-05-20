@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
+import type { IServer, IWebhook } from "btbot-types";
 
 import { servers, webhooks } from "@models";
-import type { IWebhook, IServer } from "@interfaces";
 
 export const webhooksRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IWebhook }>(

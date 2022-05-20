@@ -1,4 +1,5 @@
-import type { IStock } from "@interfaces";
+import { IStock } from "btbot-types";
+
 import { mongoose } from "@services";
 import { stockApiClient } from "@src/services/rest";
 import { NotFoundError } from "@src/types/errors";

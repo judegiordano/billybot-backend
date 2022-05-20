@@ -1,17 +1,18 @@
-import { mongoose, discord } from "@services";
-import { getRouletteResult, buildBlackJackMetrics, chance } from "@helpers";
-import { UnauthorizedError, BadRequestError } from "@errors";
 import type {
 	IBlackJack,
 	IEngagementMetrics,
 	IServer,
 	IServerSettings,
 	IUser,
-	IWebhook,
-	PipelineStage
-} from "@interfaces";
-import { CardSuit, RouletteColor } from "@enums";
-import { Dictionary } from "@types";
+	IWebhook
+} from "btbot-types";
+import { RouletteColor, CardSuit } from "btbot-types";
+
+import { mongoose, discord } from "@services";
+import { getRouletteResult, buildBlackJackMetrics, chance } from "@helpers";
+import { UnauthorizedError, BadRequestError } from "@errors";
+import type { PipelineStage } from "@interfaces";
+import type { Dictionary } from "@types";
 
 class Users extends mongoose.Repository<IUser> {
 	constructor() {

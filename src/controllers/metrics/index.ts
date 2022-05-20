@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
+import type { IEngagementMetrics, IServer, IUserMetrics } from "btbot-types";
 
 import { users, servers } from "@models";
-import type { IEngagementMetrics, IServer, IUserMetrics } from "@interfaces";
 
 export const metricsRouter = async function (app: FastifyInstance) {
 	app.put<{

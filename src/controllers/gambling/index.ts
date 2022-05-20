@@ -1,9 +1,9 @@
 import type { FastifyInstance } from "fastify";
+import { IBlackJack, IServer, RouletteColor } from "btbot-types";
+import type { IUser } from "btbot-types";
 
 import { users, servers, blackjackGames } from "@models";
-import type { IBlackJack, IServer, IUser } from "@interfaces";
 import { BadRequestError } from "@errors";
-import { RouletteColor } from "@enums";
 
 export const gamblingRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IServer & IUser & { color: RouletteColor; amount: number } }>(

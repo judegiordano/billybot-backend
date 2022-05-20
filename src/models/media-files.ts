@@ -1,6 +1,7 @@
+import type { IMediaFile } from "btbot-types";
+import { Extension } from "btbot-types";
+
 import { aws, config, mongoose } from "@services";
-import { Extension } from "@enums";
-import type { IMediaFile } from "@interfaces";
 
 class MediaFiles extends mongoose.Repository<IMediaFile> {
 	constructor() {

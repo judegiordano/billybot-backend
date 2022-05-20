@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
+import type { IStock } from "btbot-types";
 
 import { servers, stocks, users } from "@models";
-import type { IStock } from "@interfaces";
 import { NotFoundError } from "@src/types/errors";
 
 export const stocksRouter = async function (app: FastifyInstance) {

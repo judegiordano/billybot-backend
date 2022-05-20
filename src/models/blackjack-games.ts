@@ -1,9 +1,10 @@
+import { CardSuit } from "btbot-types";
+import type { IBlackJack, ICard, IHandCount, IUser } from "btbot-types";
+
 import { users } from "./user";
 import { chance } from "@helpers";
 import { mongoose } from "@services";
-import { CardSuit } from "@enums";
 import { BadRequestError } from "@errors";
-import type { IBlackJack, ICard, IHandCount, IUser } from "@interfaces";
 
 class BlackjackGames extends mongoose.Repository<IBlackJack> {
 	constructor() {

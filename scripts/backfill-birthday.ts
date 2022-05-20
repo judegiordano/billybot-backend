@@ -1,5 +1,6 @@
+import type { IUser } from "btbot-types";
+
 import { users } from "../src/models";
-import type { IUser } from "../src/types/models";
 import { createConnection } from "./connect";
 
 const backFill = [];
