@@ -1,7 +1,7 @@
 import axios from "axios";
-import { ColorCodes } from "billyp-types";
+import { ColorCodes } from "btbot-types";
 import type FormData from "form-data";
-import type { IEmbed, IWebhook } from "billyp-types";
+import type { IEmbed, IWebhook } from "btbot-types";
 
 import { DASHBOARD_URL } from "@config";
 

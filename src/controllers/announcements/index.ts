@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import type { IAnnouncement, IServer, IUser } from "billyp-types";
+import type { IAnnouncement, IServer, IUser } from "btbot-types";
 
 import { servers, users, webhooks, announcements } from "@models";
 

@@ -1,4 +1,4 @@
-import type { IAnnouncement, IUser, IWebhook } from "billyp-types";
+import type { IAnnouncement, IUser, IWebhook } from "btbot-types";
 
 import { users } from "./user";
 import { mongoose, discord } from "@services";

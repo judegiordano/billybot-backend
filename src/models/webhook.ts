@@ -1,4 +1,4 @@
-import type { IWebhook } from "billyp-types";
+import type { IWebhook } from "btbot-types";
 
 import { servers } from "./server";
 import { discord, mongoose } from "@services";

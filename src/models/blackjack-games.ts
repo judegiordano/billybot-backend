@@ -1,5 +1,5 @@
-import { CardSuit } from "billyp-types";
-import type { IBlackJack, ICard, IHandCount, IUser } from "billyp-types";
+import { CardSuit } from "btbot-types";
+import type { IBlackJack, ICard, IHandCount, IUser } from "btbot-types";
 
 import { users } from "./user";
 import { chance } from "@helpers";

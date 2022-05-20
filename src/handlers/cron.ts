@@ -1,4 +1,4 @@
-import type { IServerSettings, IWebhook } from "billyp-types";
+import type { IServerSettings, IWebhook } from "btbot-types";
 import FormData from "form-data";
 
 import { discord, mongoose } from "@services";

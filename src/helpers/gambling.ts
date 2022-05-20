@@ -1,5 +1,5 @@
-import { RouletteColor } from "billyp-types";
-import type { IBlackJack } from "billyp-types";
+import { RouletteColor } from "btbot-types";
+import type { IBlackJack } from "btbot-types";
 
 import { chance } from ".";
 

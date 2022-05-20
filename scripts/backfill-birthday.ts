@@ -1,4 +1,4 @@
-import type { IUser } from "billyp-types";
+import type { IUser } from "btbot-types";
 
 import { users } from "../src/models";
 import { createConnection } from "./connect";

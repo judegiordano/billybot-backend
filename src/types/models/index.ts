@@ -1,4 +1,4 @@
-import type { IModel } from "billyp-types";
+import type { IModel } from "btbot-types";
 import { QueryOptions, PopulateOptions } from "mongoose";
 export type { AggregateOptions } from "mongodb";
 export type { FilterQuery, UpdateQuery, PipelineStage } from "mongoose";

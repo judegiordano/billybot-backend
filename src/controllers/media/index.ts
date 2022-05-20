@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import type { IMediaFile } from "billyp-types";
+import type { IMediaFile } from "btbot-types";
 
 import { mediaFiles } from "@models";
 

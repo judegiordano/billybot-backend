@@ -5,8 +5,8 @@ import type {
 	IServerSettings,
 	IUser,
 	IWebhook
-} from "billyp-types";
-import { RouletteColor, CardSuit } from "billyp-types";
+} from "btbot-types";
+import { RouletteColor, CardSuit } from "btbot-types";
 
 import { mongoose, discord } from "@services";
 import { getRouletteResult, buildBlackJackMetrics, chance } from "@helpers";

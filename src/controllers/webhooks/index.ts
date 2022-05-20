@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import type { IServer, IWebhook } from "billyp-types";
+import type { IServer, IWebhook } from "btbot-types";
 
 import { servers, webhooks } from "@models";
 

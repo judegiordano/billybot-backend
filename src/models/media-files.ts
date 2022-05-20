@@ -1,5 +1,5 @@
-import type { IMediaFile } from "billyp-types";
-import { Extension } from "billyp-types";
+import type { IMediaFile } from "btbot-types";
+import { Extension } from "btbot-types";
 
 import { aws, config, mongoose } from "@services";
 

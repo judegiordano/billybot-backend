@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
-import { IBlackJack, IServer, RouletteColor } from "billyp-types";
-import type { IUser } from "billyp-types";
+import { IBlackJack, IServer, RouletteColor } from "btbot-types";
+import type { IUser } from "btbot-types";
 
 import { users, servers, blackjackGames } from "@models";
 import { BadRequestError } from "@errors";

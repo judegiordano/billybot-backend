@@ -1,4 +1,4 @@
-import type { IServer } from "billyp-types";
+import type { IServer } from "btbot-types";
 
 import { mongoose } from "@services";
 

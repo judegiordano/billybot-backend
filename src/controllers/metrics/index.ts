@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import type { IEngagementMetrics, IServer, IUserMetrics } from "billyp-types";
+import type { IEngagementMetrics, IServer, IUserMetrics } from "btbot-types";
 
 import { users, servers } from "@models";
 
