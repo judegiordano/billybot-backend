@@ -3,10 +3,14 @@ import { ColorCodes } from "btbot-types";
 import type FormData from "form-data";
 import type { IEmbed, IWebhook } from "btbot-types";
 
-import { DASHBOARD_URL } from "@config";
+import { DASHBOARD_URL, DISCORD_WEBHOOKS_URL, STOCK_API_URL } from "@config";
 
 export const webhooks = axios.create({
-	baseURL: "https://discord.com/api/v8/webhooks"
+	baseURL: DISCORD_WEBHOOKS_URL
+});
+
+export const stockApiClient = axios.create({
+	baseURL: STOCK_API_URL
 });
 
 export async function postContent(webhook: IWebhook, content?: string) {

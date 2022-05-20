@@ -38,7 +38,7 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 			},
 			status: {
 				type: String,
-				default: "Your turn!"
+				default: "Options: `!hit`, `!stand`, `!doubledown`"
 			},
 			won: {
 				type: Boolean,
@@ -238,7 +238,7 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 		}
 		return super.updateOne(
 			{ _id },
-			{ is_complete: false, status: "Your turn!", $inc: { turn: 1 } }
+			{ is_complete: false, status: "Options: `!hit`, `!stand`", $inc: { turn: 1 } }
 		);
 	}
 
