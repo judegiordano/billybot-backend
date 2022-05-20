@@ -73,15 +73,11 @@ export const stocksRouter = async function (app: FastifyInstance) {
 			await servers.assertExists({ server_id });
 			await users.assertHasBucks(user_id, server_id, amount);
 			const { price, currency } = await stocks.price(symbol.toUpperCase());
-			await users.assertUpdateOne({ server_id, user_id }, { $inc: { billy_bucks: -amount } });
-			return await stocks.buy(
-				server_id,
-				user_id,
-				symbol.toUpperCase(),
-				price,
-				currency,
-				amount
-			);
+			const [buy] = await Promise.all([
+				stocks.buy(server_id, user_id, symbol.toUpperCase(), price, currency, amount),
+				users.assertUpdateOne({ server_id, user_id }, { $inc: { billy_bucks: -amount } })
+			]);
+			return buy;
 		}
 	);
 	app.post<{ Body: IStock }>(
@@ -126,11 +122,11 @@ export const stocksRouter = async function (app: FastifyInstance) {
 				throw new NotFoundError(`You do not own any stock in '${symbol.toUpperCase()}'!`);
 			const { price } = await stocks.price(symbol.toUpperCase());
 			const sellValue = stocks.getCurrentSellValue(price, stock.price, stock.amount);
-			await users.assertUpdateOne(
-				{ server_id, user_id },
-				{ $inc: { billy_bucks: sellValue } }
-			);
-			return await stocks.sell(stock, price, sellValue);
+			const [sell] = await Promise.all([
+				stocks.sell(stock, price, sellValue),
+				users.assertUpdateOne({ server_id, user_id }, { $inc: { billy_bucks: sellValue } })
+			]);
+			return sell;
 		}
 	);
 	app.post<{ Body: IStock }>(
