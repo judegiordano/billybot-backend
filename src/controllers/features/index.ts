@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
+import type { IServer, IFeature } from "btbot-types";
 
 import { servers, users, features } from "@models";
-import type { IServer, IFeature } from "btbot-types";
 
 export const featureRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IFeature }>(
