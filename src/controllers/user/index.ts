@@ -26,6 +26,7 @@ export const userRouter = async function (app: FastifyInstance) {
 							has_lottery_ticket: { type: "boolean" },
 							is_admin: { type: "boolean" },
 							is_mayor: { type: "boolean" },
+							is_fool: { type: "boolean" },
 							birthday: { type: "string" }
 						}
 					}
@@ -70,10 +71,8 @@ export const userRouter = async function (app: FastifyInstance) {
 							has_lottery_ticket: { type: "boolean" },
 							is_admin: { type: "boolean" },
 							is_mayor: { type: "boolean" },
-							birthday: {
-								type: "string",
-								format: "date"
-							}
+							is_fool: { type: "boolean" },
+							birthday: { type: "string" }
 						}
 					}
 				}
@@ -119,6 +118,7 @@ export const userRouter = async function (app: FastifyInstance) {
 			is_admin?: string;
 			has_lottery_ticket?: string;
 			is_mayor?: string;
+			is_fool?: string;
 			billy_bucks?: number;
 		};
 	}>(
@@ -135,6 +135,7 @@ export const userRouter = async function (app: FastifyInstance) {
 						is_admin: { type: ["string", "null"] },
 						has_lottery_ticket: { type: ["string", "null"] },
 						is_mayor: { type: ["string", "null"] },
+						is_fool: { type: ["string", "null"] },
 						billy_bucks: { type: "number", enum: [1, -1], default: -1 }
 					}
 				},
@@ -152,7 +153,7 @@ export const userRouter = async function (app: FastifyInstance) {
 		async (req) => {
 			const { server_id } = req.params;
 			await servers.assertExists({ server_id });
-			const { page, username, is_admin, has_lottery_ticket, is_mayor, billy_bucks } =
+			const { page, username, is_admin, has_lottery_ticket, is_mayor, is_fool, billy_bucks } =
 				req.query;
 			const limit = 5;
 			const filter = {
@@ -160,6 +161,7 @@ export const userRouter = async function (app: FastifyInstance) {
 				...(username ? { username: { $regex: username, $options: "gi" } } : null),
 				...(is_admin === "true" ? { is_admin } : null),
 				...(is_mayor === "true" ? { is_mayor } : null),
+				...(is_fool === "true" ? { is_fool } : null),
 				...(has_lottery_ticket === "true" ? { has_lottery_ticket } : null)
 			};
 			const options = {
