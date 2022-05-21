@@ -35,6 +35,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			has_lottery_ticket: { type: "boolean" },
 			is_admin: { type: "boolean" },
 			is_mayor: { type: "boolean" },
+			is_fool: { type: "boolean" },
 			birthday: { type: "string" },
 			metrics: {
 				type: "object",

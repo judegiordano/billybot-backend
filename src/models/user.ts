@@ -53,6 +53,10 @@ class Users extends mongoose.Repository<IUser> {
 				type: Boolean,
 				default: false
 			},
+			is_fool: {
+				type: Boolean,
+				default: false
+			},
 			metrics: {
 				engagement: {
 					required: false,
