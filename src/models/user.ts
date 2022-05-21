@@ -193,7 +193,9 @@ class Users extends mongoose.Repository<IUser> {
 	public async assertHasBucks(user_id: string, server_id: string, amount: number) {
 		const user = await super.assertRead({ user_id, server_id });
 		if (user.billy_bucks < amount)
-			throw new BadRequestError(`you only have ${user.billy_bucks} bucks!`);
+			throw new BadRequestError(
+				`you need ${amount} bucks, you only have ${user.billy_bucks} bucks!`
+			);
 		return user;
 	}
 
@@ -257,7 +259,9 @@ class Users extends mongoose.Repository<IUser> {
 		if (member.has_lottery_ticket)
 			throw new BadRequestError("You have already bought a ticket for this week's lottery!");
 		if (member.billy_bucks < settings.lottery_cost)
-			throw new BadRequestError(`You only have ${member.billy_bucks} bucks!`);
+			throw new BadRequestError(
+				`You only have ${member.billy_bucks} bucks! Lotto tickets cost ${settings.lottery_cost} bucks.`
+			);
 		const updated = await super.assertUpdateOne(
 			{
 				user_id,

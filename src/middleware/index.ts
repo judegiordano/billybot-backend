@@ -110,7 +110,8 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 					base_lottery_jackpot: { type: "number" },
 					allowance_rate: { type: "number" },
 					birthday_bucks: { type: "number" },
-					tax_rate: { type: "number" }
+					tax_rate: { type: "number" },
+					feature_rate: { type: "number" }
 				}
 			},
 			created_at: { type: "string" },
@@ -147,6 +148,22 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			updated_at: { type: "string" }
 		}
 	});
+	app.addSchema({
+		$id: "feature",
+		type: "object",
+		properties: {
+			_id: { type: "string" },
+			server_id: { type: "string" },
+			user_id: { type: "string" },
+			user: {}, //ref
+			title: { type: "string" },
+			body: { type: "string" },
+			status: { type: "string" },
+			up_votes: { type: "number" },
+			created_at: { type: "string" },
+			updated_at: { type: "string" }
+		}
+	});
 	// arrays
 	app.addSchema({
 		$id: "userArray",
@@ -162,5 +179,10 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		$id: "webhookArray",
 		type: "array",
 		items: { $ref: "webhook#" }
+	});
+	app.addSchema({
+		$id: "featureArray",
+		type: "array",
+		items: { $ref: "feature#" }
 	});
 });
