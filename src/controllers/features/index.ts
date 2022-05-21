@@ -27,17 +27,25 @@ export const featureRouter = async function (app: FastifyInstance) {
 		},
 		async (req) => {
 			const server = await servers.assertRead({ server_id: req.body.server_id });
-			const user = await users.assertHasBucks(req.body.user_id, server.server_id, server.settings.feature_rate);
+			const user = await users.assertHasBucks(
+				req.body.user_id,
+				server.server_id,
+				server.settings.feature_rate
+			);
 			const [result] = await Promise.all([
 				features.insertOne({ ...req.body, user: user._id }),
-				users.assertUpdateOne({ user_id: user.user_id, server_id: server.server_id }, {
-					$inc: {
-						billy_bucks: -server.settings.feature_rate
-					},
-				})
+				users.assertUpdateOne(
+					{ user_id: user.user_id, server_id: server.server_id },
+					{
+						$inc: {
+							billy_bucks: -server.settings.feature_rate
+						}
+					}
+				)
 			]);
 			return result;
-		});
+		}
+	);
 	app.get<{
 		Params: IServer;
 		Querystring: {
