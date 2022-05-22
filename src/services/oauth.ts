@@ -6,7 +6,8 @@ import {
 	LAMBDA_HASH,
 	LAMBDA_REGION,
 	DISCORD_OAUTH_URL,
-	DISCORD_CLIENT_SECRET
+	DISCORD_CLIENT_SECRET,
+	DISCORD_API
 } from "@config";
 
 const scopes = ["identify", "guilds", "guilds.members.read"].join("%20");
@@ -24,6 +25,21 @@ interface IAuthorizationResponse {
 	refresh_token: string;
 	scope: string;
 	token_type: "Bearer";
+}
+
+interface IUserInfo {
+	id: string | null;
+	username: string | null;
+	avatar: string | null;
+	avatar_decoration: string | null;
+	discriminator: string | null;
+	public_flags: number | null;
+	flags: number | null;
+	banner: string | null;
+	banner_color: string | null;
+	accent_color: number | null;
+	locale: string | null;
+	mfa_enabled: boolean | null;
 }
 
 export async function authorize(code: string): Promise<IAuthorizationResponse> {
@@ -52,6 +68,16 @@ export async function refresh(refresh_token: string): Promise<IAuthorizationResp
 	}).toString();
 	const response = await axios.post(`${DISCORD_OAUTH_URL}/token`, params, {
 		headers: {
+			"Content-Type": "application/x-www-form-urlencoded"
+		}
+	});
+	return response.data;
+}
+
+export async function getUserInfo(access_token: string): Promise<IUserInfo> {
+	const response = await axios.get(`${DISCORD_API}/users/@me`, {
+		headers: {
+			Authorization: `Bearer ${access_token}`,
 			"Content-Type": "application/x-www-form-urlencoded"
 		}
 	});
