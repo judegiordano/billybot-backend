@@ -14,6 +14,7 @@ import { gamblingRouter } from "./gambling";
 import { mediaRouter } from "./media";
 import { stocksRouter } from "./stocks";
 import { featureRouter } from "./features";
+import { oauthRouter } from "./oauth";
 
 const routers = [
 	developerRouter,
@@ -27,7 +28,8 @@ const routers = [
 	gamblingRouter,
 	mediaRouter,
 	stocksRouter,
-	featureRouter
+	featureRouter,
+	oauthRouter
 ] as unknown as FastifyPluginCallback[];
 
 routers.map((router) => app.register(router, { prefix: `/api/v${config.VERSION}` }));

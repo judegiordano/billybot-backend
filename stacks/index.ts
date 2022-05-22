@@ -11,7 +11,11 @@ export default function main(app: App) {
 			STAGE: stage,
 			JWT_SECRET: process.env.JWT_SECRET ?? "secret",
 			MONGO_URI: process.env.MONGO_URI ?? "mongodb://localhost:27017/billybot-api-local",
-			VERSION: process.env.VERSION ?? "1"
+			VERSION: process.env.VERSION ?? "1",
+			LAMBDA_REGION: app.region,
+			LAMBDA_HASH: process.env.LAMBDA_HASH ?? "**********",
+			DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID ?? "client_id",
+			DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET ?? "client_secret"
 		}
 	});
 	new ApiStack(app, "api");
