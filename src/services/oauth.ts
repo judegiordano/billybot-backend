@@ -41,3 +41,19 @@ export async function authorize(code: string): Promise<IAuthorizationResponse> {
 	});
 	return response.data;
 }
+
+export async function refresh(refresh_token: string): Promise<IAuthorizationResponse> {
+	const params = new URLSearchParams({
+		client_id: DISCORD_CLIENT_ID,
+		client_secret: DISCORD_CLIENT_SECRET,
+		grant_type: "refresh_token",
+		refresh_token,
+		redirect_uri: redirect
+	}).toString();
+	const response = await axios.post(`${DISCORD_OAUTH_URL}/token`, params, {
+		headers: {
+			"Content-Type": "application/x-www-form-urlencoded"
+		}
+	});
+	return response.data;
+}

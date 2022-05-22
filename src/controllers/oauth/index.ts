@@ -25,4 +25,23 @@ export const oauthRouter = async function (app: FastifyInstance) {
 			return data;
 		}
 	);
+	app.post<{ Querystring: { refresh_token: string } }>(
+		"/oauth/refresh",
+		{
+			schema: {
+				querystring: {
+					type: "object",
+					required: ["refresh_token"],
+					properties: {
+						refresh_token: { type: "string" }
+					}
+				}
+			}
+		},
+		async (req) => {
+			const { refresh_token } = req.query;
+			const data = await oauth.refresh(refresh_token);
+			return data;
+		}
+	);
 };
