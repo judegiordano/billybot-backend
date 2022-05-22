@@ -46,8 +46,9 @@ export class ApiStack extends Stack {
 			defaultThrottlingRateLimit: 2000,
 			defaultThrottlingBurstLimit: 100,
 			cors: {
-				allowOrigins: ["*"],
-				allowHeaders: ["Authorization", "x-api-timestamp"]
+				allowOrigins: ["http://localhost:3000", "https://billybot.vercel.app"],
+				allowCredentials: true,
+				allowHeaders: ["Authorization", "x-api-timestamp", "cookie"]
 			},
 			routes: {
 				$default: "src/handlers/index.run"

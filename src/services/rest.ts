@@ -34,7 +34,8 @@ export async function postSuccessEmbed(
 			{
 				title: embed.title,
 				description:
-					embed.description ?? `[Dashboard](${DASHBOARD_URL}/${webhook.server_id})`,
+					embed.description ??
+					`[Dashboard](${DASHBOARD_URL}/server/${webhook.server_id})`,
 				color: ColorCodes.green,
 				fields: embed.fields,
 				timestamp: new Date().toISOString()

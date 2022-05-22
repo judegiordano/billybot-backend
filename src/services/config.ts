@@ -10,7 +10,7 @@ export const MONGO_URI = process.env.MONGO_URI as string;
 export const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID as string;
 export const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET as string;
 // static urls
-export const DASHBOARD_URL = "https://billybot.vercel.app/server";
+export const DASHBOARD_URL = process.env.DASHBOARD_URL as string;
 export const STOCK_API_URL = "https://finance.yahoo.com/quote";
 export const DISCORD_API = "https://discord.com/api/v8";
 export const DISCORD_WEBHOOKS_URL = `${DISCORD_API}/webhooks`;

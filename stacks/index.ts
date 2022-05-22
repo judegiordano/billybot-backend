@@ -15,7 +15,10 @@ export default function main(app: App) {
 			LAMBDA_REGION: app.region,
 			LAMBDA_HASH: process.env.LAMBDA_HASH ?? "**********",
 			DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID ?? "client_id",
-			DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET ?? "client_secret"
+			DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET ?? "client_secret",
+			DASHBOARD_URL: process.env.IS_LOCAL
+				? "http://localhost:3000"
+				: "https://billybot.vercel.app"
 		}
 	});
 	new ApiStack(app, "api");
