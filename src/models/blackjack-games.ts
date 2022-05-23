@@ -1,5 +1,6 @@
 import { CardSuit } from "btbot-types";
 import type { IBlackJack, ICard, IHandCount, IUser } from "btbot-types";
+import { BlackjackReacts } from "btbot-types";
 
 import { users } from "./user";
 import { chance } from "@helpers";
@@ -38,7 +39,7 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 			},
 			status: {
 				type: String,
-				default: "Options: `!hit`, `!stand`, `!doubledown`"
+				default: `${BlackjackReacts.hit} \`!hit\`\n${BlackjackReacts.stand} \`!stand\`\n${BlackjackReacts.doubleDown} \`!doubledown\``
 			},
 			won: {
 				type: Boolean,
@@ -238,7 +239,11 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 		}
 		return super.updateOne(
 			{ _id },
-			{ is_complete: false, status: "Options: `!hit`, `!stand`", $inc: { turn: 1 } }
+			{
+				is_complete: false,
+				status: `${BlackjackReacts.hit} \`!hit\`\n${BlackjackReacts.stand} \`!stand\``,
+				$inc: { turn: 1 }
+			}
 		);
 	}
 
