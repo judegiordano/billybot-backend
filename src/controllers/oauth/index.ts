@@ -46,6 +46,7 @@ export const oauthRouter = async function (app: FastifyInstance) {
 			return await oauth.refresh(refresh_token);
 		}
 	);
+	// discord request proxies
 	app.get<{ Querystring: { access_token: string } }>(
 		"/oauth/me",
 		{
@@ -62,6 +63,24 @@ export const oauthRouter = async function (app: FastifyInstance) {
 		async (req) => {
 			const { access_token } = req.query;
 			return await oauth.getUserInfo(access_token);
+		}
+	);
+	app.get<{ Querystring: { access_token: string } }>(
+		"/oauth/me/guilds",
+		{
+			schema: {
+				querystring: {
+					type: "object",
+					required: ["access_token"],
+					properties: {
+						access_token: { type: "string" }
+					}
+				}
+			}
+		},
+		async (req) => {
+			const { access_token } = req.query;
+			return await oauth.getUserGuilds(access_token);
 		}
 	);
 };

@@ -34,7 +34,7 @@ export async function pickLotteryWinner() {
 
 export async function goodMorning() {
 	await mongoose.createConnection();
-	const memHooks = await webhooks.list({ channel_name: "bot-testing" });
+	const memHooks = await webhooks.list({ channel_name: "mems" });
 	// const memHooks = await webhooks.list({ channel_name: "mems" });
 	if (memHooks.length <= 0) {
 		return {

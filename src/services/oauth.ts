@@ -42,6 +42,19 @@ interface IUserInfo {
 	mfa_enabled: boolean | null;
 }
 
+interface IGuildInfo {
+	id: string;
+	name: string;
+	icon: string;
+	description: string;
+	features: string[];
+	emojis: string[];
+	banner: string;
+	owner_id: string;
+	application_id: null;
+	roles: string[];
+}
+
 export async function authorize(code: string): Promise<IAuthorizationResponse> {
 	const params = new URLSearchParams({
 		client_id: DISCORD_CLIENT_ID,
@@ -76,6 +89,16 @@ export async function refresh(refresh_token: string): Promise<IAuthorizationResp
 
 export async function getUserInfo(access_token: string): Promise<IUserInfo> {
 	const response = await axios.get(`${DISCORD_API}/users/@me`, {
+		headers: {
+			Authorization: `Bearer ${access_token}`,
+			"Content-Type": "application/x-www-form-urlencoded"
+		}
+	});
+	return response.data;
+}
+
+export async function getUserGuilds(access_token: string): Promise<IGuildInfo[]> {
+	const response = await axios.get(`${DISCORD_API}/users/@me/guilds`, {
 		headers: {
 			Authorization: `Bearer ${access_token}`,
 			"Content-Type": "application/x-www-form-urlencoded"
