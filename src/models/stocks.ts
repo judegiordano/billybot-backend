@@ -111,7 +111,7 @@ class Stocks extends mongoose.Repository<IStock> {
 	}
 
 	public getCurrentSellValue(currentPrice: number, originalPrice: number, amount: number) {
-		return Math.round(amount * (currentPrice / originalPrice));
+		return Math.round(amount * ((currentPrice - originalPrice) / originalPrice));
 	}
 
 	public async portfolio(server_id: string, user_id: string) {

@@ -74,7 +74,7 @@ export const stocksRouter = async function (app: FastifyInstance) {
 		},
 		async (req) => {
 			const { server_id, user_id, symbol, amount } = req.body;
-			if (!symbol || !amount || amount < 1)
+			if (!symbol || amount == null || amount < 1)
 				throw new BadRequestError(
 					"Must specify a valid ticker symbol and a positive amount of BillyBucks!\n\nExample: `!buystock CRM 100`"
 				);
