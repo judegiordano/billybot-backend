@@ -150,6 +150,31 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		}
 	});
 	app.addSchema({
+		$id: "client",
+		type: "object",
+		properties: {
+			_id: { type: "string" },
+			email: { type: "string" },
+			username: { type: "string" },
+			// password: { type: "string" }, dont expose
+			elevation: { type: "string" },
+			// token_version: { type: "number" }, dont expose
+			auth_state: {
+				type: "object",
+				properties: {
+					user_id: { type: "string" },
+					username: { type: "string" },
+					discriminator: { type: "string" },
+					avatar: { type: "string" }
+					// access_token: { type: "string" }, dont expose
+					// refresh_token: { type: "string" } dont expose
+				}
+			},
+			created_at: { type: "string" },
+			updated_at: { type: "string" }
+		}
+	});
+	app.addSchema({
 		$id: "feature",
 		type: "object",
 		properties: {
