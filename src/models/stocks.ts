@@ -60,7 +60,7 @@ class Stocks extends mongoose.Repository<IStock> {
 
 			return { symbol, price, currency } as IStock;
 		} catch (error) {
-			throw new NotFoundError(`Stock ticker symbol '${symbol}' not found!`);
+			throw new NotFoundError(`Stock ticker symbol \`${symbol}\` not found!`);
 		}
 	}
 
@@ -79,7 +79,8 @@ class Stocks extends mongoose.Repository<IStock> {
 		symbol: string,
 		price: number,
 		currency: string,
-		amount: number
+		amount: number,
+		bucks: number
 	) {
 		const stock = await super.read({ server_id, user_id, symbol, is_deleted: false });
 		if (!stock) {
@@ -91,7 +92,7 @@ class Stocks extends mongoose.Repository<IStock> {
 				currency,
 				amount
 			});
-			return { symbol, price, currency, amount, add_on: false };
+			return { symbol, price, currency, amount, add_on: false, bucks };
 		}
 
 		const avgPrice = parseFloat(
@@ -101,17 +102,17 @@ class Stocks extends mongoose.Repository<IStock> {
 			{ _id: stock._id },
 			{ $inc: { amount: amount }, price: avgPrice }
 		);
-		return { symbol, price, currency, amount, add_on: true };
+		return { symbol, price, currency, amount, add_on: true, bucks };
 	}
 
-	public async sell(stock: IStock, price: number, amount: number) {
+	public async sell(stock: IStock, price: number, amount: number, delta: number, bucks: number) {
 		await super.assertUpdateOne({ _id: stock._id }, { is_deleted: true });
 		const { symbol, currency } = stock;
-		return { symbol, price, currency, amount };
+		return { symbol, price, currency, amount, delta, bucks };
 	}
 
 	public getCurrentSellValue(currentPrice: number, originalPrice: number, amount: number) {
-		return Math.round(amount * ((currentPrice - originalPrice) / originalPrice));
+		return Math.round(amount * (currentPrice / originalPrice));
 	}
 
 	public async portfolio(server_id: string, user_id: string) {
