@@ -1,7 +1,7 @@
 import type { IModel } from "btbot-types";
 
-import { mongoose } from "@services";
-import { BadRequestError } from "@src/types";
+import { mongoose, password } from "@services";
+import { BadRequestError, UnauthorizedError } from "@src/types";
 
 enum ClientElevation {
 	user = "user",
@@ -85,10 +85,25 @@ class Clients extends mongoose.Repository<IClient> {
 	}
 
 	public async assertNewClient({ username, email }: IClient) {
+		// TODO: perform stricter checks
 		const emailTaken = await clients.exists({ email });
 		if (emailTaken) throw new BadRequestError("email taken");
 		const userNameTaken = await clients.exists({ username });
 		if (userNameTaken) throw new BadRequestError("username taken");
+	}
+
+	public async register(client: IClient) {
+		await this.assertNewClient(client);
+		const hash = await password.hashPassword(client.password);
+		return super.insertOne({ ...client, password: hash });
+	}
+
+	public async login({ username, password: pass }: IClient) {
+		const found = await super.read({ username });
+		if (!found) throw new UnauthorizedError("username not found");
+		const match = await password.comparePassword(pass, found.password);
+		if (!match) throw new UnauthorizedError("incorrect password");
+		return found;
 	}
 }
 

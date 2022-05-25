@@ -2,7 +2,6 @@ import type { FastifyInstance } from "fastify";
 
 import { clients } from "@models";
 import { IClient } from "@src/models/clients";
-import { password as pass } from "@src/services";
 
 export const clientsRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IClient }>(
@@ -19,17 +18,28 @@ export const clientsRouter = async function (app: FastifyInstance) {
 						password: { type: "string" }
 					}
 				},
-				response: {
-					200: { $ref: "client#" }
-				}
+				response: { 200: { $ref: "client#" } }
 			}
 		},
-		async (req) => {
-			const { password } = req.body;
-			await clients.assertNewClient(req.body);
-			const hash = await pass.hashPassword(password);
-			return await clients.insertOne({ ...req.body, password: hash });
-		}
+		async (req) => await clients.register(req.body)
+	);
+	app.post<{ Body: IClient }>(
+		"/clients/login",
+		{
+			schema: {
+				body: {
+					type: "object",
+					required: ["username", "password"],
+					additionalProperties: false,
+					properties: {
+						username: { type: "string" },
+						password: { type: "string" }
+					}
+				},
+				response: { 200: { $ref: "client#" } }
+			}
+		},
+		async (req) => await clients.login(req.body)
 	);
 	app.get<{ Querystring: { code: string } }>(
 		"/clients/oauth/connect",
