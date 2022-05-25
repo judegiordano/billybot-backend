@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import type { IStock } from "btbot-types";
 
 import { servers, stocks, users } from "@models";
-import { NotFoundError } from "@src/types/errors";
+import { BadRequestError, NotFoundError } from "@src/types/errors";
 
 export const stocksRouter = async function (app: FastifyInstance) {
 	app.get<{
@@ -35,6 +35,10 @@ export const stocksRouter = async function (app: FastifyInstance) {
 		},
 		async (req) => {
 			const { symbol } = req.query;
+			if (!symbol)
+				throw new BadRequestError(
+					"Must specify a valid ticker symbol!\n\nExample: `!stock CRM`"
+				);
 			return await stocks.price(symbol.toUpperCase());
 		}
 	);
@@ -45,13 +49,13 @@ export const stocksRouter = async function (app: FastifyInstance) {
 			schema: {
 				body: {
 					type: "object",
-					required: ["server_id", "user_id", "symbol", "amount"],
+					required: ["server_id", "user_id"],
 					additionalProperties: false,
 					properties: {
 						server_id: { type: "string" },
 						user_id: { type: "string" },
 						symbol: { type: "string" },
-						amount: { type: "number", minimum: 1 }
+						amount: { type: "number" }
 					}
 				},
 				response: {
@@ -62,7 +66,8 @@ export const stocksRouter = async function (app: FastifyInstance) {
 							price: { type: "number" },
 							currency: { type: "string" },
 							amount: { type: "number" },
-							add_on: { type: "boolean" }
+							add_on: { type: "boolean" },
+							bucks: { type: "number" }
 						}
 					}
 				}
@@ -70,11 +75,23 @@ export const stocksRouter = async function (app: FastifyInstance) {
 		},
 		async (req) => {
 			const { server_id, user_id, symbol, amount } = req.body;
+			if (!symbol || amount == null || amount < 1)
+				throw new BadRequestError(
+					"Must specify a valid ticker symbol and a positive amount of BillyBucks!\n\nExample: `!buystock CRM 100`"
+				);
 			await servers.assertExists({ server_id });
-			await users.assertHasBucks(user_id, server_id, amount);
+			const { billy_bucks: bucks } = await users.assertHasBucks(user_id, server_id, amount);
 			const { price, currency } = await stocks.price(symbol.toUpperCase());
 			const [buy] = await Promise.all([
-				stocks.buy(server_id, user_id, symbol.toUpperCase(), price, currency, amount),
+				stocks.buy(
+					server_id,
+					user_id,
+					symbol.toUpperCase(),
+					price,
+					currency,
+					amount,
+					bucks - amount
+				),
 				users.assertUpdateOne({ server_id, user_id }, { $inc: { billy_bucks: -amount } })
 			]);
 			return buy;
@@ -87,7 +104,7 @@ export const stocksRouter = async function (app: FastifyInstance) {
 			schema: {
 				body: {
 					type: "object",
-					required: ["server_id", "user_id", "symbol"],
+					required: ["server_id", "user_id"],
 					additionalProperties: false,
 					properties: {
 						server_id: { type: "string" },
@@ -102,7 +119,9 @@ export const stocksRouter = async function (app: FastifyInstance) {
 							symbol: { type: "string" },
 							price: { type: "number" },
 							currency: { type: "string" },
-							amount: { type: "number" }
+							amount: { type: "number" },
+							delta: { type: "number" },
+							bucks: { type: "number" }
 						}
 					}
 				}
@@ -110,8 +129,12 @@ export const stocksRouter = async function (app: FastifyInstance) {
 		},
 		async (req) => {
 			const { server_id, user_id, symbol } = req.body;
+			if (!symbol)
+				throw new BadRequestError(
+					"Must specify a valid ticker symbol that you own stock in!\n\nExample: `!sellstock CRM`"
+				);
 			await servers.assertExists({ server_id });
-			await users.assertExists({ server_id, user_id });
+			const { billy_bucks: bucks } = await users.assertRead({ server_id, user_id });
 			const stock = await stocks.read({
 				server_id,
 				user_id,
@@ -119,11 +142,12 @@ export const stocksRouter = async function (app: FastifyInstance) {
 				is_deleted: false
 			});
 			if (!stock)
-				throw new NotFoundError(`You do not own any stock in '${symbol.toUpperCase()}'!`);
+				throw new NotFoundError(`You do not own any stock in \`${symbol.toUpperCase()}\`!`);
 			const { price } = await stocks.price(symbol.toUpperCase());
 			const sellValue = stocks.getCurrentSellValue(price, stock.price, stock.amount);
+			const delta = sellValue - stock.amount;
 			const [sell] = await Promise.all([
-				stocks.sell(stock, price, sellValue),
+				stocks.sell(stock, price, sellValue, delta, bucks + sellValue),
 				users.assertUpdateOne({ server_id, user_id }, { $inc: { billy_bucks: sellValue } })
 			]);
 			return sell;
@@ -144,17 +168,23 @@ export const stocksRouter = async function (app: FastifyInstance) {
 				},
 				response: {
 					200: {
-						type: "array",
-						items: {
-							type: "object",
-							properties: {
-								symbol: { type: "string" },
-								price_bought: { type: "number" },
-								price_current: { type: "number" },
-								currency: { type: "string" },
-								amount: { type: "number" },
-								amount_worth: { type: "number" }
-							}
+						type: "object",
+						properties: {
+							stocks: {
+								type: "array",
+								items: {
+									type: "object",
+									properties: {
+										symbol: { type: "string" },
+										price_bought: { type: "number" },
+										price_current: { type: "number" },
+										currency: { type: "string" },
+										amount: { type: "number" },
+										amount_worth: { type: "number" }
+									}
+								}
+							},
+							bucks: { type: "number" }
 						}
 					}
 				}
@@ -163,8 +193,9 @@ export const stocksRouter = async function (app: FastifyInstance) {
 		async (req) => {
 			const { server_id, user_id } = req.body;
 			await servers.assertExists({ server_id });
-			await users.assertExists({ server_id, user_id });
-			return await stocks.portfolio(server_id, user_id);
+			const user = await users.assertRead({ user_id, server_id });
+			const stockList = await stocks.portfolio(server_id, user_id);
+			return { stocks: stockList, bucks: user.billy_bucks };
 		}
 	);
 };
