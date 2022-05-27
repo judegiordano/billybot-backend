@@ -3,10 +3,10 @@ import { ColorCodes } from "btbot-types";
 import type FormData from "form-data";
 import type { IEmbed, IWebhook } from "btbot-types";
 
-import { DASHBOARD_URL, DISCORD_WEBHOOKS_URL, STOCK_API_URL } from "@config";
+import { DASHBOARD_URL, DISCORD_API, STOCK_API_URL } from "@config";
 
 export const webhooks = axios.create({
-	baseURL: DISCORD_WEBHOOKS_URL
+	baseURL: `${DISCORD_API}/webhooks`
 });
 
 export const stockApiClient = axios.create({
@@ -34,7 +34,8 @@ export async function postSuccessEmbed(
 			{
 				title: embed.title,
 				description:
-					embed.description ?? `[Dashboard](${DASHBOARD_URL}/${webhook.server_id})`,
+					embed.description ??
+					`[Dashboard](${DASHBOARD_URL}/server/${webhook.server_id})`,
 				color: ColorCodes.green,
 				fields: embed.fields,
 				timestamp: new Date().toISOString()

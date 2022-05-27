@@ -1,31 +1,7 @@
-import type { IModel } from "btbot-types";
+import { ClientElevation, IClient, ClientConnectionStatus } from "btbot-types";
 
-import { mongoose, password } from "@services";
+import { jwt, mongoose, oauth, password } from "@services";
 import { BadRequestError, UnauthorizedError } from "@src/types";
-
-enum ClientElevation {
-	user = "user",
-	admin = "admin"
-}
-
-// this is a transient interface, used to track current login
-interface ClientAuthState {
-	user_id?: string;
-	username?: string;
-	discriminator?: string;
-	avatar?: string;
-	access_token?: string;
-	refresh_token?: string;
-}
-
-export interface IClient extends IModel {
-	email: string;
-	username: string;
-	password: string;
-	elevation: ClientElevation;
-	token_version: number;
-	auth_state?: ClientAuthState;
-}
 
 class Clients extends mongoose.Repository<IClient> {
 	constructor() {
@@ -52,6 +28,11 @@ class Clients extends mongoose.Repository<IClient> {
 			token_version: {
 				type: Number,
 				default: 0
+			},
+			connection_status: {
+				type: String,
+				enum: Object.values(ClientConnectionStatus),
+				default: ClientConnectionStatus.disconnected
 			},
 			auth_state: {
 				_id: false,
@@ -95,15 +76,95 @@ class Clients extends mongoose.Repository<IClient> {
 	public async register(client: IClient) {
 		await this.assertNewClient(client);
 		const hash = await password.hashPassword(client.password);
-		return super.insertOne({ ...client, password: hash });
+		const newClient = await super.insertOne({ ...client, password: hash });
+		const { _id, token_version } = newClient;
+		const token = jwt.sign({ _id, token_version });
+		return {
+			token,
+			client: newClient
+		};
 	}
 
 	public async login({ username, password: pass }: IClient) {
-		const found = await super.read({ username });
-		if (!found) throw new UnauthorizedError("username not found");
-		const match = await password.comparePassword(pass, found.password);
+		const client = await super.read({ username });
+		if (!client) throw new UnauthorizedError("username not found");
+		const match = await password.comparePassword(pass, client.password);
 		if (!match) throw new UnauthorizedError("incorrect password");
-		return found;
+		const { _id, token_version } = client;
+		return {
+			token: jwt.sign({ _id, token_version }),
+			client
+		};
+	}
+
+	public async validateToken(token: string) {
+		const { token_version, _id } = jwt.verify<{ token_version: number; _id: string }>(token);
+		const exists = await super.exists({ _id, token_version });
+		if (!exists) throw new UnauthorizedError("invalid token");
+		return { _id, token_version };
+	}
+
+	public async assertReadByToken(token: string) {
+		const { token_version, _id } = jwt.verify<{ token_version: number; _id: string }>(token);
+		const exists = await super.read({ _id, token_version });
+		if (!exists) throw new UnauthorizedError("invalid token");
+		return exists;
+	}
+
+	public async refreshToken(token: string) {
+		const { _id, token_version } = await this.validateToken(token);
+		return { token: jwt.sign({ _id, token_version }) };
+	}
+
+	public async connectOauthAccount(code: string, token: string) {
+		const { _id, token_version } = await this.validateToken(token);
+		const { refresh_token, access_token } = await oauth.authorize(code);
+		const client = await super.updateOne(
+			{ _id },
+			{
+				connection_status: ClientConnectionStatus.connected,
+				"auth_state.refresh_token": refresh_token,
+				"auth_state.access_token": access_token
+			}
+		);
+		return {
+			token: jwt.sign({ _id, token_version }),
+			connection_status: client?.connection_status as string
+		};
+	}
+
+	public async refreshClient(authToken: string) {
+		// verify token
+		const { _id, token_version, auth_state } = await this.assertReadByToken(authToken);
+		// assert oauth account is connected
+		if (!auth_state?.refresh_token || !auth_state?.access_token)
+			throw new UnauthorizedError("no auth client connected");
+		// refresh oauth credentials
+		const { refresh_token, access_token } = await oauth.refresh(auth_state.refresh_token);
+		const user = await oauth.getUserInfo(access_token);
+		// updated and serialize user info
+		const updatedClient = await clients.updateOne(
+			{ _id },
+			{
+				"auth_state.refresh_token": refresh_token,
+				"auth_state.access_token": access_token,
+				"auth_state.user_id": user.id,
+				"auth_state.username": user.username,
+				"auth_state.discriminator": user.discriminator,
+				"auth_state.avatar": user.avatar
+			}
+		);
+		return {
+			token: jwt.sign({ _id, token_version }),
+			client: updatedClient as IClient
+		};
+	}
+
+	public async listGuilds(token: string) {
+		const { auth_state } = await this.assertReadByToken(token);
+		if (!auth_state?.refresh_token || !auth_state?.access_token)
+			throw new UnauthorizedError("no auth client connected");
+		return oauth.getUserGuilds(auth_state.access_token);
 	}
 }
 

@@ -5,8 +5,10 @@ export class ApiStack extends Stack {
 		super(scope, id, props);
 
 		const mediaBucket = new Bucket(this, "media", {
-			s3Bucket: {
-				publicReadAccess: true
+			cdk: {
+				bucket: {
+					publicReadAccess: true
+				}
 			}
 		});
 
@@ -43,18 +45,14 @@ export class ApiStack extends Stack {
 		});
 
 		const api = new Api(this, "api", {
-			defaultThrottlingRateLimit: 2000,
-			defaultThrottlingBurstLimit: 100,
-			cors: {
-				allowOrigins: ["*"],
-				allowHeaders: ["Authorization", "x-api-timestamp"]
-			},
 			routes: {
 				$default: "src/handlers/index.run"
 			},
-			defaultFunctionProps: {
-				environment: {
-					MEDIA_BUCKET: mediaBucket.bucketName
+			defaults: {
+				function: {
+					environment: {
+						MEDIA_BUCKET: mediaBucket.bucketName
+					}
 				}
 			}
 		});

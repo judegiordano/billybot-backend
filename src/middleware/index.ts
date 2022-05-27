@@ -158,6 +158,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			username: { type: "string" },
 			// password: { type: "string" }, dont expose
 			elevation: { type: "string" },
+			connection_status: { type: "string" },
 			// token_version: { type: "number" }, dont expose
 			auth_state: {
 				type: "object",

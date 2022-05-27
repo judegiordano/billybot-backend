@@ -1,7 +1,8 @@
 import type { FastifyInstance } from "fastify";
+import type { IClient } from "btbot-types";
 
-import { clients } from "@models";
-import { IClient } from "@src/models/clients";
+import { clients, servers } from "@models";
+import { DASHBOARD_URL } from "@src/services/config";
 
 export const clientsRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IClient }>(
@@ -18,10 +19,20 @@ export const clientsRouter = async function (app: FastifyInstance) {
 						password: { type: "string" }
 					}
 				},
-				response: { 200: { $ref: "client#" } }
+				response: {
+					200: {
+						type: "object",
+						properties: {
+							token: { type: "string" },
+							client: { $ref: "client#" }
+						}
+					}
+				}
 			}
 		},
-		async (req) => await clients.register(req.body)
+		async (req) => {
+			return await clients.register(req.body);
+		}
 	);
 	app.post<{ Body: IClient }>(
 		"/clients/login",
@@ -36,27 +47,72 @@ export const clientsRouter = async function (app: FastifyInstance) {
 						password: { type: "string" }
 					}
 				},
-				response: { 200: { $ref: "client#" } }
+				response: {
+					200: {
+						type: "object",
+						properties: {
+							token: { type: "string" },
+							client: { $ref: "client#" }
+						}
+					}
+				}
 			}
 		},
-		async (req) => await clients.login(req.body)
+		async (req) => {
+			return await clients.login(req.body);
+		}
 	);
-	app.get<{ Querystring: { code: string } }>(
-		"/clients/oauth/connect",
+	app.get(
+		"/clients/refresh/client",
+		{
+			preValidation: [app.authenticate],
+			schema: {
+				response: {
+					200: {
+						type: "object",
+						properties: {
+							token: { type: "string" },
+							client: { $ref: "client#" }
+						}
+					}
+				}
+			}
+		},
+		async (req) => {
+			return await clients.refreshClient(req.token);
+		}
+	);
+	app.get("/clients/refresh/token", { preValidation: [app.authenticate] }, async (req) => {
+		return await clients.refreshToken(req.token);
+	});
+	app.get<{ Querystring: { code: string; state: string } }>(
+		"/clients/oauth/redirect",
 		{
 			schema: {
 				querystring: {
 					type: "object",
 					required: ["code"],
 					properties: {
-						code: { type: "string" }
+						code: { type: "string" },
+						state: { type: "string" }
 					}
 				}
 			}
 		},
-		async (req) => {
-			const { code } = req.query;
-			return code;
+		async (req, res) => {
+			const { code, state } = req.query;
+			const { token, connection_status } = await clients.connectOauthAccount(code, state);
+			const params = new URLSearchParams({ token, connection_status }).toString();
+			res.status(307).redirect(`${DASHBOARD_URL}/oauth/success?${params}`);
 		}
 	);
+	app.get("/clients/guilds", { preValidation: [app.authenticate] }, async (req) => {
+		const guilds = await clients.listGuilds(req.token);
+		const ids = guilds.map(({ id }) => id);
+		return await servers.list(
+			{ server_id: { $in: ids } },
+			{},
+			{ name: 1, server_id: 1, icon_hash: 1 }
+		);
+	});
 };
