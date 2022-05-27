@@ -19,7 +19,7 @@ export const userRouter = async function (app: FastifyInstance) {
 						properties: {
 							server_id: { type: "string" },
 							user_id: { type: "string" },
-							billy_bucks: { type: "number", default: 500, minimum: 0 },
+							billy_bucks: { type: "number", minimum: 0 },
 							username: { type: "string" },
 							discriminator: { type: "string" },
 							avatar_hash: { type: "string" },
