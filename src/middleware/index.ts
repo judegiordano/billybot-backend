@@ -21,6 +21,24 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		}
 	});
 	app.addSchema({
+		$id: "bet",
+		type: "object",
+		properties: {
+			challenge: {}, //ref
+			user_id: { type: "string" },
+			participant_id: { type: "string" },
+			amount: { type: "number" }
+		}
+	});
+	app.addSchema({
+		$id: "participant",
+		type: "object",
+		properties: {
+			user_id: { type: "string" },
+			is_mayor: { type: "boolean" }
+		}
+	});
+	app.addSchema({
 		$id: "user",
 		type: "object",
 		properties: {
@@ -165,6 +183,19 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			updated_at: { type: "string" }
 		}
 	});
+	app.addSchema({
+		$id: "challenge",
+		type: "object",
+		properties: {
+			_id: { type: "string" },
+			server_id: { type: "string" },
+			participants: { $ref: "participantArray#" },
+			details: { type: "string" },
+			is_active: { type: "boolean" },
+			created_at: { type: "string" },
+			updated_at: { type: "string" }
+		}
+	});
 	// arrays
 	app.addSchema({
 		$id: "userArray",
@@ -185,5 +216,21 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		$id: "featureArray",
 		type: "array",
 		items: { $ref: "feature#" }
+	});
+	app.addSchema({
+		$id: "challengeArray",
+		type: "array",
+		items: { $ref: "challenge#" }
+	});
+	app.addSchema({
+		$id: "betArray",
+		type: "array",
+		items: { $ref: "bet#" }
+	});
+	app.addSchema({
+		$id: "participantArray",
+		type: "array",
+		items: { $ref: "participant#" },
+		uniqueItems: true
 	});
 });

@@ -6,3 +6,5 @@ export { blackjackGames } from "./blackjack-games";
 export { mediaFiles } from "./media-files";
 export { stocks } from "./stocks";
 export { features } from "./feature";
+export { challenges } from "./challenge";
+export { bets } from "./bet";
