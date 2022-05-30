@@ -95,6 +95,16 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 									overall_losings: { type: "number" },
 									last_hand: {}
 								}
+							},
+							challenges: {
+								type: "object",
+								properties: {
+									bets: { type: "number" },
+									wins: { type: "number" },
+									losses: { type: "number" },
+									overall_winnings: { type: "number" },
+									overall_losings: { type: "number" }
+								}
 							}
 						}
 					},

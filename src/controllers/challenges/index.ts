@@ -113,7 +113,10 @@ export const challengeRouter = async function (app: FastifyInstance) {
 					amount,
 					challenge: challenge._id
 				}),
-				users.assertUpdateOne({ user_id, server_id }, { $inc: { billy_bucks: -amount } })
+				users.assertUpdateOne(
+					{ user_id, server_id },
+					{ $inc: { billy_bucks: -amount, "metrics.gambling.challenges.bets": +1 } }
+				)
 			]);
 			return result;
 		}
@@ -160,19 +163,42 @@ export const challengeRouter = async function (app: FastifyInstance) {
 					{ is_fool: false }
 				);
 
-			const betList = await bets.list({
+			const wonBetList = await bets.list({
 				challenge,
-				participant_id
+				participant_id: newMayor
 			});
-			const betUpdates = betList.map(({ user_id, amount }: IBet) => {
+			const wonBetUpdates = wonBetList.map(({ user_id, amount }: IBet) => {
 				return users.assertUpdateOne(
 					{ server_id, user_id },
-					{ $inc: { billy_bucks: +amount } }
+					{
+						$inc: {
+							billy_bucks: +(amount * 2),
+							"metrics.gambling.challenges.wins": +1,
+							"metrics.gambling.challenges.overall_winnings": +(amount * 2)
+						}
+					}
+				);
+			});
+
+			const lostBetList = await bets.list({
+				challenge,
+				participant_id: newFool
+			});
+			const lostBetUpdates = lostBetList.map(({ user_id, amount }: IBet) => {
+				return users.assertUpdateOne(
+					{ server_id, user_id },
+					{
+						$inc: {
+							"metrics.gambling.challenges.losses": +1,
+							"metrics.gambling.challenges.overall_losings": +amount
+						}
+					}
 				);
 			});
 
 			const [results] = await Promise.all([
-				Promise.all(betUpdates),
+				Promise.all(wonBetUpdates),
+				Promise.all(lostBetUpdates),
 				users.assertUpdateOne({ server_id, user_id: newMayor }, { is_mayor: true }),
 				users.assertUpdateOne(
 					{ server_id, user_id: newFool },
