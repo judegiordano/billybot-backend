@@ -38,11 +38,9 @@ class Challenges extends mongoose.Repository<IChallenge> {
 
 	public async getNewFool(server_id: string, participant_id: string) {
 		const { participants } = await super.assertRead({ server_id, is_active: true });
-		if (participants[0].user_id === participant_id) {
+		if (participants[0].user_id === participant_id)
 			return { newMayor: participant_id, newFool: participants[1].user_id };
-		} else {
-			return { newMayor: participant_id, newFool: participants[0].user_id };
-		}
+		return { newMayor: participant_id, newFool: participants[0].user_id };
 	}
 }
 
