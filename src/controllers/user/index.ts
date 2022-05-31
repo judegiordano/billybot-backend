@@ -155,7 +155,6 @@ export const userRouter = async function (app: FastifyInstance) {
 			await servers.assertExists({ server_id });
 			const { page, username, is_admin, has_lottery_ticket, is_mayor, is_fool, billy_bucks } =
 				req.query;
-			const limit = 5;
 			const filter = {
 				server_id,
 				...(username ? { username: { $regex: username, $options: "gi" } } : null),
@@ -164,21 +163,17 @@ export const userRouter = async function (app: FastifyInstance) {
 				...(is_fool === "true" ? { is_fool } : null),
 				...(has_lottery_ticket === "true" ? { has_lottery_ticket } : null)
 			};
-			const options = {
-				skip: (page - 1) * limit,
-				limit,
+			const { pages, items } = await users.paginate(filter, {
+				page,
 				sort: {
 					billy_bucks,
 					username: 1
-				}
-			};
-			const [count, members] = await Promise.all([
-				users.count(filter),
-				users.list(filter, options)
-			]);
+				},
+				populate: [{ path: "user", select: ["username", "user_id"] }]
+			});
 			return {
-				pages: Math.ceil(count / limit),
-				users: members
+				pages,
+				users: items
 			};
 		}
 	);

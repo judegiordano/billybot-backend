@@ -14,7 +14,13 @@ import type {
 import { nanoid } from "@helpers";
 import { MONGO_URI } from "@config";
 import { NotFoundError, BadRequestError } from "@errors";
-import type { Projection, Options, PipelineStage, AggregateOptions } from "@interfaces";
+import type {
+	Projection,
+	Options,
+	PipelineStage,
+	AggregateOptions,
+	PaginationOptions
+} from "@interfaces";
 
 let cachedConnection: Connection | null = null;
 
@@ -186,5 +192,24 @@ export class Repository<T extends IModel> {
 
 	public async aggregate<T>(pipeline: PipelineStage[], options?: AggregateOptions) {
 		return this.model.aggregate(pipeline, options) as unknown as T;
+	}
+
+	public async paginate(filter: FilterQuery<T>, options?: PaginationOptions<T>) {
+		const limit = options?.limit ?? 5;
+		const page = options?.page ?? 1;
+		const paginationOptions = {
+			page,
+			skip: (page - 1) * limit,
+			limit,
+			...options
+		};
+		const [count, items] = await Promise.all([
+			this.count(filter),
+			this.list(filter, paginationOptions)
+		]);
+		return {
+			pages: Math.ceil(count / limit),
+			items
+		};
 	}
 }

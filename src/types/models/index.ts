@@ -14,3 +14,7 @@ export interface Options<T extends IModel> extends QueryOptions {
 	skip?: number;
 	new?: boolean;
 }
+
+export interface PaginationOptions<T extends IModel> extends Options<T> {
+	page: number;
+}

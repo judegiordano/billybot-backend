@@ -244,25 +244,17 @@ export const challengeRouter = async function (app: FastifyInstance) {
 			const { server_id } = req.params;
 			const { page, is_active, created_at } = req.query;
 			await servers.assertExists({ server_id });
-			const limit = 5;
 			const filter = {
 				server_id,
 				...(is_active === "true" ? { is_active } : null)
 			};
-			const options = {
-				skip: (page - 1) * limit,
-				limit,
-				sort: {
-					created_at
-				}
-			};
-			const [count, challengeList] = await Promise.all([
-				challenges.count(filter),
-				challenges.list(filter, options)
-			]);
+			const { pages, items } = await challenges.paginate(filter, {
+				page,
+				sort: { created_at }
+			});
 			return {
-				pages: Math.ceil(count / limit),
-				challenges: challengeList
+				pages,
+				challenges: items
 			};
 		}
 	);
