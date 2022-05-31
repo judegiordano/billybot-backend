@@ -1,4 +1,4 @@
-import { ClientElevation, IClient, ClientConnectionStatus } from "btbot-types";
+import { ClientElevation, IClient, ClientConnectionStatus, IServer } from "btbot-types";
 
 import { jwt, mongoose, oauth, password } from "@services";
 import { BadRequestError, UnauthorizedError } from "@src/types";
@@ -164,18 +164,23 @@ class Clients extends mongoose.Repository<IClient> {
 		};
 	}
 
-	public async listGuilds(token: string) {
+	public async listGuildIds(token: string) {
 		const { auth_state } = await this.assertReadByToken(token);
 		if (!auth_state?.refresh_token || !auth_state?.access_token)
 			throw new UnauthorizedError("no auth client connected");
-		return oauth.getUserGuilds(auth_state.access_token);
+		const guilds = await oauth.getUserGuilds(auth_state.access_token);
+		return guilds.map(({ id }) => id);
 	}
 
-	public async syncGuilds(token: string, guilds: string[]) {
+	public async syncGuilds(token: string, guilds: IServer[]) {
 		const { auth_state, _id } = await this.assertReadByToken(token);
 		if (!auth_state?.refresh_token || !auth_state?.access_token)
 			throw new UnauthorizedError("no auth client connected");
-		return super.updateOne({ _id }, { "auth_state.registered_servers": guilds });
+		if (guilds.length === 0) {
+			return super.updateOne({ _id }, { "auth_state.registered_servers": [] });
+		}
+		const matchIds = guilds.map(({ server_id }) => server_id);
+		return super.updateOne({ _id }, { "auth_state.registered_servers": matchIds });
 	}
 }
 

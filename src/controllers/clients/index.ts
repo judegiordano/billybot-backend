@@ -3,6 +3,7 @@ import type { IClient } from "btbot-types";
 
 import { clients, servers } from "@models";
 import { DASHBOARD_URL } from "@src/services/config";
+import { UnauthorizedError } from "@src/types";
 
 export const clientsRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: IClient }>(
@@ -79,7 +80,15 @@ export const clientsRouter = async function (app: FastifyInstance) {
 			}
 		},
 		async (req) => {
-			return await clients.refreshClient(req.token);
+			const { token, client } = await clients.refreshClient(req.token);
+			const ids = await clients.listGuildIds(token);
+			const matches = await servers.list(
+				{ server_id: { $in: ids } },
+				{},
+				{ name: 1, server_id: 1, icon_hash: 1 }
+			);
+			await clients.syncGuilds(token, matches);
+			return { token, client };
 		}
 	);
 	app.get("/clients/refresh/token", { preValidation: [app.authenticate] }, async (req) => {
@@ -107,19 +116,17 @@ export const clientsRouter = async function (app: FastifyInstance) {
 		}
 	);
 	app.get("/clients/guilds", { preValidation: [app.authenticate] }, async (req) => {
-		const guilds = await clients.listGuilds(req.token);
-		const ids = guilds.map(({ id }) => id);
+		const { auth_state } = await clients.assertReadByToken(req.token);
+		if (!auth_state?.refresh_token || !auth_state?.access_token)
+			throw new UnauthorizedError("no auth client connected");
+		if (!auth_state?.registered_servers || auth_state?.registered_servers.length === 0)
+			throw new UnauthorizedError("no servers registered");
+		const ids = auth_state.registered_servers.map((id) => id);
 		const matches = await servers.list(
 			{ server_id: { $in: ids } },
 			{},
 			{ name: 1, server_id: 1, icon_hash: 1 }
 		);
-		if (matches.length === 0) {
-			await clients.syncGuilds(req.token, []);
-			return matches;
-		}
-		const matchIds = matches.map(({ server_id }) => server_id);
-		await clients.syncGuilds(req.token, matchIds);
 		return matches;
 	});
 };
