@@ -168,8 +168,7 @@ export const userRouter = async function (app: FastifyInstance) {
 				sort: {
 					billy_bucks,
 					username: 1
-				},
-				populate: [{ path: "user", select: ["username", "user_id"] }]
+				}
 			});
 			return {
 				pages,
