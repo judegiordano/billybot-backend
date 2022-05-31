@@ -157,6 +157,29 @@ class Users extends mongoose.Repository<IUser> {
 								]
 							}
 						}
+					},
+					challenges: {
+						required: false,
+						bets: {
+							type: Number,
+							default: 0
+						},
+						wins: {
+							type: Number,
+							default: 0
+						},
+						losses: {
+							type: Number,
+							default: 0
+						},
+						overall_winnings: {
+							type: Number,
+							default: 0
+						},
+						overall_losings: {
+							type: Number,
+							default: 0
+						}
 					}
 				},
 				lottery: {
