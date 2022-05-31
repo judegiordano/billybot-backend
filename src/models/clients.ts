@@ -60,6 +60,10 @@ class Clients extends mongoose.Repository<IClient> {
 				refresh_token: {
 					type: String,
 					required: false
+				},
+				registered_servers: {
+					type: [String],
+					required: false
 				}
 			}
 		});
@@ -165,6 +169,13 @@ class Clients extends mongoose.Repository<IClient> {
 		if (!auth_state?.refresh_token || !auth_state?.access_token)
 			throw new UnauthorizedError("no auth client connected");
 		return oauth.getUserGuilds(auth_state.access_token);
+	}
+
+	public async syncGuilds(token: string, guilds: string[]) {
+		const { auth_state, _id } = await this.assertReadByToken(token);
+		if (!auth_state?.refresh_token || !auth_state?.access_token)
+			throw new UnauthorizedError("no auth client connected");
+		return super.updateOne({ _id }, { "auth_state.registered_servers": guilds });
 	}
 }
 

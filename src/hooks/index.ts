@@ -48,5 +48,6 @@ export async function authenticate(req: FastifyRequest) {
 	if (!auth) throw new UnauthorizedError("no auth header found");
 	const token = auth.split(" ")[1];
 	if (!token) throw new UnauthorizedError("invalid auth token");
-	return (req.token = token);
+	req.token = token;
+	return;
 }

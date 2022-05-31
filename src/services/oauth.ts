@@ -9,7 +9,7 @@ const redirect = encodeURI(`${API_URL}/clients/oauth/redirect`);
 
 export const redirectUri = `${DISCORD_API}/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${redirect}&response_type=${responseType}&scope=${scopes}`;
 
-interface IAuthorizationResponse {
+export interface IAuthorizationResponse {
 	access_token: string;
 	expires_in: number;
 	refresh_token: string;
@@ -17,7 +17,7 @@ interface IAuthorizationResponse {
 	token_type: "Bearer";
 }
 
-interface IUserInfo {
+export interface IUserInfo {
 	id: string | null;
 	username: string | null;
 	avatar: string | null;

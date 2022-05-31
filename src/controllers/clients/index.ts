@@ -109,10 +109,17 @@ export const clientsRouter = async function (app: FastifyInstance) {
 	app.get("/clients/guilds", { preValidation: [app.authenticate] }, async (req) => {
 		const guilds = await clients.listGuilds(req.token);
 		const ids = guilds.map(({ id }) => id);
-		return await servers.list(
+		const matches = await servers.list(
 			{ server_id: { $in: ids } },
 			{},
 			{ name: 1, server_id: 1, icon_hash: 1 }
 		);
+		if (matches.length === 0) {
+			await clients.syncGuilds(req.token, []);
+			return matches;
+		}
+		const matchIds = matches.map(({ server_id }) => server_id);
+		await clients.syncGuilds(req.token, matchIds);
+		return matches;
 	});
 };
