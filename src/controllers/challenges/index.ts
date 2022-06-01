@@ -80,6 +80,11 @@ export const challengeRouter = async function (app: FastifyInstance) {
 		},
 		async (req) => {
 			const { server_id, user_id, participant_id, amount } = req.body;
+			const server = await servers.assertRead({ server_id });
+			if (amount > server.settings.challenge_bet_max)
+				throw new BadRequestError(
+					`Bet cannot be more than the maximum of ${server.settings.challenge_bet_max}`
+				);
 			const challenge = await challenges.assertRead({
 				server_id,
 				is_active: true

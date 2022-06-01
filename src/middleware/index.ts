@@ -140,7 +140,8 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 					allowance_rate: { type: "number" },
 					birthday_bucks: { type: "number" },
 					tax_rate: { type: "number" },
-					feature_rate: { type: "number" }
+					feature_rate: { type: "number" },
+					challenge_bet_max: { type: "number" }
 				}
 			},
 			created_at: { type: "string" },
