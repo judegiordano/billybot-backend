@@ -12,8 +12,7 @@ export default function main(app: App) {
 			JWT_SECRET: process.env.JWT_SECRET ?? "secret",
 			MONGO_URI: process.env.MONGO_URI ?? "mongodb://localhost:27017/billybot-api-local",
 			VERSION: process.env.VERSION ?? "1",
-			LAMBDA_REGION: app.region,
-			LAMBDA_HASH: process.env.LAMBDA_HASH ?? "**********",
+			REGION: app.region,
 			DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID ?? "client_id",
 			DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET ?? "client_secret"
 		}

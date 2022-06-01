@@ -67,5 +67,9 @@ export class ApiStack extends Stack {
 				: "https://*******/.execute-api.us-east-1.amazonaws.com/api/v*/",
 			bucket: process.env.IS_LOCAL ? mediaBucket.bucketName : "*******"
 		});
+
+		// expose api url to lambdas
+		const functions = this.getAllFunctions();
+		functions.map((fn) => fn.addEnvironment("API_URL", api.url));
 	}
 }
