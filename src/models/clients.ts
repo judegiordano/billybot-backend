@@ -81,12 +81,7 @@ class Clients extends mongoose.Repository<IClient> {
 		await this.assertNewClient(client);
 		const hash = await password.hashPassword(client.password);
 		const newClient = await super.insertOne({ ...client, password: hash });
-		const { _id, token_version } = newClient;
-		const token = jwt.sign({ _id, token_version });
-		return {
-			token,
-			client: newClient
-		};
+		return newClient;
 	}
 
 	public async login({ username, password: pass }: IClient) {
@@ -94,18 +89,7 @@ class Clients extends mongoose.Repository<IClient> {
 		if (!client) throw new UnauthorizedError("username not found");
 		const match = await password.comparePassword(pass, client.password);
 		if (!match) throw new UnauthorizedError("incorrect password");
-		const { _id, token_version } = client;
-		return {
-			token: jwt.sign({ _id, token_version }),
-			client
-		};
-	}
-
-	public async validateToken(token: string) {
-		const { token_version, _id } = jwt.verify<{ token_version: number; _id: string }>(token);
-		const exists = await super.exists({ _id, token_version });
-		if (!exists) throw new UnauthorizedError("invalid token");
-		return { _id, token_version };
+		return client;
 	}
 
 	public async assertReadByToken(token: string) {
@@ -115,13 +99,8 @@ class Clients extends mongoose.Repository<IClient> {
 		return exists;
 	}
 
-	public async refreshToken(token: string) {
-		const { _id, token_version } = await this.validateToken(token);
-		return { token: jwt.sign({ _id, token_version }) };
-	}
-
 	public async connectOauthAccount(code: string, token: string) {
-		const { _id, token_version } = await this.validateToken(token);
+		const { _id } = await this.assertReadByToken(token);
 		const { refresh_token, access_token } = await oauth.authorize(code);
 		const client = await super.updateOne(
 			{ _id },
@@ -131,22 +110,19 @@ class Clients extends mongoose.Repository<IClient> {
 				"auth_state.access_token": access_token
 			}
 		);
-		return {
-			token: jwt.sign({ _id, token_version }),
-			connection_status: client?.connection_status as string
-		};
+		return client as IClient;
 	}
 
 	public async refreshClient(authToken: string) {
 		// verify token
-		const { _id, token_version, auth_state } = await this.assertReadByToken(authToken);
+		const { _id, auth_state } = await this.assertReadByToken(authToken);
 		// assert oauth account is connected
 		if (!auth_state?.refresh_token || !auth_state?.access_token)
 			throw new UnauthorizedError("no auth client connected");
 		// refresh oauth credentials
 		const { refresh_token, access_token } = await oauth.refresh(auth_state.refresh_token);
 		const user = await oauth.getUserInfo(access_token);
-		// updated and serialize user info
+		// updated user info
 		const updatedClient = await clients.updateOne(
 			{ _id },
 			{
@@ -158,29 +134,32 @@ class Clients extends mongoose.Repository<IClient> {
 				"auth_state.avatar": user.avatar
 			}
 		);
-		return {
-			token: jwt.sign({ _id, token_version }),
-			client: updatedClient as IClient
-		};
+		return updatedClient as IClient;
 	}
 
-	public async listGuildIds(token: string) {
-		const { auth_state } = await this.assertReadByToken(token);
+	public async listGuildIds(authToken: string) {
+		const { auth_state } = await this.assertReadByToken(authToken);
 		if (!auth_state?.refresh_token || !auth_state?.access_token)
 			throw new UnauthorizedError("no auth client connected");
 		const guilds = await oauth.getUserGuilds(auth_state.access_token);
 		return guilds.map(({ id }) => id);
 	}
 
-	public async syncGuilds(token: string, guilds: IServer[]) {
+	public async refreshGuilds(token: string, guilds: IServer[]) {
 		const { auth_state, _id } = await this.assertReadByToken(token);
 		if (!auth_state?.refresh_token || !auth_state?.access_token)
 			throw new UnauthorizedError("no auth client connected");
 		if (guilds.length === 0) {
-			return super.updateOne({ _id }, { "auth_state.registered_servers": [] });
+			return super.updateOne(
+				{ _id },
+				{ "auth_state.registered_servers": [] }
+			) as Promise<IClient>;
 		}
 		const matchIds = guilds.map(({ server_id }) => server_id);
-		return super.updateOne({ _id }, { "auth_state.registered_servers": matchIds });
+		return super.updateOne(
+			{ _id },
+			{ "auth_state.registered_servers": matchIds }
+		) as Promise<IClient>;
 	}
 }
 

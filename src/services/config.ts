@@ -15,4 +15,5 @@ export const MEDIA_BUCKET = process.env.MEDIA_BUCKET as string;
 export const DISCORD_API = "https://discord.com/api/v8";
 export const STOCK_API_URL = "https://finance.yahoo.com/quote";
 export const DASHBOARD_URL = IS_LOCAL ? "http://localhost:3000" : "https://billybot.vercel.app";
+export const DASHBOARD_DOMAIN = IS_LOCAL ? "localhost" : "billybot.vercel.app";
 export const API_URL = `https://${LAMBDA_HASH}.execute-api.${LAMBDA_REGION}.amazonaws.com/api/v${VERSION}`;

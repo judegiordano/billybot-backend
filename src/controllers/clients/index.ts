@@ -4,8 +4,12 @@ import type { IClient } from "btbot-types";
 import { clients, servers } from "@models";
 import { DASHBOARD_URL } from "@src/services/config";
 import { UnauthorizedError } from "@src/types";
+import { cookie, oauth } from "@src/services";
 
 export const clientsRouter = async function (app: FastifyInstance) {
+	app.get("/clients/oauth", { preValidation: [app.authenticate] }, async (req) => {
+		return { redirect_url: oauth.buildRedirect(req.token) };
+	});
 	app.post<{ Body: IClient }>(
 		"/clients/register",
 		{
@@ -21,18 +25,14 @@ export const clientsRouter = async function (app: FastifyInstance) {
 					}
 				},
 				response: {
-					200: {
-						type: "object",
-						properties: {
-							token: { type: "string" },
-							client: { $ref: "client#" }
-						}
-					}
+					200: { $ref: "client#" }
 				}
 			}
 		},
-		async (req) => {
-			return await clients.register(req.body);
+		async (req, res) => {
+			const client = await clients.register(req.body);
+			cookie.sign(res, client);
+			return client;
 		}
 	);
 	app.post<{ Body: IClient }>(
@@ -49,51 +49,61 @@ export const clientsRouter = async function (app: FastifyInstance) {
 					}
 				},
 				response: {
-					200: {
-						type: "object",
-						properties: {
-							token: { type: "string" },
-							client: { $ref: "client#" }
-						}
-					}
+					200: { $ref: "client#" }
 				}
 			}
 		},
-		async (req) => {
-			return await clients.login(req.body);
+		async (req, res) => {
+			const client = await clients.login(req.body);
+			cookie.sign(res, client);
+			return client;
 		}
 	);
-	app.get(
+	app.post("/clients/logout", async (_, res) => {
+		cookie.destroyCookie(res);
+		return { ok: true };
+	});
+	app.post(
 		"/clients/refresh/client",
 		{
 			preValidation: [app.authenticate],
 			schema: {
-				response: {
-					200: {
-						type: "object",
-						properties: {
-							token: { type: "string" },
-							client: { $ref: "client#" }
-						}
-					}
-				}
+				response: { 200: { $ref: "client#" } }
 			}
 		},
-		async (req) => {
-			const { token, client } = await clients.refreshClient(req.token);
-			const ids = await clients.listGuildIds(token);
+		async (req, res) => {
+			await clients.refreshClient(req.token);
+			const ids = await clients.listGuildIds(req.token);
 			const matches = await servers.list(
 				{ server_id: { $in: ids } },
 				{},
 				{ name: 1, server_id: 1, icon_hash: 1 }
 			);
-			await clients.syncGuilds(token, matches);
-			return { token, client };
+			const updatedClient = await clients.refreshGuilds(req.token, matches);
+			cookie.sign(res, updatedClient);
+			return updatedClient;
 		}
 	);
-	app.get("/clients/refresh/token", { preValidation: [app.authenticate] }, async (req) => {
-		return await clients.refreshToken(req.token);
-	});
+	app.post<{ Body: { token: string } }>(
+		"/clients/refresh/token",
+		{
+			schema: {
+				body: {
+					type: "object",
+					required: ["token"],
+					properties: {
+						token: { type: "string" }
+					}
+				},
+				response: { 200: { $ref: "client#" } }
+			}
+		},
+		async (req, res) => {
+			const client = await clients.assertReadByToken(req.body.token);
+			cookie.sign(res, client);
+			return client;
+		}
+	);
 	app.get<{ Querystring: { code: string; state: string } }>(
 		"/clients/oauth/redirect",
 		{
@@ -110,8 +120,11 @@ export const clientsRouter = async function (app: FastifyInstance) {
 		},
 		async (req, res) => {
 			const { code, state } = req.query;
-			const { token, connection_status } = await clients.connectOauthAccount(code, state);
-			const params = new URLSearchParams({ token, connection_status }).toString();
+			const client = await clients.connectOauthAccount(code, state);
+			const params = new URLSearchParams({
+				connection_status: client.connection_status
+			}).toString();
+			cookie.sign(res, client);
 			res.status(307).redirect(`${DASHBOARD_URL}/oauth/success?${params}`);
 		}
 	);

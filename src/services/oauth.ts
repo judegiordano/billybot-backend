@@ -9,6 +9,10 @@ const redirect = encodeURI(`${API_URL}/clients/oauth/redirect`);
 
 export const redirectUri = `${DISCORD_API}/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${redirect}&response_type=${responseType}&scope=${scopes}`;
 
+export const buildRedirect = (token: string) => {
+	return `${DISCORD_API}/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${redirect}&response_type=${responseType}&scope=${scopes}&state=${token}`;
+};
+
 export interface IAuthorizationResponse {
 	access_token: string;
 	expires_in: number;
