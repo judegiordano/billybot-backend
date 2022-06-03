@@ -1,4 +1,4 @@
-import axios from "axios";
+import { RestApi } from "./request";
 
 import { API_URL, DISCORD_API, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET } from "./config";
 
@@ -12,6 +12,23 @@ export const redirectUri = `${DISCORD_API}/oauth2/authorize?client_id=${DISCORD_
 export const buildRedirect = (token: string) => {
 	return `${DISCORD_API}/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${redirect}&response_type=${responseType}&scope=${scopes}&state=${token}`;
 };
+
+const oauthApi = new RestApi(`${DISCORD_API}/oauth2`, {
+	formBody: {
+		client_id: DISCORD_CLIENT_ID,
+		client_secret: DISCORD_CLIENT_SECRET,
+		redirect_uri: redirect
+	},
+	headers: {
+		"content-type": "application/x-www-form-urlencoded"
+	}
+});
+
+const userApi = new RestApi(`${DISCORD_API}/users/@me`, {
+	headers: {
+		"content-type": "application/x-www-form-urlencoded"
+	}
+});
 
 export interface IAuthorizationResponse {
 	access_token: string;
@@ -49,54 +66,38 @@ export interface IGuildInfo {
 	roles: string[];
 }
 
-export async function authorize(code: string): Promise<IAuthorizationResponse> {
-	const params = new URLSearchParams({
-		client_id: DISCORD_CLIENT_ID,
-		client_secret: DISCORD_CLIENT_SECRET,
-		grant_type: "authorization_code",
+export async function authorize(code: string) {
+	const formBody = {
 		code,
-		redirect_uri: redirect
-	}).toString();
-	const response = await axios.post(`${DISCORD_API}/oauth2/token`, params, {
-		headers: {
-			"Content-Type": "application/x-www-form-urlencoded"
-		}
-	});
-	return response.data;
+		grant_type: "authorization_code"
+	};
+	const { data } = await oauthApi.post<IAuthorizationResponse>("token", { formBody });
+	return data;
 }
 
-export async function refresh(refresh_token: string): Promise<IAuthorizationResponse> {
-	const params = new URLSearchParams({
-		client_id: DISCORD_CLIENT_ID,
-		client_secret: DISCORD_CLIENT_SECRET,
-		grant_type: "refresh_token",
+export async function refresh(refresh_token: string) {
+	const formBody = {
 		refresh_token,
-		redirect_uri: redirect
-	});
-	const response = await axios.post(`${DISCORD_API}/oauth2/token`, params, {
-		headers: {
-			"Content-Type": "application/x-www-form-urlencoded"
-		}
-	});
-	return response.data;
+		grant_type: "refresh_token"
+	};
+	const { data } = await oauthApi.post<IAuthorizationResponse>("token", { formBody });
+	return data;
 }
 
-export async function getUserInfo(access_token: string): Promise<IUserInfo> {
-	const response = await axios.get(`${DISCORD_API}/users/@me`, {
+export async function getUserInfo(access_token: string) {
+	const { data } = await userApi.get<IUserInfo>("", {
 		headers: {
-			Authorization: `Bearer ${access_token}`,
-			"Content-Type": "application/x-www-form-urlencoded"
+			Authorization: `Bearer ${access_token}`
 		}
 	});
-	return response.data;
+	return data;
 }
 
 export async function getUserGuilds(access_token: string): Promise<IGuildInfo[]> {
-	const response = await axios.get(`${DISCORD_API}/users/@me/guilds`, {
+	const { data } = await userApi.get<IGuildInfo[]>("guilds", {
 		headers: {
-			Authorization: `Bearer ${access_token}`,
-			"Content-Type": "application/x-www-form-urlencoded"
+			Authorization: `Bearer ${access_token}`
 		}
 	});
-	return response.data;
+	return data;
 }

@@ -1,7 +1,7 @@
 import { IStock } from "btbot-types";
 
 import { mongoose } from "@services";
-import { stockApiClient } from "@src/services/rest";
+import { stockApiClient } from "@src/services";
 import { NotFoundError } from "@src/types/errors";
 
 class Stocks extends mongoose.Repository<IStock> {
@@ -43,9 +43,9 @@ class Stocks extends mongoose.Repository<IStock> {
 
 	public async price(symbol: string) {
 		try {
-			const { data } = await stockApiClient.get(symbol);
+			const { data } = await stockApiClient.get<string>(symbol);
 
-			const priceString = (data as string)
+			const priceString = data
 				.split(`"${symbol}":{"sourceInterval"`)[1]
 				.split("regularMarketPrice")[1]
 				// eslint-disable-next-line prettier/prettier

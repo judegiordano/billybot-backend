@@ -7,3 +7,4 @@ export * as aws from "./aws";
 export * as password from "./password";
 export * as oauth from "./oauth";
 export * as cookie from "./cookie";
+export { discordApi, test, stockApiClient } from "./request";
