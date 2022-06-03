@@ -8,7 +8,8 @@ import { cookie, oauth } from "@src/services";
 
 export const clientsRouter = async function (app: FastifyInstance) {
 	app.get("/clients/oauth", { preValidation: [app.authenticate] }, async (req) => {
-		return { redirect_url: oauth.buildRedirect(req.token) };
+		const redirect_url = oauth.buildRedirect(req.token);
+		return { redirect_url };
 	});
 	app.post<{ Body: IClient }>(
 		"/clients/register",

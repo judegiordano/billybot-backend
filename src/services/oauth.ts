@@ -7,13 +7,11 @@ const responseType = "code";
 
 const redirect = encodeURI(`${API_URL}/clients/oauth/redirect`);
 
-export const redirectUri = `${DISCORD_API}/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${redirect}&response_type=${responseType}&scope=${scopes}`;
-
 export const buildRedirect = (token: string) => {
 	return `${DISCORD_API}/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${redirect}&response_type=${responseType}&scope=${scopes}&state=${token}`;
 };
 
-const oauthApi = new RestApi(`${DISCORD_API}/oauth2`, {
+const oauthApi = new RestApi(`${DISCORD_API}/v8/oauth2`, {
 	formBody: {
 		client_id: DISCORD_CLIENT_ID,
 		client_secret: DISCORD_CLIENT_SECRET,
@@ -24,7 +22,7 @@ const oauthApi = new RestApi(`${DISCORD_API}/oauth2`, {
 	}
 });
 
-const userApi = new RestApi(`${DISCORD_API}/users/@me`, {
+const userApi = new RestApi(`${DISCORD_API}/v8/users/@me`, {
 	headers: {
 		"content-type": "application/x-www-form-urlencoded"
 	}

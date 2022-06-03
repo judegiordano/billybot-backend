@@ -7,7 +7,7 @@ import { DASHBOARD_URL, DISCORD_API } from "@config";
 import { discordApi } from "./request";
 
 export const webhooks = axios.create({
-	baseURL: `${DISCORD_API}/webhooks`
+	baseURL: `${DISCORD_API}/v8/webhooks`
 });
 
 export async function postContent(webhook: IWebhook, content: string) {

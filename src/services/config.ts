@@ -11,7 +11,7 @@ export const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET as string
 // resources
 export const MEDIA_BUCKET = process.env.MEDIA_BUCKET as string;
 // static urls
-export const DISCORD_API = "https://discord.com/api/v8";
+export const DISCORD_API = "https://discord.com/api";
 export const STOCK_API_URL = "https://finance.yahoo.com/quote";
 export const DASHBOARD_URL = IS_LOCAL ? "http://localhost:3000" : "https://billybot.vercel.app";
 export const DASHBOARD_DOMAIN = IS_LOCAL ? "localhost" : "billybot.vercel.app";
