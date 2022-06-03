@@ -1,6 +1,7 @@
 import { RestApi } from "./request";
 
 import { API_URL, DISCORD_API, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET } from "./config";
+import { IAuthorizationResponse, IGuildInfo, IUserInfo } from "@src/types";
 
 const scopes = ["identify", "guilds", "guilds.members.read"].join("%20");
 const responseType = "code";
@@ -27,42 +28,6 @@ const userApi = new RestApi(`${DISCORD_API}/v8/users/@me`, {
 		"content-type": "application/x-www-form-urlencoded"
 	}
 });
-
-export interface IAuthorizationResponse {
-	access_token: string;
-	expires_in: number;
-	refresh_token: string;
-	scope: string;
-	token_type: "Bearer";
-}
-
-export interface IUserInfo {
-	id: string | null;
-	username: string | null;
-	avatar: string | null;
-	avatar_decoration: string | null;
-	discriminator: string | null;
-	public_flags: number | null;
-	flags: number | null;
-	banner: string | null;
-	banner_color: string | null;
-	accent_color: number | null;
-	locale: string | null;
-	mfa_enabled: boolean | null;
-}
-
-export interface IGuildInfo {
-	id: string;
-	name: string;
-	icon: string;
-	description: string;
-	features: string[];
-	emojis: string[];
-	banner: string;
-	owner_id: string;
-	application_id: null;
-	roles: string[];
-}
 
 export async function authorize(code: string) {
 	const formBody = {
