@@ -29,13 +29,10 @@ class MediaFiles extends mongoose.Repository<IMediaFile> {
 
 	public async getMedia(file_name: string) {
 		const { key } = await super.assertRead({ file_name });
-		const file = await aws.s3
-			.getObject({
-				Bucket: config.MEDIA_BUCKET,
-				Key: key
-			})
-			.promise();
-		return { file, key };
+		const params = { Bucket: config.MEDIA_BUCKET, Key: key };
+		const url = aws.s3.getSignedUrl("getObject", params);
+		const file = await aws.s3.getObject(params).promise();
+		return { file, key, url };
 	}
 }
 

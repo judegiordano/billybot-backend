@@ -49,7 +49,7 @@ export const challengeRouter = async function (app: FastifyInstance) {
 					)}`
 				);
 			}
-			const result = await challenges.insertOne({
+			return await challenges.insertOne({
 				server_id,
 				details,
 				participants: [
@@ -57,7 +57,6 @@ export const challengeRouter = async function (app: FastifyInstance) {
 					{ user_id: mayor.user_id, is_mayor: true }
 				]
 			});
-			return result;
 		}
 	);
 	app.post<{ Body: IBet & { server_id: string } }>(
@@ -73,7 +72,7 @@ export const challengeRouter = async function (app: FastifyInstance) {
 						server_id: { type: "string" },
 						user_id: { type: "string" },
 						participant_id: { type: "string" },
-						amount: { type: "number", minmimum: 1 }
+						amount: { type: "number", minimum: 1 }
 					}
 				}
 			}
@@ -120,7 +119,7 @@ export const challengeRouter = async function (app: FastifyInstance) {
 				}),
 				users.assertUpdateOne(
 					{ user_id, server_id },
-					{ $inc: { billy_bucks: -amount, "metrics.gambling.challenges.bets": +1 } }
+					{ $inc: { billy_bucks: -amount, "metrics.gambling.challenges.bets": 1 } }
 				)
 			]);
 			return result;
@@ -177,9 +176,9 @@ export const challengeRouter = async function (app: FastifyInstance) {
 					{ server_id, user_id },
 					{
 						$inc: {
-							billy_bucks: +(amount * 2),
-							"metrics.gambling.challenges.wins": +1,
-							"metrics.gambling.challenges.overall_winnings": +(amount * 2)
+							billy_bucks: amount * 2,
+							"metrics.gambling.challenges.wins": 1,
+							"metrics.gambling.challenges.overall_winnings": amount * 2
 						}
 					}
 				);
@@ -195,7 +194,7 @@ export const challengeRouter = async function (app: FastifyInstance) {
 					{
 						$inc: {
 							"metrics.gambling.challenges.losses": +1,
-							"metrics.gambling.challenges.overall_losings": +amount
+							"metrics.gambling.challenges.overall_losings": amount
 						}
 					}
 				);
@@ -250,25 +249,17 @@ export const challengeRouter = async function (app: FastifyInstance) {
 			const { server_id } = req.params;
 			const { page, is_active, created_at } = req.query;
 			await servers.assertExists({ server_id });
-			const limit = 5;
 			const filter = {
 				server_id,
 				...(is_active === "true" ? { is_active } : null)
 			};
-			const options = {
-				skip: (page - 1) * limit,
-				limit,
-				sort: {
-					created_at
-				}
-			};
-			const [count, challengeList] = await Promise.all([
-				challenges.count(filter),
-				challenges.list(filter, options)
-			]);
+			const { pages, items } = await challenges.paginate(filter, {
+				page,
+				sort: { created_at }
+			});
 			return {
-				pages: Math.ceil(count / limit),
-				challenges: challengeList
+				pages,
+				challenges: items
 			};
 		}
 	);

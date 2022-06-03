@@ -3,21 +3,20 @@ import { ColorCodes } from "btbot-types";
 import type FormData from "form-data";
 import type { IEmbed, IWebhook } from "btbot-types";
 
-import { DASHBOARD_URL, DISCORD_WEBHOOKS_URL, STOCK_API_URL } from "@config";
+import { DASHBOARD_URL, DISCORD_API } from "@config";
+import { discordApi } from "./request";
 
 export const webhooks = axios.create({
-	baseURL: DISCORD_WEBHOOKS_URL
+	baseURL: `${DISCORD_API}/v8/webhooks`
 });
 
-export const stockApiClient = axios.create({
-	baseURL: STOCK_API_URL
-});
-
-export async function postContent(webhook: IWebhook, content?: string) {
-	return webhooks.post(`${webhook.webhook_id}/${webhook.webhook_token}`, {
-		content,
-		username: webhook.username,
-		avatar_url: webhook.avatar_url
+export async function postContent(webhook: IWebhook, content: string) {
+	return discordApi.post(`webhooks/${webhook.webhook_id}/${webhook.webhook_token}`, {
+		body: {
+			content,
+			username: webhook.username,
+			avatar_url: webhook.avatar_url
+		}
 	});
 }
 
@@ -26,20 +25,23 @@ export async function postSuccessEmbed(
 	embed: Pick<IEmbed, "title" | "description" | "fields">,
 	content?: string
 ) {
-	return webhooks.post(`${webhook.webhook_id}/${webhook.webhook_token}`, {
-		content: content ?? "",
-		username: webhook.username,
-		avatar_url: webhook.avatar_url,
-		embeds: [
-			{
-				title: embed.title,
-				description:
-					embed.description ?? `[Dashboard](${DASHBOARD_URL}/${webhook.server_id})`,
-				color: ColorCodes.green,
-				fields: embed.fields,
-				timestamp: new Date().toISOString()
-			}
-		]
+	return discordApi.post(`webhooks/${webhook.webhook_id}/${webhook.webhook_token}`, {
+		body: {
+			content: content ?? "",
+			username: webhook.username,
+			avatar_url: webhook.avatar_url,
+			embeds: [
+				{
+					title: embed.title,
+					description:
+						embed.description ??
+						`[Dashboard](${DASHBOARD_URL}/user/server/${webhook.server_id})`,
+					color: ColorCodes.green,
+					fields: embed.fields,
+					timestamp: new Date().toISOString()
+				}
+			]
+		}
 	});
 }
 

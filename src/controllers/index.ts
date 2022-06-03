@@ -14,6 +14,7 @@ import { gamblingRouter } from "./gambling";
 import { mediaRouter } from "./media";
 import { stocksRouter } from "./stocks";
 import { featureRouter } from "./features";
+import { clientsRouter } from "./clients";
 import { challengeRouter } from "./challenges";
 
 const routers = [
@@ -29,6 +30,7 @@ const routers = [
 	mediaRouter,
 	stocksRouter,
 	featureRouter,
+	clientsRouter,
 	challengeRouter
 ] as unknown as FastifyPluginCallback[];
 

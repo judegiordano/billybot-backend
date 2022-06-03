@@ -66,25 +66,17 @@ export const announcementsRouter = async function (app: FastifyInstance) {
 			const { server_id } = req.params;
 			const { page, created_at } = req.query;
 			await servers.assertExists({ server_id });
-			const limit = 5;
 			const filter = {
 				server_id
 			};
-			const options = {
-				skip: (page - 1) * limit,
-				limit,
-				sort: {
-					created_at
-				},
+			const { pages, items } = await announcements.paginate(filter, {
+				page,
+				sort: { created_at },
 				populate: [{ path: "user", select: ["username", "user_id"] }]
-			};
-			const [count, msgs] = await Promise.all([
-				announcements.count(filter),
-				announcements.list(filter, options)
-			]);
+			});
 			return {
-				pages: Math.ceil(count / limit),
-				announcements: msgs
+				pages,
+				announcements: items
 			};
 		}
 	);

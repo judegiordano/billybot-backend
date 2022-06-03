@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: Production
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Use Node.js
-        uses: actions/setup-node@v2
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
         with:
-          node-version: 14.x
+          node-version: 16.x
           cache: yarn
 
       - run: yarn install --frozen-lockfile
@@ -36,3 +36,5 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           VERSION: ${{ secrets.VERSION }}
           MONGO_URI: ${{ secrets.MONGO_URI }}
+          DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
+          DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}

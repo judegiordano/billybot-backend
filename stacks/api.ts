@@ -5,8 +5,10 @@ export class ApiStack extends Stack {
 		super(scope, id, props);
 
 		const mediaBucket = new Bucket(this, "media", {
-			s3Bucket: {
-				publicReadAccess: true
+			cdk: {
+				bucket: {
+					publicReadAccess: true
+				}
 			}
 		});
 
@@ -43,18 +45,14 @@ export class ApiStack extends Stack {
 		});
 
 		const api = new Api(this, "api", {
-			defaultThrottlingRateLimit: 2000,
-			defaultThrottlingBurstLimit: 100,
-			cors: {
-				allowOrigins: ["*"],
-				allowHeaders: ["Authorization", "x-api-timestamp"]
-			},
 			routes: {
 				$default: "src/handlers/index.run"
 			},
-			defaultFunctionProps: {
-				environment: {
-					MEDIA_BUCKET: mediaBucket.bucketName
+			defaults: {
+				function: {
+					environment: {
+						MEDIA_BUCKET: mediaBucket.bucketName
+					}
 				}
 			}
 		});
@@ -69,5 +67,9 @@ export class ApiStack extends Stack {
 				: "https://*******/.execute-api.us-east-1.amazonaws.com/api/v*/",
 			bucket: process.env.IS_LOCAL ? mediaBucket.bucketName : "*******"
 		});
+
+		// expose api url to lambdas
+		const functions = this.getAllFunctions();
+		functions.map((fn) => fn.addEnvironment("API_URL", api.url));
 	}
 }

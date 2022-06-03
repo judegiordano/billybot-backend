@@ -1,9 +1,10 @@
 import Fastify from "fastify";
 import helmet from "fastify-helmet";
+import cors from "@fastify/cors";
 import type { FastifyError, FastifyRequest, FastifyReply } from "fastify";
 
 import { schemas } from "@middleware";
-import { restricted } from "@hooks";
+import { restricted, authenticate } from "@hooks";
 import { CommonError } from "@errors";
 
 export const app = Fastify({
@@ -16,8 +17,18 @@ export const app = Fastify({
 	onConstructorPoisoning: "error"
 });
 app.register(schemas);
-app.register(helmet);
+app.register(helmet, {
+	hidePoweredBy: true
+});
+app.register(cors, {
+	origin: true,
+	preflight: true,
+	strictPreflight: false,
+	credentials: true,
+	methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"]
+});
 app.decorate("restricted", restricted);
+app.decorate("authenticate", authenticate);
 app.setErrorHandler(
 	async (error: FastifyError | CommonError, req: FastifyRequest, res: FastifyReply) => {
 		req.log.error(error, error.stack);

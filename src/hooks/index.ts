@@ -2,7 +2,7 @@ import type { FastifyRequest, RawRequestDefaultExpression } from "fastify";
 
 import { UnauthorizedError, ForbiddenError } from "@errors";
 import type { JwtPayload } from "@types";
-import { jwt, config } from "@services";
+import { jwt, config, cookie } from "@services";
 
 const timestampDrift = 60 * 1000;
 
@@ -40,5 +40,12 @@ function validateAuthToken(headers: Headers) {
 export async function restricted(req: FastifyRequest) {
 	validateTimestamp(req.headers);
 	validateAuthToken(req.headers);
+	return;
+}
+
+export async function authenticate(req: FastifyRequest) {
+	const auth = req.headers.cookie;
+	if (!auth) throw new UnauthorizedError("no auth token found");
+	req.token = cookie.getCookie(req);
 	return;
 }

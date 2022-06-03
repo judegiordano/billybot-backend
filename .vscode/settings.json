@@ -31,6 +31,7 @@
 	"euxo",
 	"packageid",
 	"pipefail",
+	"undici",
 	"upsert",
 	"vercel"
 ]
