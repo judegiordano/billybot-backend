@@ -195,7 +195,8 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 					user_id: { type: "string" },
 					username: { type: "string" },
 					discriminator: { type: "string" },
-					avatar: { type: "string" }
+					avatar: { type: "string" },
+					registered_servers: { type: "array", items: { type: "string" } }
 					// access_token: { type: "string" }, dont expose
 					// refresh_token: { type: "string" } dont expose
 				}

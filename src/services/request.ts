@@ -1,6 +1,5 @@
 import _ from "lodash";
 import { request } from "undici";
-// import FormData from "form-data";
 import type { HttpMethod, ResponseData } from "undici/types/dispatcher";
 
 import { config } from "@services";

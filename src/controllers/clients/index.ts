@@ -3,7 +3,6 @@ import type { IClient } from "btbot-types";
 
 import { clients, servers } from "@models";
 import { DASHBOARD_URL } from "@src/services/config";
-import { UnauthorizedError } from "@src/types";
 import { cookie, oauth } from "@src/services";
 
 export const clientsRouter = async function (app: FastifyInstance) {
@@ -64,27 +63,6 @@ export const clientsRouter = async function (app: FastifyInstance) {
 		cookie.destroyCookie(res);
 		return { ok: true };
 	});
-	app.post(
-		"/clients/refresh/client",
-		{
-			preValidation: [app.authenticate],
-			schema: {
-				response: { 200: { $ref: "client#" } }
-			}
-		},
-		async (req, res) => {
-			await clients.refreshClient(req.token);
-			const ids = await clients.listGuildIds(req.token);
-			const matches = await servers.list(
-				{ server_id: { $in: ids } },
-				{},
-				{ name: 1, server_id: 1, icon_hash: 1 }
-			);
-			const updatedClient = await clients.refreshGuilds(req.token, matches);
-			cookie.sign(res, updatedClient);
-			return updatedClient;
-		}
-	);
 	app.post<{ Body: { token: string } }>(
 		"/clients/refresh/token",
 		{
@@ -101,6 +79,20 @@ export const clientsRouter = async function (app: FastifyInstance) {
 		},
 		async (req, res) => {
 			const client = await clients.assertReadByToken(req.body.token);
+			cookie.sign(res, client);
+			return client;
+		}
+	);
+	app.post(
+		"/clients/refresh/client",
+		{
+			preValidation: [app.authenticate],
+			schema: {
+				response: { 200: { $ref: "client#" } }
+			}
+		},
+		async (req, res) => {
+			const client = await clients.assertReadByToken(req.token);
 			cookie.sign(res, client);
 			return client;
 		}
@@ -122,22 +114,30 @@ export const clientsRouter = async function (app: FastifyInstance) {
 		async (req, res) => {
 			const { code, state } = req.query;
 			const client = await clients.connectOauthAccount(code, state);
+			const guilds = await oauth.getUserGuilds(client.auth_state?.access_token as string);
+			const ids = guilds.map(({ id }) => id);
+			const matches = await servers.list(
+				{ server_id: { $in: ids } },
+				{},
+				{ name: 1, server_id: 1, icon_hash: 1 }
+			);
+			const matchIds = matches.map(({ server_id }) => server_id);
+			const updatedClient = (await clients.updateOne(
+				{ _id: client._id },
+				{ "auth_state.registered_servers": matchIds }
+			)) as IClient;
 			const params = new URLSearchParams({
-				connection_status: client.connection_status
+				connection_status: updatedClient.connection_status
 			}).toString();
-			cookie.sign(res, client);
+			cookie.sign(res, updatedClient);
 			res.status(307).redirect(`${DASHBOARD_URL}/oauth/success?${params}`);
 		}
 	);
 	app.get("/clients/guilds", { preValidation: [app.authenticate] }, async (req) => {
-		const { auth_state } = await clients.assertReadByToken(req.token);
-		if (!auth_state?.refresh_token || !auth_state?.access_token)
-			throw new UnauthorizedError("no auth client connected");
-		if (!auth_state?.registered_servers || auth_state?.registered_servers.length === 0)
-			throw new UnauthorizedError("no servers registered");
-		const ids = auth_state.registered_servers.map((id) => id);
+		const { auth_state } = await clients.assertAuth(req.token);
+		const ids = auth_state.registered_servers?.map((id) => id);
 		const matches = await servers.list(
-			{ server_id: { $in: ids } },
+			{ server_id: { $in: ids ?? [] } },
 			{},
 			{ name: 1, server_id: 1, icon_hash: 1 }
 		);

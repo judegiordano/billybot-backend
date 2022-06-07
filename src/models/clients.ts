@@ -3,6 +3,18 @@ import { ClientElevation, IClient, ClientConnectionStatus, IServer } from "btbot
 import { jwt, mongoose, oauth, password } from "@services";
 import { BadRequestError, UnauthorizedError } from "@src/types";
 
+interface IAuthorizedClient extends IClient {
+	auth_state: {
+		user_id: string;
+		username: string;
+		discriminator: string;
+		avatar: string;
+		access_token: string;
+		refresh_token: string;
+		registered_servers?: string[];
+	};
+}
+
 class Clients extends mongoose.Repository<IClient> {
 	constructor() {
 		super("Client", {
@@ -92,28 +104,42 @@ class Clients extends mongoose.Repository<IClient> {
 		return client;
 	}
 
-	public async assertReadByToken(token: string) {
+	public async assertReadByToken(token: string): Promise<IClient> {
 		const { token_version, _id } = jwt.verify<{ token_version: number; _id: string }>(token);
 		const exists = await super.read({ _id, token_version });
 		if (!exists) throw new UnauthorizedError("invalid token");
 		return exists;
 	}
 
-	public async connectOauthAccount(code: string, token: string) {
+	public async assertAuth(token: string): Promise<IAuthorizedClient> {
+		const client = await this.assertReadByToken(token);
+		const { auth_state } = client;
+		if (!auth_state) throw new UnauthorizedError("no auth client connected");
+		if (!auth_state.refresh_token || !auth_state.access_token)
+			throw new UnauthorizedError("no auth client connected");
+		return client as IAuthorizedClient;
+	}
+
+	public async connectOauthAccount(code: string, token: string): Promise<IClient> {
 		const { _id } = await this.assertReadByToken(token);
 		const { refresh_token, access_token } = await oauth.authorize(code);
+		const user = await oauth.getUserInfo(access_token);
 		const client = await super.updateOne(
 			{ _id },
 			{
 				connection_status: ClientConnectionStatus.connected,
 				"auth_state.refresh_token": refresh_token,
-				"auth_state.access_token": access_token
+				"auth_state.access_token": access_token,
+				"auth_state.user_id": user.id,
+				"auth_state.username": user.username,
+				"auth_state.discriminator": user.discriminator,
+				"auth_state.avatar": user.avatar
 			}
 		);
 		return client as IClient;
 	}
 
-	public async refreshClient(authToken: string) {
+	public async refreshClient(authToken: string): Promise<IClient> {
 		// verify token
 		const { _id, auth_state } = await this.assertReadByToken(authToken);
 		// assert oauth account is connected
@@ -145,7 +171,7 @@ class Clients extends mongoose.Repository<IClient> {
 		return guilds.map(({ id }) => id);
 	}
 
-	public async refreshGuilds(token: string, guilds: IServer[]) {
+	public async refreshGuilds(token: string, guilds: IServer[]): Promise<IClient> {
 		const { auth_state, _id } = await this.assertReadByToken(token);
 		if (!auth_state?.refresh_token || !auth_state?.access_token)
 			throw new UnauthorizedError("no auth client connected");
