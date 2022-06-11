@@ -1,8 +1,9 @@
-import type { IServerSettings, IWebhook } from "btbot-types";
+import { ClientConnectionStatus, IClient, IServerSettings, IWebhook } from "btbot-types";
 import FormData from "form-data";
 
 import { discord, mongoose } from "@services";
-import { users, webhooks, servers, mediaFiles } from "@models";
+import { oauthQueue } from "@aws/queues";
+import { users, webhooks, servers, mediaFiles, clients } from "@models";
 
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();
@@ -78,6 +79,34 @@ export async function happyBirthday() {
 		};
 	}
 	await Promise.all(generalWebhooks.map((webhook: IWebhook) => users.wishBirthday(webhook)));
+	return {
+		statusCode: 200,
+		headers: { "Content-Type": "application/json" },
+		body: "done"
+	};
+}
+
+// refresh client tokens
+export async function refreshOauthTokens() {
+	await mongoose.createConnection();
+	const connectedAccounts = await clients.list({
+		auth_state: { $ne: null },
+		"auth_state.refresh_token": { $ne: null },
+		connection_status: ClientConnectionStatus.connected
+	});
+	if (connectedAccounts.length === 0) {
+		return {
+			statusCode: 200,
+			headers: { "Content-Type": "application/json" },
+			body: "no connected accounts"
+		};
+	}
+	const operations = connectedAccounts.map((client: IClient) => {
+		const { _id, auth_state } = client;
+		const { refresh_token } = auth_state as { refresh_token: string };
+		return oauthQueue.sendTokenQueueMessage({ _id, refresh_token });
+	});
+	await Promise.all(operations);
 	return {
 		statusCode: 200,
 		headers: { "Content-Type": "application/json" },

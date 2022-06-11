@@ -2,15 +2,9 @@ import Chance from "chance";
 import type { IUser } from "btbot-types";
 import { customAlphabet } from "nanoid";
 
-import { MEDIA_BUCKET } from "@config";
-
 export function buildAvatarUrl(user: IUser) {
 	if (!user.avatar_hash) return "https://discord.com/assets/c09a43a372ba81e3018c3151d4ed4773.png";
 	return `https://cdn.discordapp.com/avatars/${user.user_id}/${user.avatar_hash}.png`;
-}
-
-export function buildMediaUrl(key: string) {
-	return `https://${MEDIA_BUCKET}.s3.amazonaws.com/${key}`;
 }
 
 export function readableDate(date: Date) {
@@ -25,6 +19,8 @@ export function diffInDays(date1: Date, date2: Date) {
 	const diff = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
 	return diff;
 }
+
+export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 20);
 

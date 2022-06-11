@@ -1,7 +1,8 @@
 import type { IMediaFile } from "btbot-types";
 import { Extension } from "btbot-types";
 
-import { aws, config, mongoose } from "@services";
+import { mongoose } from "@services";
+import { mediaBucket } from "@aws/buckets";
 
 class MediaFiles extends mongoose.Repository<IMediaFile> {
 	constructor() {
@@ -29,10 +30,7 @@ class MediaFiles extends mongoose.Repository<IMediaFile> {
 
 	public async getMedia(file_name: string) {
 		const { key } = await super.assertRead({ file_name });
-		const params = { Bucket: config.MEDIA_BUCKET, Key: key };
-		const url = aws.s3.getSignedUrl("getObject", params);
-		const file = await aws.s3.getObject(params).promise();
-		return { file, key, url };
+		return mediaBucket.getObject(key);
 	}
 }
 

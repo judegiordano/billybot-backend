@@ -5,7 +5,7 @@ import { serialize, parse, CookieSerializeOptions } from "cookie";
 import { jwt, config } from ".";
 import { UnauthorizedError } from "@src/types";
 
-const cookieName = "billybot.dashboard.jid";
+const cookieName = config.COOKIE_NAME;
 
 const cookieOptions: CookieSerializeOptions = {
 	httpOnly: true,

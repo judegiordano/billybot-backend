@@ -45,3 +45,13 @@ export interface IGuildInfo {
 	application_id: null;
 	roles: string[];
 }
+
+export type SqsMessage = Record<string, any>;
+export type TokenRefreshMessage = {
+	_id: string;
+	refresh_token: string;
+};
+export type FifoOptions = {
+	MessageGroupId: string;
+	MessageDeduplicationId: string;
+};

@@ -83,9 +83,9 @@ class Clients extends mongoose.Repository<IClient> {
 
 	public async assertNewClient({ username, email }: IClient) {
 		// TODO: perform stricter checks
-		const emailTaken = await clients.exists({ email });
+		const emailTaken = await super.exists({ email });
 		if (emailTaken) throw new BadRequestError("email taken");
-		const userNameTaken = await clients.exists({ username });
+		const userNameTaken = await super.exists({ username });
 		if (userNameTaken) throw new BadRequestError("username taken");
 	}
 
@@ -149,7 +149,7 @@ class Clients extends mongoose.Repository<IClient> {
 		const { refresh_token, access_token } = await oauth.refresh(auth_state.refresh_token);
 		const user = await oauth.getUserInfo(access_token);
 		// updated user info
-		const updatedClient = await clients.updateOne(
+		const updatedClient = await super.updateOne(
 			{ _id },
 			{
 				"auth_state.refresh_token": refresh_token,

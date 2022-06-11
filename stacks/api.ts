@@ -1,4 +1,13 @@
-import { Stack, App, StackProps, Api, Function, Cron, Bucket } from "@serverless-stack/resources";
+import {
+	Stack,
+	App,
+	StackProps,
+	Api,
+	Function,
+	Cron,
+	Bucket,
+	Queue
+} from "@serverless-stack/resources";
 
 export class ApiStack extends Stack {
 	constructor(scope: App, id: string, props?: StackProps) {
@@ -8,6 +17,15 @@ export class ApiStack extends Stack {
 			cdk: {
 				bucket: {
 					publicReadAccess: true
+				}
+			}
+		});
+
+		const tokenQueue = new Queue(this, "refresh-token-queue", {
+			consumer: "src/handlers/queue.refreshTokenConsumer",
+			cdk: {
+				queue: {
+					fifo: true
 				}
 			}
 		});
@@ -25,9 +43,23 @@ export class ApiStack extends Stack {
 		});
 
 		new Cron(this, "birthday-cron", {
-			// fires at 10:00am MON-FRI (UTC -> EST)
+			// fires every day at 10:00am (UTC -> EST)
 			schedule: "cron(0 14 * * ? *)",
 			job: "src/handlers/cron.happyBirthday"
+		});
+
+		new Cron(this, "refresh-oauth", {
+			// fires every 5 days
+			schedule: "rate(5 days)",
+			job: {
+				function: {
+					handler: "src/handlers/cron.refreshOauthTokens",
+					permissions: [tokenQueue],
+					environment: {
+						REFRESH_TOKEN_QUEUE: tokenQueue.cdk.queue.queueUrl
+					}
+				}
+			}
 		});
 
 		new Cron(this, "good-morning-cron", {
@@ -70,6 +102,8 @@ export class ApiStack extends Stack {
 
 		// expose api url to lambdas
 		const functions = this.getAllFunctions();
-		functions.map((fn) => fn.addEnvironment("API_URL", api.url));
+		functions.map((fn) => {
+			fn.addEnvironment("API_URL", api.url);
+		});
 	}
 }

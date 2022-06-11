@@ -1,0 +1,1 @@
+export { mediaBucket } from "./media";

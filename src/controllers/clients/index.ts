@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import type { IClient } from "btbot-types";
+import type { IClient, IServer } from "btbot-types";
 
 import { clients, servers } from "@models";
 import { DASHBOARD_URL } from "@src/services/config";
@@ -121,7 +121,7 @@ export const clientsRouter = async function (app: FastifyInstance) {
 				{},
 				{ name: 1, server_id: 1, icon_hash: 1 }
 			);
-			const matchIds = matches.map(({ server_id }) => server_id);
+			const matchIds = matches.map((server: IServer) => server.server_id && server.server_id);
 			const updatedClient = (await clients.updateOne(
 				{ _id: client._id },
 				{ "auth_state.registered_servers": matchIds }
