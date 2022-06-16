@@ -30,6 +30,15 @@ export class ApiStack extends Stack {
 			}
 		});
 
+		const notificationQueue = new Queue(this, "email-notification-queue", {
+			consumer: "src/handlers/queue.notificationQueueConsumer",
+			cdk: {
+				queue: {
+					fifo: true
+				}
+			}
+		});
+
 		new Cron(this, "lottery-cron", {
 			// fires at 12:00pm FRI (UTC -> EST)
 			schedule: "cron(0 16 ? * FRI *)",
@@ -82,6 +91,7 @@ export class ApiStack extends Stack {
 			},
 			defaults: {
 				function: {
+					permissions: [notificationQueue],
 					environment: {
 						MEDIA_BUCKET: mediaBucket.bucketName
 					}
@@ -100,10 +110,11 @@ export class ApiStack extends Stack {
 			bucket: process.env.IS_LOCAL ? mediaBucket.bucketName : "*******"
 		});
 
-		// expose api url to lambdas
+		// expose envs to lambdas
 		const functions = this.getAllFunctions();
 		functions.map((fn) => {
 			fn.addEnvironment("API_URL", api.url);
+			fn.addEnvironment("NOTIFICATION_QUEUE", notificationQueue.cdk.queue.queueUrl);
 		});
 	}
 }

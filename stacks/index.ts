@@ -11,6 +11,8 @@ export default function main(app: App) {
 			STAGE: stage,
 			JWT_SECRET: process.env.JWT_SECRET ?? "secret",
 			MONGO_URI: process.env.MONGO_URI ?? "mongodb://localhost:27017/billybot-api-local",
+			EMAIL: process.env.EMAIL ?? "billybot.alerts@gmail.com",
+			SENDGRID_API_KEY: process.env.SENDGRID_API_KEY ?? "xxxxxxxxxxxx",
 			VERSION: process.env.VERSION ?? "1",
 			REGION: app.region,
 			DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID ?? "client_id",

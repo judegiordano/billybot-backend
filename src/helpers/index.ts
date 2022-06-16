@@ -27,3 +27,4 @@ export const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 20);
 export const chance = new Chance();
 
 export { spinColor, getRouletteResult, buildBlackJackMetrics } from "./gambling";
+export { renderTemplate } from "./email-templates";

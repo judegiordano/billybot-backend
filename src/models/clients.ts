@@ -1,6 +1,7 @@
 import { ClientElevation, IClient, ClientConnectionStatus, IServer } from "btbot-types";
 
 import { jwt, mongoose, oauth, password } from "@services";
+import { nanoid } from "@helpers";
 import { BadRequestError, UnauthorizedError } from "@src/types";
 
 interface IAuthorizedClient extends IClient {
@@ -102,6 +103,15 @@ class Clients extends mongoose.Repository<IClient> {
 		const match = await password.comparePassword(pass, client.password);
 		if (!match) throw new UnauthorizedError("incorrect password");
 		return client;
+	}
+
+	public async resetPassword({ username, email }: { username: string; email: string }) {
+		const client = await super.read({ username, email });
+		if (!client) throw new UnauthorizedError("username or email not found");
+		const tempPassword = nanoid();
+		const hash = await password.hashPassword(tempPassword);
+		await super.updateOne({ _id: client._id }, { password: hash });
+		return { client, tempPassword };
 	}
 
 	public async assertReadByToken(token: string): Promise<IClient> {

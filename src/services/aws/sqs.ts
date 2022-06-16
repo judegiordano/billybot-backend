@@ -3,6 +3,7 @@ import type { SQSRecord } from "aws-lambda";
 import { customAlphabet } from "nanoid";
 
 import type { FifoOptions } from "@src/types";
+import { delay } from "@helpers";
 
 const nanoid = customAlphabet("0123456789", 20);
 
@@ -15,11 +16,12 @@ export class Fifo {
 		this.queueUrl = queueUrl;
 	}
 
-	public dedupe(id: string) {
+	protected dedupe(id: string) {
 		return `${nanoid()}.${id}`;
 	}
 
-	public async sendMessage<T>(message: T, options: FifoOptions) {
+	protected async sendMessage<T>(message: T, options: FifoOptions) {
+		await delay(options.MessageDelay ?? 0);
 		return this.sqs
 			.sendMessage({
 				QueueUrl: this.queueUrl,
@@ -30,7 +32,7 @@ export class Fifo {
 			.promise();
 	}
 
-	public parseRecords<T>(records: SQSRecord[]) {
+	protected parseRecords<T>(records: SQSRecord[]) {
 		return records.map(({ body }) => JSON.parse(body) as T);
 	}
 }
