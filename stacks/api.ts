@@ -115,6 +115,7 @@ export class ApiStack extends Stack {
 		functions.map((fn) => {
 			fn.addEnvironment("API_URL", api.url);
 			fn.addEnvironment("NOTIFICATION_QUEUE", notificationQueue.cdk.queue.queueUrl);
+			fn.addEnvironment("REFRESH_TOKEN_QUEUE", tokenQueue.cdk.queue.queueUrl);
 		});
 	}
 }
