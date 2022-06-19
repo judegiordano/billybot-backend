@@ -1,22 +1,13 @@
 import type { SQSEvent } from "aws-lambda";
 
 import { mongoose } from "@src/services";
-import { oauthQueue } from "@aws/queues";
+import { oauthQueue, notificationQueue } from "@aws/queues";
 
 export async function refreshTokenConsumer({ Records }: SQSEvent) {
-	try {
-		await mongoose.createConnection();
-		const ok = await oauthQueue.refreshTokensHandler(Records);
-		return {
-			statusCode: 200,
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ ok })
-		};
-	} catch (error) {
-		return {
-			statusCode: 500,
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ error })
-		};
-	}
+	await mongoose.createConnection();
+	return await oauthQueue.refreshTokensHandler(Records);
+}
+
+export async function notificationQueueConsumer({ Records }: SQSEvent) {
+	return await notificationQueue.emailQueueHandler(Records);
 }

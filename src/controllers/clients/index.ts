@@ -3,6 +3,7 @@ import type { IClient, IServer } from "btbot-types";
 
 import { clients, servers } from "@models";
 import { DASHBOARD_URL } from "@src/services/config";
+import { notificationQueue } from "@aws/queues";
 import { cookie, oauth } from "@src/services";
 
 export const clientsRouter = async function (app: FastifyInstance) {
@@ -31,6 +32,7 @@ export const clientsRouter = async function (app: FastifyInstance) {
 		},
 		async (req, res) => {
 			const client = await clients.register(req.body);
+			await notificationQueue.queueAccountCreatedEmail(client.email, client.username);
 			cookie.sign(res, client);
 			return client;
 		}
@@ -57,6 +59,27 @@ export const clientsRouter = async function (app: FastifyInstance) {
 			const client = await clients.login(req.body);
 			cookie.sign(res, client);
 			return client;
+		}
+	);
+	app.post<{ Body: IClient }>(
+		"/clients/password-reset",
+		{
+			schema: {
+				body: {
+					type: "object",
+					required: ["username", "email"],
+					additionalProperties: false,
+					properties: {
+						username: { type: "string" },
+						email: { type: "string" }
+					}
+				}
+			}
+		},
+		async (req) => {
+			const { client, tempPassword } = await clients.resetPassword(req.body);
+			await notificationQueue.queuePasswordResetEmail(client.email, tempPassword);
+			return { ok: true };
 		}
 	);
 	app.post("/clients/logout", async (_, res) => {

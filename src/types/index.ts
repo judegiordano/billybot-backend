@@ -51,7 +51,14 @@ export type TokenRefreshMessage = {
 	_id: string;
 	refresh_token: string;
 };
+export type EmailQueueMessage = {
+	recipients: string[];
+	text?: string;
+	html?: string;
+	subject?: string;
+};
 export type FifoOptions = {
 	MessageGroupId: string;
 	MessageDeduplicationId: string;
+	MessageDelay?: number;
 };
