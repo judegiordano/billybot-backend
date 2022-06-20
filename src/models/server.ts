@@ -47,7 +47,7 @@ class Servers extends mongoose.Repository<IServer> {
 				},
 				feature_rate: {
 					type: Number,
-					default: 250
+					default: 100
 				},
 				challenge_bet_max: {
 					type: Number,
