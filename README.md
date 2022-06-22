@@ -1,79 +1,27 @@
 # BIllyBot Backend
-## Headers
-```
-authorization: 'Bearer xxxxx'
-x-api-timestamp: 'xxxxx'
-```
----
-## Methods
-```
-/api/v*/
-```
-<details>
-<summary>/developer</summary>
-<p>
 
-- `GET` /ping
-</p>
-</details>
----
-<details>
-<summary>/users</summary>
-<p>
+## Running Serverless Stack Locally
 
-- `POST` /
-	```ts
-	{
-		server_id: string;
-		user_id: string;
-		username: string;
-		discriminator: string;
-		billy_bucks?: number;
-		avatar_hash?: string;
-	}[]
-	```
-</p>
-<p>
+1: Ensure you have a valid [aws account](https://serverless-stack.com/chapters/create-an-aws-account.html)
 
-- `GET` /server/`server_id`
-</p>
-<p>
+2: Create a valid [IAM User](https://serverless-stack.com/chapters/create-an-iam-user.html)
 
-- `GET` /?user_id=`string`&server_id=`string`
-</p>
-<p>
+3: Copy The `Secret Access Key` and `Access Key Id` (do not lose these)
 
-- `DELETE` /server/`server_id`
-</p>
-</details>
----
-<details>
-<summary>/metrics</summary>
-<p>
+4: Install the [Aws cli](https://serverless-stack.com/chapters/configure-the-aws-cli.html)
 
-- `GET` /server/`server_id`
-	```
-	?posts=0|1
-	&reactions_used=0|1
-	&reactions_received=0|1
-	&mentions=0|1
-	```
-</p>
-<p>
+5: in terminal, run
 
-- `PUT` /
-	```ts
-	{
-		server_id: string;
-        user_id: string;
-		metrics: {
-			posts?: number;
-			reactions_used?: number;
-			reactions_received?: number;
-			mentions?: number;
-		}
-	}[]
-	```
-</p>
-</details>
----
+	aws configure
+
+ and enter your `Secret Access Key` and `Access Key Id`
+
+6: clone this backend repository locally
+
+7: `compose up` the necessary mongodb docker image provided in the dev container
+
+8: run `yarn install`
+
+9: run `yarn start local`
+
+10: begin making requests either through curl or the team postman workspace (will have to request access)
