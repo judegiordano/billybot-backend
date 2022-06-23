@@ -110,7 +110,7 @@ export const challengeRouter = async function (app: FastifyInstance) {
 			});
 			if (hasBet) throw new BadRequestError("You have already bet on the current challenge");
 			await users.assertHasBucks(user_id, server_id, amount);
-			const [result] = await Promise.all([
+			const [bet, user] = await Promise.all([
 				bets.insertOne({
 					user_id,
 					participant_id,
@@ -122,7 +122,7 @@ export const challengeRouter = async function (app: FastifyInstance) {
 					{ $inc: { billy_bucks: -amount, "metrics.gambling.challenges.bets": 1 } }
 				)
 			]);
-			return result;
+			return { bet, billyBucks: user.billy_bucks };
 		}
 	);
 	app.put<{ Body: { server_id: string; participant_id: string } }>(
