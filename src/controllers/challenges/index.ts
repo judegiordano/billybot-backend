@@ -122,7 +122,7 @@ export const challengeRouter = async function (app: FastifyInstance) {
 					{ $inc: { billy_bucks: -amount, "metrics.gambling.challenges.bets": 1 } }
 				)
 			]);
-			return { bet: betResult, billyBucks: userResult.billy_bucks };
+			return { bet: betResult, billy_bucks: userResult.billy_bucks };
 		}
 	);
 	app.put<{ Body: { server_id: string; participant_id: string } }>(

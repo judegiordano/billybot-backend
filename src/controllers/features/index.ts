@@ -21,7 +21,7 @@ export const featureRouter = async function (app: FastifyInstance) {
 					}
 				},
 				response: {
-					200: { feature: { $ref: "feature#" }, billyBucks: { type: "number" } }
+					200: { feature: { $ref: "feature#" }, billy_bucks: { type: "number" } }
 				}
 			}
 		},
@@ -43,7 +43,7 @@ export const featureRouter = async function (app: FastifyInstance) {
 					}
 				)
 			]);
-			return { feature: featureResult, billyBucks: userResult.billy_bucks };
+			return { feature: featureResult, billy_bucks: userResult.billy_bucks };
 		}
 	);
 	app.get<{
