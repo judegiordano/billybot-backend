@@ -21,7 +21,7 @@ export const featureRouter = async function (app: FastifyInstance) {
 					}
 				},
 				response: {
-					200: { $ref: "feature#" }
+					200: { feature: { $ref: "feature#" }, billy_bucks: { type: "number" } }
 				}
 			}
 		},
@@ -32,7 +32,7 @@ export const featureRouter = async function (app: FastifyInstance) {
 				server.server_id,
 				server.settings.feature_rate
 			);
-			const [result] = await Promise.all([
+			const [featureResult, userResult] = await Promise.all([
 				features.insertOne({ ...req.body, user: user._id }),
 				users.assertUpdateOne(
 					{ user_id: user.user_id, server_id: server.server_id },
@@ -43,7 +43,7 @@ export const featureRouter = async function (app: FastifyInstance) {
 					}
 				)
 			]);
-			return result;
+			return { feature: featureResult, billy_bucks: userResult.billy_bucks };
 		}
 	);
 	app.get<{
