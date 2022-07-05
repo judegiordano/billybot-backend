@@ -209,8 +209,8 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 				users.assertRead({ user_id: mentioned_user_id, server_id })
 			]);
 
-			if (user.user_id === mentionedUser.user_id)
-				throw new BadRequestError("You cannot play Connect Four against yourself!");
+			// if (user.user_id === mentionedUser.user_id)
+			// 	throw new BadRequestError("You cannot play Connect Four against yourself!");
 
 			const [
 				existingChallenge,
@@ -254,8 +254,14 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 				// start the game
 				const [startNewGame] = await Promise.all([
 					connectFourGames.acceptExistingChallengeAndStartGame(existingChallenge),
-					users.updateOne({ _id: user._id }, { $inc: { billy_bucks: -wager } }),
-					users.updateOne({ _id: mentionedUser._id }, { $inc: { billy_bucks: -wager } })
+					users.updateOne(
+						{ _id: user._id },
+						{ $inc: { billy_bucks: -existingChallenge.wager } }
+					),
+					users.updateOne(
+						{ _id: mentionedUser._id },
+						{ $inc: { billy_bucks: -existingChallenge.wager } }
+					)
 				]);
 				return startNewGame;
 			}
@@ -303,13 +309,31 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 
 			const game = connectFourGames.moveHandler(user, activeGame, move);
 
-			if (connectFourGames.isGameWon(game)) {
+			const [wonHorizonally, wonVertically, wonAscendingDiagonally, wonDescendingDiagonally] =
+				await connectFourGames.isGameWon(game);
+
+			if (
+				wonHorizonally ||
+				wonVertically ||
+				wonAscendingDiagonally ||
+				wonDescendingDiagonally
+			) {
 				game.is_complete = true;
 				await users.updateOne({ _id: user._id }, { $inc: { billy_bucks: 2 * game.wager } });
 			} else {
 				if (connectFourGames.isGameDrawn(game)) {
 					game.is_complete = true;
 					game.to_move = "";
+					await Promise.all([
+						users.updateOne(
+							{ server_id, user_id: game.red_user_id },
+							{ $inc: { billy_bucks: game.wager } }
+						),
+						users.updateOne(
+							{ server_id, user_id: game.yellow_user_id },
+							{ $inc: { billy_bucks: game.wager } }
+						)
+					]);
 				} else {
 					game.to_move =
 						game.to_move === game.red_user_id ? game.yellow_user_id : game.red_user_id;

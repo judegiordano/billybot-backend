@@ -1,4 +1,4 @@
-import type { IConnectFour, IUser } from "btbot-types";
+import type { ConnectFourColumn, IConnectFour, IUser } from "btbot-types";
 import { ConnectFourColor } from "btbot-types";
 
 import { mongoose } from "@services";
@@ -139,13 +139,22 @@ class ConnectFourGames extends mongoose.Repository<IConnectFour> {
 		return game;
 	}
 
-	/** Check for four in a row */
-	public isGameWon(game: IConnectFour) {
+	/** Check for four in a row (horizontally, vertically, ascending diagonally, descending diagonally) */
+	public async isGameWon(game: IConnectFour) {
 		const { board } = game;
 		const color =
 			game.to_move === game.red_user_id ? ConnectFourColor.red : ConnectFourColor.yellow;
 
-		// horizontally
+		return Promise.all([
+			this.winCheckHorizonally(board, color),
+			this.winCheckVertically(board, color),
+			this.winCheckAscendingDiagonally(board, color),
+			this.winCheckDescendingDiagonally(board, color)
+		]);
+	}
+
+	/** Check for four in a row horizonally*/
+	private async winCheckHorizonally(board: ConnectFourColumn[], color: ConnectFourColor) {
 		for (let i = 0; i < 4; i++) {
 			for (let j = 0; j < 6; j++) {
 				if (
@@ -157,8 +166,11 @@ class ConnectFourGames extends mongoose.Repository<IConnectFour> {
 					return true;
 			}
 		}
+		return false;
+	}
 
-		// vertically
+	/** Check for four in a row vertically*/
+	private async winCheckVertically(board: ConnectFourColumn[], color: ConnectFourColor) {
 		for (let i = 0; i < 7; i++) {
 			for (let j = 0; j < 3; j++) {
 				if (
@@ -170,8 +182,11 @@ class ConnectFourGames extends mongoose.Repository<IConnectFour> {
 					return true;
 			}
 		}
+		return false;
+	}
 
-		// ascending diagonally
+	/** Check for four in a row ascending diagonally*/
+	private async winCheckAscendingDiagonally(board: ConnectFourColumn[], color: ConnectFourColor) {
 		for (let i = 0; i < 4; i++) {
 			for (let j = 0; j < 3; j++) {
 				if (
@@ -183,8 +198,14 @@ class ConnectFourGames extends mongoose.Repository<IConnectFour> {
 					return true;
 			}
 		}
+		return false;
+	}
 
-		// descending diagonally
+	/** Check for four in a row descending diagonally*/
+	private async winCheckDescendingDiagonally(
+		board: ConnectFourColumn[],
+		color: ConnectFourColor
+	) {
 		for (let i = 0; i < 4; i++) {
 			for (let j = 3; j < 6; j++) {
 				if (
@@ -196,7 +217,6 @@ class ConnectFourGames extends mongoose.Repository<IConnectFour> {
 					return true;
 			}
 		}
-
 		return false;
 	}
 
