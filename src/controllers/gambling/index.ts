@@ -214,21 +214,21 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 
 			const [
 				existingChallenge,
-				userHasActiveGame,
-				mentionedUserHasActiveGame,
+				userActiveGame,
+				mentionedUserActiveGame,
 				userHasEnoughBucks,
 				mentionedUserHasEnoughBucks
 			] = await Promise.all([
 				connectFourGames.getUnacceptedChallenge(user),
-				connectFourGames.hasActiveGame(user),
-				connectFourGames.hasActiveGame(mentionedUser),
+				connectFourGames.getActiveGame(user),
+				connectFourGames.getActiveGame(mentionedUser),
 				users.hasBucks(user.user_id, server_id, wager),
 				users.hasBucks(mentionedUser.user_id, server_id, wager)
 			]);
 
-			if (userHasActiveGame)
+			if (userActiveGame)
 				throw new BadRequestError("You already have an active game of Connect Four!");
-			if (mentionedUserHasActiveGame)
+			if (mentionedUserActiveGame)
 				throw new BadRequestError(
 					`<@${mentionedUser.user_id}> already has an active game of Connect Four!`
 				);
@@ -243,31 +243,31 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 					`<@${mentionedUser.user_id}> only has ${mentionedUser.billy_bucks} BillyBucks - cannot wager ${wager} BillyBucks!`
 				);
 
-			if (existingChallenge) {
-				if (existingChallenge.yellow_user_id === user.user_id) {
-					// if the user is yellow in the existing challenge, check if the mentioned user is red
-					if (existingChallenge.red_user_id === mentionedUser.user_id) {
-						// start the game
-						const [startNewGame] = await Promise.all([
-							connectFourGames.acceptExistingChallengeAndStartGame(existingChallenge),
-							users.updateOne({ _id: user._id }, { $inc: { billy_bucks: -wager } }),
-							users.updateOne(
-								{ _id: mentionedUser._id },
-								{ $inc: { billy_bucks: -wager } }
-							)
-						]);
-						return startNewGame;
-					}
-					// issue a new challenge to the mentioned user
-					return await connectFourGames.createNewChallenge(user, mentionedUser, wager);
-				}
-				// update the existing challenge
+			// issue a new challenge to the mentioned user if there is no existing challenge
+			if (!existingChallenge)
+				return await connectFourGames.createNewChallenge(user, mentionedUser, wager);
+
+			if (
+				existingChallenge.yellow_user_id === user.user_id &&
+				existingChallenge.red_user_id === mentionedUser.user_id
+			) {
+				// start the game
+				const [startNewGame] = await Promise.all([
+					connectFourGames.acceptExistingChallengeAndStartGame(existingChallenge),
+					users.updateOne({ _id: user._id }, { $inc: { billy_bucks: -wager } }),
+					users.updateOne({ _id: mentionedUser._id }, { $inc: { billy_bucks: -wager } })
+				]);
+				return startNewGame;
+			}
+
+			// update the existing challenge
+			if (existingChallenge.red_user_id === user.user_id)
 				return await connectFourGames.updateExistingChallenge(
 					existingChallenge,
 					mentionedUser,
 					wager
 				);
-			}
+
 			// issue a new challenge to the mentioned user
 			return await connectFourGames.createNewChallenge(user, mentionedUser, wager);
 		}
@@ -299,9 +299,7 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 			await servers.assertExists({ server_id });
 
 			const user = await users.assertRead({ user_id, server_id });
-			const activeGame = await connectFourGames.getActiveGame(user);
-			if (!activeGame)
-				throw new BadRequestError("You do not have an active game of Connect Four!");
+			const activeGame = await connectFourGames.assertHasActiveGame(user);
 
 			const game = connectFourGames.moveHandler(user, activeGame, move);
 

@@ -3,6 +3,7 @@ import { ConnectFourColor } from "btbot-types";
 
 import { mongoose } from "@services";
 import { BadRequestError } from "@errors";
+import { chance } from "@helpers";
 
 class ConnectFourGames extends mongoose.Repository<IConnectFour> {
 	constructor() {
@@ -65,7 +66,7 @@ class ConnectFourGames extends mongoose.Repository<IConnectFour> {
 	/** Return user's active game or open/unaccepted challenge if it exists, else null */
 	public async getActiveGame(user: IUser, challenge?: boolean) {
 		const { user_id, server_id } = user;
-		return await super.read({
+		return super.read({
 			server_id,
 			$or: [{ red_user_id: user_id }, { yellow_user_id: user_id }],
 			is_accepted: challenge ? false : true,
@@ -75,7 +76,7 @@ class ConnectFourGames extends mongoose.Repository<IConnectFour> {
 
 	/** Return user's open/unaccepted active challenge if it exists, else null */
 	public async getUnacceptedChallenge(user: IUser) {
-		return await this.getActiveGame(user, true);
+		return this.getActiveGame(user, true);
 	}
 
 	/** Return true if user has an active game, else false */
@@ -84,9 +85,16 @@ class ConnectFourGames extends mongoose.Repository<IConnectFour> {
 		return false;
 	}
 
+	/** Throw error if the user does not have an active game, else return the game */
+	public async assertHasActiveGame(user: IUser) {
+		const game = await this.getActiveGame(user);
+		if (!game) throw new BadRequestError("You do not have an active game of Connect Four!");
+		return game;
+	}
+
 	/** Challenge another player to a game */
 	public async createNewChallenge(challengerUser: IUser, challengedUser: IUser, wager: number) {
-		return await super.insertOne({
+		return super.insertOne({
 			server_id: challengerUser.server_id,
 			red_user_id: challengerUser.user_id,
 			yellow_user_id: challengedUser.user_id,
@@ -106,14 +114,14 @@ class ConnectFourGames extends mongoose.Repository<IConnectFour> {
 		)
 			return existingChallenge;
 		const { _id } = existingChallenge;
-		return await super.updateOne({ _id }, { yellow_user_id: challengedUser.user_id, wager });
+		return super.updateOne({ _id }, { yellow_user_id: challengedUser.user_id, wager });
 	}
 
 	/** Randomly pick which player moves first and start the game */
 	public async acceptExistingChallengeAndStartGame(existingChallenge: IConnectFour) {
 		const { _id, red_user_id, yellow_user_id } = existingChallenge;
-		const to_move = Math.random() < 0.5 ? red_user_id : yellow_user_id;
-		return await super.updateOne({ _id }, { to_move, is_accepted: true });
+		const to_move = chance.bool() ? red_user_id : yellow_user_id;
+		return super.updateOne({ _id }, { to_move, is_accepted: true });
 	}
 
 	/** Validate move and update the board */
@@ -203,7 +211,7 @@ class ConnectFourGames extends mongoose.Repository<IConnectFour> {
 	/** Update the gamestate at the end of a turn */
 	public async endTurn(game: IConnectFour) {
 		const { _id } = game;
-		return await super.updateOne({ _id }, game);
+		return super.updateOne({ _id }, game);
 	}
 }
 
