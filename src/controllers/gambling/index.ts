@@ -209,8 +209,8 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 				users.assertRead({ user_id: mentioned_user_id, server_id })
 			]);
 
-			// if (user.user_id === mentionedUser.user_id)
-			// 	throw new BadRequestError("You cannot play Connect Four against yourself!");
+			if (user.user_id === mentionedUser.user_id)
+				throw new BadRequestError("You cannot play Connect Four against yourself!");
 
 			const [
 				existingChallenge,
