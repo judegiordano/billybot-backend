@@ -9,3 +9,4 @@ export { features } from "./feature";
 export { clients } from "./clients";
 export { challenges } from "./challenge";
 export { bets } from "./bet";
+export { connectFourGames } from "./connect-four-games";
