@@ -226,6 +226,11 @@ class Users extends mongoose.Repository<IUser> {
 		return user;
 	}
 
+	public async hasBucks(user_id: string, server_id: string, amount: number) {
+		const { billy_bucks } = await super.assertRead({ user_id, server_id });
+		return billy_bucks >= amount;
+	}
+
 	public async payBucks(
 		server_id: string,
 		amount: number,

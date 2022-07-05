@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
-import { IBlackJack, IServer, RouletteColor } from "btbot-types";
-import type { IUser } from "btbot-types";
+import type { IBlackJack, IConnectFour, IServer, IUser } from "btbot-types";
+import { RouletteColor } from "btbot-types";
 
-import { users, servers, blackjackGames } from "@models";
+import { users, servers, blackjackGames, connectFourGames } from "@models";
 import { BadRequestError } from "@errors";
 
 export const gamblingRouter = async function (app: FastifyInstance) {
@@ -175,6 +175,174 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 			);
 			if (!game) return {};
 			return blackjackGames.normalizeHands(game);
+		}
+	);
+	app.post<{
+		Body: IConnectFour & {
+			user_id: string;
+			mentioned_user_id: string;
+		};
+	}>(
+		"/gamble/connectfour/challenge",
+		{
+			preValidation: [app.restricted],
+			schema: {
+				body: {
+					type: "object",
+					required: ["server_id", "user_id", "mentioned_user_id"],
+					additionalProperties: false,
+					properties: {
+						server_id: { type: "string" },
+						user_id: { type: "string" },
+						mentioned_user_id: { type: "string" },
+						wager: { type: "number", default: 0 }
+					}
+				}
+			}
+		},
+		async (req) => {
+			const { server_id, user_id, mentioned_user_id, wager } = req.body;
+			await servers.assertExists({ server_id });
+
+			const [user, mentionedUser] = await Promise.all([
+				users.assertRead({ user_id, server_id }),
+				users.assertRead({ user_id: mentioned_user_id, server_id })
+			]);
+
+			const [
+				existingChallenge,
+				userHasActiveGame,
+				mentionedUserHasActiveGame,
+				userHasEnoughBucks,
+				mentionedUserHasEnoughBucks
+			] = await Promise.all([
+				connectFourGames.getUnacceptedChallenge(user),
+				connectFourGames.hasActiveGame(user),
+				connectFourGames.hasActiveGame(mentionedUser),
+				users.hasBucks(user.user_id, server_id, wager),
+				users.hasBucks(mentionedUser.user_id, server_id, wager)
+			]);
+
+			if (userHasActiveGame)
+				throw new BadRequestError("You already have an active game of Connect Four!");
+			if (mentionedUserHasActiveGame)
+				throw new BadRequestError(
+					`<@${mentionedUser.user_id}> already has an active game of Connect Four!`
+				);
+
+			if (wager < 0) throw new BadRequestError("Wager amount must not be negative!");
+			if (!userHasEnoughBucks)
+				throw new BadRequestError(
+					`You only have ${user.billy_bucks} BillyBucks - cannot wager ${wager} BillyBucks!`
+				);
+			if (!mentionedUserHasEnoughBucks)
+				throw new BadRequestError(
+					`<@${mentionedUser.user_id}> only has ${mentionedUser.billy_bucks} BillyBucks - cannot wager ${wager} BillyBucks!`
+				);
+
+			if (existingChallenge) {
+				if (existingChallenge.yellow_user_id === user.user_id) {
+					// if the user is yellow in the existing challenge, check if the mentioned user is red
+					if (existingChallenge.red_user_id === mentionedUser.user_id) {
+						// start the game
+						const [startNewGame] = await Promise.all([
+							connectFourGames.acceptExistingChallengeAndStartGame(existingChallenge),
+							users.updateOne({ _id: user._id }, { $inc: { billy_bucks: -wager } }),
+							users.updateOne(
+								{ _id: mentionedUser._id },
+								{ $inc: { billy_bucks: -wager } }
+							)
+						]);
+						return startNewGame;
+					}
+					// issue a new challenge to the mentioned user
+					return await connectFourGames.createNewChallenge(user, mentionedUser, wager);
+				}
+				// update the existing challenge
+				return await connectFourGames.updateExistingChallenge(
+					existingChallenge,
+					mentionedUser,
+					wager
+				);
+			}
+			// issue a new challenge to the mentioned user
+			return await connectFourGames.createNewChallenge(user, mentionedUser, wager);
+		}
+	);
+	app.post<{
+		Body: IConnectFour & {
+			user_id: string;
+			move: number;
+		};
+	}>(
+		"/gamble/connectfour/move",
+		{
+			preValidation: [app.restricted],
+			schema: {
+				body: {
+					type: "object",
+					required: ["server_id", "user_id", "move"],
+					additionalProperties: false,
+					properties: {
+						server_id: { type: "string" },
+						user_id: { type: "string" },
+						move: { type: "number" }
+					}
+				}
+			}
+		},
+		async (req) => {
+			const { server_id, user_id, move } = req.body;
+			await servers.assertExists({ server_id });
+
+			const user = await users.assertRead({ user_id, server_id });
+			const activeGame = await connectFourGames.getActiveGame(user);
+			if (!activeGame)
+				throw new BadRequestError("You do not have an active game of Connect Four!");
+
+			const game = connectFourGames.moveHandler(user, activeGame, move);
+
+			if (connectFourGames.isGameWon(game)) {
+				game.is_complete = true;
+				await users.updateOne({ _id: user._id }, { $inc: { billy_bucks: 2 * game.wager } });
+			} else {
+				if (connectFourGames.isGameDrawn(game)) {
+					game.is_complete = true;
+					game.to_move = "";
+				} else {
+					game.to_move =
+						game.to_move === game.red_user_id ? game.yellow_user_id : game.red_user_id;
+				}
+			}
+
+			return await connectFourGames.endTurn(game);
+		}
+	);
+	app.get<{ Params: IUser; Querystring: IUser }>(
+		"/gamble/connectfour/server/:server_id",
+		{
+			preValidation: [app.restricted],
+			schema: {
+				params: { $ref: "serverIdParams#" },
+				querystring: {
+					type: "object",
+					required: ["user_id"],
+					additionalProperties: false,
+					properties: {
+						user_id: { type: "string" }
+					}
+				}
+			}
+		},
+		async (req) => {
+			const { user_id } = req.query;
+			const { server_id } = req.params;
+			await servers.assertExists({ server_id });
+			const user = await users.assertRead({ user_id, server_id });
+
+			const game = await connectFourGames.getActiveGame(user);
+			if (!game) return {};
+			return game;
 		}
 	);
 };

@@ -1388,10 +1388,10 @@ bson@^4.2.2, bson@^4.6.1:
   dependencies:
     buffer "^5.6.0"
 
-btbot-types@^1.6.6:
-  version "1.6.6"
-  resolved "https://registry.yarnpkg.com/btbot-types/-/btbot-types-1.6.6.tgz#da6970ffbf4bc6f51701edb3d6d529626ce96ebc"
-  integrity sha512-CupEToqTOMgciu0ZIUqhsXA23IRWOBZjMpqA68otWI1AWHTqx3qbtyIWxGrtcq542dwMFim61g94VQY9iwIEMQ==
+btbot-types@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/btbot-types/-/btbot-types-1.7.0.tgz#561c1a0b8dfc303b38fca56e76678930b86893aa"
+  integrity sha512-x/2ND71RVlh2q1e//mleLhQaSgXFjJVpNYkS1U4WZLLhwqYUkXZ+m6PMj9nXEtoOEljLuaYgy0XV1jWYgrU5XA==
 
 buffer-crc32@^0.2.1, buffer-crc32@^0.2.13:
   version "0.2.13"
