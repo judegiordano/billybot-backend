@@ -442,12 +442,7 @@ class Users extends mongoose.Repository<IUser> {
 	public async updateConnectFourMetrics(game: IConnectFour, user_id: string) {
 		const { server_id } = game;
 		const { $inc } = buildConnectFourMetrics(game, user_id);
-		return super.updateOne(
-			{ server_id, user_id },
-			{
-				$inc
-			}
-		) as Promise<IUser>;
+		return super.updateOne({ server_id, user_id }, { $inc }) as Promise<IUser>;
 	}
 
 	public async lotteryInformation(server: IServer) {
