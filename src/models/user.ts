@@ -1,5 +1,6 @@
 import type {
 	IBlackJack,
+	IConnectFour,
 	IEngagementMetrics,
 	IServer,
 	IServerSettings,
@@ -9,7 +10,12 @@ import type {
 import { RouletteColor, CardSuit } from "btbot-types";
 
 import { mongoose, discord } from "@services";
-import { getRouletteResult, buildBlackJackMetrics, chance } from "@helpers";
+import {
+	getRouletteResult,
+	buildBlackJackMetrics,
+	buildConnectFourMetrics,
+	chance
+} from "@helpers";
 import { UnauthorizedError, BadRequestError } from "@errors";
 import type { PipelineStage } from "@interfaces";
 import type { Dictionary } from "@types";
@@ -161,6 +167,33 @@ class Users extends mongoose.Repository<IUser> {
 					challenges: {
 						required: false,
 						bets: {
+							type: Number,
+							default: 0
+						},
+						wins: {
+							type: Number,
+							default: 0
+						},
+						losses: {
+							type: Number,
+							default: 0
+						},
+						draws: {
+							type: Number,
+							default: 0
+						},
+						overall_winnings: {
+							type: Number,
+							default: 0
+						},
+						overall_losings: {
+							type: Number,
+							default: 0
+						}
+					},
+					connect_four: {
+						required: false,
+						games: {
 							type: Number,
 							default: 0
 						},
@@ -402,6 +435,17 @@ class Users extends mongoose.Repository<IUser> {
 					won: game.won,
 					hand: game.player_hand
 				}
+			}
+		) as Promise<IUser>;
+	}
+
+	public async updateConnectFourMetrics(game: IConnectFour, user_id: string) {
+		const { server_id } = game;
+		const { $inc } = buildConnectFourMetrics(game, user_id);
+		return super.updateOne(
+			{ server_id, user_id },
+			{
+				$inc
 			}
 		) as Promise<IUser>;
 	}
