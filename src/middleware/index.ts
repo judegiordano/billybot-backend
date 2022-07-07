@@ -105,6 +105,17 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 									overall_winnings: { type: "number" },
 									overall_losings: { type: "number" }
 								}
+							},
+							connect_four: {
+								type: "object",
+								properties: {
+									games: { type: "number" },
+									wins: { type: "number" },
+									losses: { type: "number" },
+									draws: { type: "number" },
+									overall_winnings: { type: "number" },
+									overall_losings: { type: "number" }
+								}
 							}
 						}
 					},
