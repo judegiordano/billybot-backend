@@ -178,10 +178,6 @@ class Users extends mongoose.Repository<IUser> {
 							type: Number,
 							default: 0
 						},
-						draws: {
-							type: Number,
-							default: 0
-						},
 						overall_winnings: {
 							type: Number,
 							default: 0
@@ -202,6 +198,10 @@ class Users extends mongoose.Repository<IUser> {
 							default: 0
 						},
 						losses: {
+							type: Number,
+							default: 0
+						},
+						draws: {
 							type: Number,
 							default: 0
 						},
