@@ -1,4 +1,4 @@
-import { RouletteColor } from "btbot-types";
+import { IConnectFour, RouletteColor } from "btbot-types";
 import type { IBlackJack } from "btbot-types";
 
 import { chance } from ".";
@@ -44,6 +44,20 @@ export function buildBlackJackMetrics(game: IBlackJack) {
 		"metrics.gambling.blackjack.double_downs": double_down ? 1 : 0,
 		...(won ? { "metrics.gambling.blackjack.overall_winnings": payout } : {}),
 		...(!won ? { "metrics.gambling.blackjack.overall_losings": wager } : {})
+	};
+	return { $inc };
+}
+
+export function buildConnectFourMetrics(game: IConnectFour, user_id: string) {
+	const { to_move, wager } = game;
+	const won = to_move === user_id;
+	const draw = !to_move;
+
+	const $inc = {
+		"metrics.gambling.connect_four.games": 1,
+		[`metrics.gambling.connect_four.${won ? "wins" : draw ? "draws" : "losses"}`]: 1,
+		...(won ? { "metrics.gambling.connect_four.overall_winnings": wager } : {}),
+		...(!won && !draw ? { "metrics.gambling.connect_four.overall_losings": wager } : {})
 	};
 	return { $inc };
 }

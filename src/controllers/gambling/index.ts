@@ -319,7 +319,11 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 				wonDescendingDiagonally
 			) {
 				game.is_complete = true;
-				await users.updateOne({ _id: user._id }, { $inc: { billy_bucks: 2 * game.wager } });
+				await Promise.all([
+					users.updateOne({ _id: user._id }, { $inc: { billy_bucks: 2 * game.wager } }),
+					users.updateConnectFourMetrics(game, game.red_user_id),
+					users.updateConnectFourMetrics(game, game.yellow_user_id)
+				]);
 			} else {
 				if (connectFourGames.isGameDrawn(game)) {
 					game.is_complete = true;
@@ -332,7 +336,9 @@ export const gamblingRouter = async function (app: FastifyInstance) {
 						users.updateOne(
 							{ server_id, user_id: game.yellow_user_id },
 							{ $inc: { billy_bucks: game.wager } }
-						)
+						),
+						users.updateConnectFourMetrics(game, game.red_user_id),
+						users.updateConnectFourMetrics(game, game.yellow_user_id)
 					]);
 				} else {
 					game.to_move =
