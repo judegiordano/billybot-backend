@@ -176,6 +176,25 @@ export const userRouter = async function (app: FastifyInstance) {
 			};
 		}
 	);
+	app.get<{
+		Params: IServer;
+	}>(
+		"/users/birthday/server/:server_id",
+		{
+			schema: {
+				params: { $ref: "serverIdParams#" },
+				response: { 200: { $ref: "userArray#" } }
+			}
+		},
+		async (req) => {
+			const { server_id } = req.params;
+			await servers.assertExists({ server_id });
+			return await users.list(
+				{ server_id, birthday: { $ne: null } },
+				{ sort: { birthday: 1 } }
+			);
+		}
+	);
 	app.delete<{ Params: IServer }>(
 		"/users/server/:server_id",
 		{
