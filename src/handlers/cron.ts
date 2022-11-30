@@ -4,6 +4,7 @@ import FormData from "form-data";
 import { discord, mongoose } from "@services";
 import { oauthQueue } from "@aws/queues";
 import { users, webhooks, servers, mediaFiles, clients } from "@models";
+import { factApiClient } from "@src/services/request";
 
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();
@@ -118,6 +119,31 @@ export async function refreshOauthTokens() {
 export async function houseCleaning() {
 	await mongoose.createConnection();
 	await Promise.all([users.resetAllowance(), servers.resetTaxCollection()]);
+	return {
+		statusCode: 200,
+		headers: { "Content-Type": "application/json" },
+		body: "operations complete"
+	};
+}
+
+// post a fun fact
+export async function funFact() {
+	await mongoose.createConnection();
+	const randomShitHooks = await webhooks.list({ channel_name: "random-shit" });
+	if (randomShitHooks.length <= 0) {
+		return {
+			statusCode: 200,
+			headers: { "Content-Type": "application/json" },
+			body: "no webhooks found for random-shit"
+		};
+	}
+	const { data } = await factApiClient.get<{ text: string }>();
+	await Promise.all(
+		randomShitHooks.map((webhook: IWebhook) => {
+			const content = `Fun Fact of the Day!\n\n${data.text}`;
+			return discord.postContent(webhook, content);
+		})
+	);
 	return {
 		statusCode: 200,
 		headers: { "Content-Type": "application/json" },
