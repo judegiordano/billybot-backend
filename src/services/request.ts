@@ -80,7 +80,7 @@ export class RestApi {
 
 	private async request<T>(path?: string, options?: RequestOptions) {
 		const { url, method, headers, body } = this.buildRequest(path, options);
-		const response: ResponseData = await request(url, { method, headers, body });
+		const response = await request(url, { method, headers, body });
 		return this.buildResponse<T>(response);
 	}
 
