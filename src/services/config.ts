@@ -21,3 +21,4 @@ export const STOCK_API_URL = "https://finance.yahoo.com/quote";
 export const DASHBOARD_URL = IS_LOCAL ? "http://localhost:3000" : "https://billybot.vercel.app";
 export const DASHBOARD_DOMAIN = IS_LOCAL ? "localhost" : "billybot.vercel.app";
 export const API_URL = `${process.env.API_URL}/api/v${VERSION}`;
+export const FACT_URL = "https://uselessfacts.jsph.pl/random.json";

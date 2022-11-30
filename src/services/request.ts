@@ -49,15 +49,16 @@ export class RestApi {
 	private buildRequest(path?: string, options?: RequestOptions) {
 		const combinedOptions = _.merge(this.baseOptions, options);
 		const method = combinedOptions?.method ?? "GET";
-		const query = new URLSearchParams(combinedOptions.params);
 		const url = new URL(`${this.baseUrl}${path ? `/${path}` : ""}`);
+		for (const [key, value] of Object.entries(combinedOptions.params ?? {})) {
+			url.searchParams.set(key, value);
+		}
 		const body = this.buildBody(combinedOptions);
 		const headers = combinedOptions.headers;
 		return {
 			url,
 			method,
 			headers,
-			query,
 			body
 		};
 	}
@@ -78,8 +79,8 @@ export class RestApi {
 	}
 
 	private async request<T>(path?: string, options?: RequestOptions) {
-		const { url, method, headers, body, query } = this.buildRequest(path, options);
-		const response = await request(url, { method, headers, body, query });
+		const { url, method, headers, body } = this.buildRequest(path, options);
+		const response = await request(url, { method, headers, body });
 		return this.buildResponse<T>(response);
 	}
 
@@ -107,3 +108,4 @@ export class RestApi {
 export const discordApi = new RestApi(`${config.DISCORD_API}/v8`);
 export const stockApiClient = new RestApi(config.STOCK_API_URL);
 export const test = new RestApi("https://jsonplaceholder.typicode.com");
+export const factApiClient = new RestApi(config.FACT_URL, { params: { language: "en" } });
