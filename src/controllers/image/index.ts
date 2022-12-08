@@ -1,13 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { Configuration, OpenAIApi } from "openai";
-import { BadRequestError } from "@src/types/errors";
-import { OPENAI_API_KEY } from "@config";
 
-const openai = new OpenAIApi(
-	new Configuration({
-		apiKey: OPENAI_API_KEY
-	})
-);
+import { BadRequestError } from "@src/types/errors";
+import { OpenAIClient } from "@src/helpers";
 
 export const imageRouter = async function (app: FastifyInstance) {
 	app.post<{
@@ -39,7 +33,7 @@ export const imageRouter = async function (app: FastifyInstance) {
 		async (req) => {
 			try {
 				const { prompt } = req.body;
-				const response = await openai.createImage({
+				const response = await OpenAIClient.createImage({
 					prompt,
 					n: 1,
 					size: "512x512"
