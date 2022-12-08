@@ -233,6 +233,12 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		}
 	});
 	app.addSchema({
+		$id: "participantArray",
+		type: "array",
+		items: { $ref: "participant#" },
+		uniqueItems: true
+	});
+	app.addSchema({
 		$id: "challenge",
 		type: "object",
 		properties: {
@@ -275,11 +281,5 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		$id: "betArray",
 		type: "array",
 		items: { $ref: "bet#" }
-	});
-	app.addSchema({
-		$id: "participantArray",
-		type: "array",
-		items: { $ref: "participant#" },
-		uniqueItems: true
 	});
 });
