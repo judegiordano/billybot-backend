@@ -1,16 +1,13 @@
 import type { FastifyInstance } from "fastify";
 
-import { BadRequestError } from "@src/types/errors";
-import { OpenAIClient } from "@src/helpers";
+import { BadRequestError } from "@errors";
+import { OpenAIClient } from "@helpers";
 
 export const imageRouter = async function (app: FastifyInstance) {
-	app.post<{
-		Body: {
-			prompt: string;
-		};
-	}>(
+	app.post<{ Body: { prompt: string } }>(
 		"/image",
 		{
+			preValidation: [app.restricted],
 			schema: {
 				body: {
 					type: "object",
