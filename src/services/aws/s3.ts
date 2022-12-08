@@ -16,6 +16,10 @@ export class Bucket {
 		return { file, key, url };
 	}
 
+	public putObject() {
+		//
+	}
+
 	public buildPublicUrl(key: string) {
 		return new URL(`https://${this.bucketName}.s3.amazonaws.com/${key}`);
 	}
