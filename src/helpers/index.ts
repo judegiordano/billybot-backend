@@ -1,6 +1,8 @@
 import Chance from "chance";
 import type { IUser } from "btbot-types";
 import { customAlphabet } from "nanoid";
+import { Configuration, OpenAIApi } from "openai";
+import { OPENAI_API_KEY } from "@config";
 
 export function buildAvatarUrl(user: IUser) {
 	if (!user.avatar_hash) return "https://discord.com/assets/c09a43a372ba81e3018c3151d4ed4773.png";
@@ -25,6 +27,12 @@ export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve
 export const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 20);
 
 export const chance = new Chance();
+
+export const OpenAIClient = new OpenAIApi(
+	new Configuration({
+		apiKey: OPENAI_API_KEY
+	})
+);
 
 export {
 	spinColor,

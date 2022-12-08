@@ -11,6 +11,7 @@ export const JWT_SECRET = process.env.JWT_SECRET as string;
 export const MONGO_URI = process.env.MONGO_URI as string;
 export const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID as string;
 export const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET as string;
+export const OPENAI_API_KEY = process.env.OPENAI_API_KEY as string;
 // resources
 export const MEDIA_BUCKET = process.env.MEDIA_BUCKET as string;
 export const REFRESH_TOKEN_QUEUE = process.env.REFRESH_TOKEN_QUEUE as string;
