@@ -16,8 +16,14 @@ export class Bucket {
 		return { file, key, url };
 	}
 
-	public putObject() {
-		//
+	public putObject(file_name: string, body: Buffer | Uint8Array | Blob | string) {
+		const params = { Bucket: this.bucketName, Key: file_name, Body: body };
+		return this.s3.putObject(params).promise();
+	}
+
+	public getSignedUrl(fileName: string) {
+		const params = { Bucket: this.bucketName, Key: fileName };
+		return this.s3.getSignedUrl("getObject", params);
 	}
 
 	public buildPublicUrl(key: string) {

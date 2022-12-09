@@ -1,3 +1,4 @@
+import slugify from "slugify";
 import Chance from "chance";
 import type { IUser } from "btbot-types";
 import { customAlphabet } from "nanoid";
@@ -41,3 +42,4 @@ export {
 	buildConnectFourMetrics
 } from "./gambling";
 export { renderTemplate } from "./email-templates";
+export { slugify };

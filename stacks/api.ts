@@ -117,6 +117,7 @@ export class ApiStack extends Stack {
 				}
 			}
 		});
+		api.attachPermissions(["s3"]);
 
 		new Function(this, "create-token", {
 			handler: "src/handlers/functions.createToken"
