@@ -3,7 +3,7 @@ import type { FastifyInstance } from "fastify";
 import { BadRequestError, InternalServerError } from "@errors";
 import { OpenAIClient, slugify } from "@helpers";
 import { openaiBucket } from "@aws/buckets/openai";
-import { users } from "@src/models";
+import { users, openAiImages } from "@src/models";
 
 export const imageRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: { prompt: string; user_id: string; server_id: string } }>(
@@ -22,12 +22,7 @@ export const imageRouter = async function (app: FastifyInstance) {
 					}
 				},
 				response: {
-					200: {
-						type: "object",
-						properties: {
-							image_url: { type: "string" }
-						}
-					}
+					200: { $ref: "openaiChallenge#" }
 				}
 			}
 		},
@@ -35,8 +30,8 @@ export const imageRouter = async function (app: FastifyInstance) {
 			try {
 				const { prompt, server_id, user_id } = req.body;
 				await users.assertExists({ user_id, server_id });
-				const fileName = slugify(`${user_id} ${server_id} ${prompt}.png`);
-				if (fileName.length >= 1024) {
+				const filename = slugify(`${user_id} ${server_id} ${prompt}.png`);
+				if (filename.length >= 1024) {
 					throw new BadRequestError("input prompt too long");
 				}
 				const response = await OpenAIClient.createImage({
@@ -50,10 +45,14 @@ export const imageRouter = async function (app: FastifyInstance) {
 					throw new InternalServerError("no data found");
 				}
 				const buffer = Buffer.from(data, "base64");
-				await openaiBucket.putObject(fileName, buffer);
-				return {
-					image_url: openaiBucket.buildPublicUrl(fileName)
-				};
+				await openaiBucket.putObject(filename, buffer);
+				return await openAiImages.insertOne({
+					user_id,
+					server_id,
+					prompt,
+					filename,
+					permalink: openaiBucket.buildPublicUrl(filename).toString()
+				});
 			} catch (error) {
 				console.log({ error });
 				throw new BadRequestError("The image could not be generated!");
