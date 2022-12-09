@@ -7,7 +7,7 @@ import { openaiBucket } from "@aws/buckets";
 
 class OpenAiImage extends mongoose.Repository<IOpenAiImage> {
 	constructor() {
-		super("Open_Image", {
+		super("Openai_Image", {
 			server_id: {
 				type: String,
 				index: true,
