@@ -1,8 +1,6 @@
 import type { FastifyInstance } from "fastify";
 
-import { BadRequestError, InternalServerError } from "@errors";
-import { OpenAIClient, slugify } from "@helpers";
-import { openaiBucket } from "@aws/buckets/openai";
+import { BadRequestError } from "@errors";
 import { users, openAiImages } from "@src/models";
 
 export const imageRouter = async function (app: FastifyInstance) {
@@ -30,29 +28,7 @@ export const imageRouter = async function (app: FastifyInstance) {
 			try {
 				const { prompt, server_id, user_id } = req.body;
 				await users.assertExists({ user_id, server_id });
-				const filename = slugify(`${user_id} ${server_id} ${prompt}.png`);
-				if (filename.length >= 1024) {
-					throw new BadRequestError("input prompt too long");
-				}
-				const response = await OpenAIClient.createImage({
-					prompt,
-					n: 1,
-					size: "1024x1024",
-					response_format: "b64_json"
-				});
-				const data = response.data.data[0].b64_json;
-				if (!data) {
-					throw new InternalServerError("no data found");
-				}
-				const buffer = Buffer.from(data, "base64");
-				await openaiBucket.putObject(filename, buffer);
-				return await openAiImages.insertOne({
-					user_id,
-					server_id,
-					prompt,
-					filename,
-					permalink: openaiBucket.buildPublicUrl(filename).toString()
-				});
+				return await openAiImages.generate({ user_id, server_id, prompt });
 			} catch (error) {
 				console.log({ error });
 				throw new BadRequestError("The image could not be generated!");
