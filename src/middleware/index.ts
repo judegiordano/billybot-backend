@@ -265,6 +265,19 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			updated_at: { type: "string" }
 		}
 	});
+	app.addSchema({
+		$id: "openaiCompletion",
+		type: "object",
+		properties: {
+			_id: { type: "string" },
+			server_id: { type: "string" },
+			user_id: { type: "string" },
+			prompt: { type: "string" },
+			output: { type: "string" },
+			created_at: { type: "string" },
+			updated_at: { type: "string" }
+		}
+	});
 	// arrays
 	app.addSchema({
 		$id: "userArray",
