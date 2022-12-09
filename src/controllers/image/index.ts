@@ -7,7 +7,7 @@ import { users, openAiImages } from "@src/models";
 
 export const imageRouter = async function (app: FastifyInstance) {
 	app.post<{ Body: { prompt: string; user_id: string; server_id: string } }>(
-		"/image",
+		"/images",
 		{
 			preValidation: [app.restricted],
 			schema: {
@@ -53,6 +53,36 @@ export const imageRouter = async function (app: FastifyInstance) {
 					filename,
 					permalink: openaiBucket.buildPublicUrl(filename).toString()
 				});
+			} catch (error) {
+				console.log({ error });
+				throw new BadRequestError("The image could not be generated!");
+			}
+		}
+	);
+	app.get<{ Querystring: { server_id: number; user_id: number } }>(
+		"/images",
+		{
+			preValidation: [app.restricted],
+			schema: {
+				querystring: {
+					type: "object",
+					required: ["user_id", "server_id"],
+					additionalProperties: false,
+					properties: {
+						user_id: { type: "string" },
+						server_id: { type: "string" }
+					}
+				},
+				response: {
+					200: { $ref: "openaiChallengeArray#" }
+				}
+			}
+		},
+		async (req) => {
+			try {
+				const { server_id, user_id } = req.query;
+				await users.assertExists({ user_id, server_id });
+				return await openAiImages.list({ user_id, server_id });
 			} catch (error) {
 				console.log({ error });
 				throw new BadRequestError("The image could not be generated!");

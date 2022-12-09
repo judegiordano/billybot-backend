@@ -296,4 +296,9 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		type: "array",
 		items: { $ref: "bet#" }
 	});
+	app.addSchema({
+		$id: "openaiChallengeArray",
+		type: "array",
+		items: { $ref: "openaiChallenge#" }
+	});
 });
