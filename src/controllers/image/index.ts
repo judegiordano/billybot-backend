@@ -58,7 +58,7 @@ export const imageRouter = async function (app: FastifyInstance) {
 			try {
 				const { server_id, user_id } = req.query;
 				await users.assertExists({ user_id, server_id });
-				return await openAiImages.list({ user_id, server_id });
+				return await openAiImages.list({ user_id, server_id }, { sort: { created_at: 1 } });
 			} catch (error) {
 				console.log({ error });
 				throw new BadRequestError("The image could not be generated!");
