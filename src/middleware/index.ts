@@ -252,7 +252,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		}
 	});
 	app.addSchema({
-		$id: "openaiChallenge",
+		$id: "openaiImage",
 		type: "object",
 		properties: {
 			_id: { type: "string" },
@@ -297,8 +297,8 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		items: { $ref: "bet#" }
 	});
 	app.addSchema({
-		$id: "openaiChallengeArray",
+		$id: "openaiImageArray",
 		type: "array",
-		items: { $ref: "openaiChallenge#" }
+		items: { $ref: "openaiImage#" }
 	});
 });

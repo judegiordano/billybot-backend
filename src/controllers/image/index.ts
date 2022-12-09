@@ -22,7 +22,7 @@ export const imageRouter = async function (app: FastifyInstance) {
 					}
 				},
 				response: {
-					200: { $ref: "openaiChallenge#" }
+					200: { $ref: "openaiImage#" }
 				}
 			}
 		},
@@ -37,7 +37,7 @@ export const imageRouter = async function (app: FastifyInstance) {
 				const response = await OpenAIClient.createImage({
 					prompt,
 					n: 1,
-					size: "512x512",
+					size: "1024x1024",
 					response_format: "b64_json"
 				});
 				const data = response.data.data[0].b64_json;
@@ -74,7 +74,7 @@ export const imageRouter = async function (app: FastifyInstance) {
 					}
 				},
 				response: {
-					200: { $ref: "openaiChallengeArray#" }
+					200: { $ref: "openaiImageArray#" }
 				}
 			}
 		},
