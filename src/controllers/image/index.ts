@@ -16,7 +16,7 @@ export const imageRouter = async function (app: FastifyInstance) {
 					required: ["prompt", "user_id", "server_id"],
 					additionalProperties: false,
 					properties: {
-						prompt: { type: "string" },
+						prompt: { type: "string", maxLength: 950 },
 						user_id: { type: "string" },
 						server_id: { type: "string" }
 					}
