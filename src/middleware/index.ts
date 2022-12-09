@@ -251,6 +251,20 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			updated_at: { type: "string" }
 		}
 	});
+	app.addSchema({
+		$id: "openaiImage",
+		type: "object",
+		properties: {
+			_id: { type: "string" },
+			server_id: { type: "string" },
+			user_id: { type: "string" },
+			prompt: { type: "string" },
+			filename: { type: "string" },
+			permalink: { type: "string" },
+			created_at: { type: "string" },
+			updated_at: { type: "string" }
+		}
+	});
 	// arrays
 	app.addSchema({
 		$id: "userArray",
@@ -281,5 +295,10 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 		$id: "betArray",
 		type: "array",
 		items: { $ref: "bet#" }
+	});
+	app.addSchema({
+		$id: "openaiImageArray",
+		type: "array",
+		items: { $ref: "openaiImage#" }
 	});
 });

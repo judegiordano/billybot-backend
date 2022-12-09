@@ -21,6 +21,14 @@ export class ApiStack extends Stack {
 			}
 		});
 
+		const openaiBucket = new Bucket(this, "openai", {
+			cdk: {
+				bucket: {
+					publicReadAccess: true
+				}
+			}
+		});
+
 		const tokenQueue = new Queue(this, "refresh-token-queue", {
 			consumer: "src/handlers/queue.refreshTokenConsumer",
 			cdk: {
@@ -101,13 +109,15 @@ export class ApiStack extends Stack {
 			},
 			defaults: {
 				function: {
-					permissions: [notificationQueue],
+					permissions: [notificationQueue, openaiBucket],
 					environment: {
-						MEDIA_BUCKET: mediaBucket.bucketName
+						MEDIA_BUCKET: mediaBucket.bucketName,
+						OPENAI_BUCKET: openaiBucket.bucketName
 					}
 				}
 			}
 		});
+		api.attachPermissions(["s3"]);
 
 		new Function(this, "create-token", {
 			handler: "src/handlers/functions.createToken"
@@ -117,7 +127,8 @@ export class ApiStack extends Stack {
 			endpoint: process.env.IS_LOCAL
 				? api.url
 				: "https://*******/.execute-api.us-east-1.amazonaws.com/api/v*/",
-			bucket: process.env.IS_LOCAL ? mediaBucket.bucketName : "*******"
+			mediaBucket: process.env.IS_LOCAL ? mediaBucket.bucketName : "*******",
+			openaiBucket: process.env.IS_LOCAL ? openaiBucket.bucketName : "*******"
 		});
 
 		// expose envs to lambdas
