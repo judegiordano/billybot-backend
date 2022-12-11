@@ -3,8 +3,7 @@ import FormData from "form-data";
 
 import { discord, mongoose } from "@services";
 import { oauthQueue } from "@aws/queues";
-import { users, webhooks, servers, mediaFiles, clients } from "@models";
-import { factApiClient } from "@src/services/request";
+import { users, webhooks, servers, mediaFiles, clients, funFacts } from "@models";
 
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();
@@ -137,10 +136,10 @@ export async function funFact() {
 			body: "no webhooks found for random-shit"
 		};
 	}
-	const { data } = await factApiClient.get<{ text: string }>();
+	const { fact } = await funFacts.newFact();
 	await Promise.all(
 		randomShitHooks.map((webhook: IWebhook) => {
-			const content = `Fun Fact of the Day!\n\n${data.text}`;
+			const content = `Fun Fact of the Day!\n\n${fact}`;
 			return discord.postContent(webhook, content);
 		})
 	);

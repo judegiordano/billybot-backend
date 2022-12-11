@@ -108,4 +108,3 @@ export class RestApi {
 export const discordApi = new RestApi(`${config.DISCORD_API}/v8`);
 export const stockApiClient = new RestApi(config.STOCK_API_URL);
 export const test = new RestApi("https://jsonplaceholder.typicode.com");
-export const factApiClient = new RestApi(config.FACT_URL, { params: { language: "en" } });
