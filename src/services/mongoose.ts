@@ -240,6 +240,6 @@ export class Repository<T extends IModel> {
 				$limit: limit
 			}
 		];
-		return this.aggregate(pipeline);
+		return this.aggregate<T[]>(pipeline);
 	}
 }

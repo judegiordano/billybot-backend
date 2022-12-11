@@ -22,7 +22,7 @@ export interface PaginationOptions<T extends IModel> extends Options<T> {
 export interface AutoCompleteOptions<T> {
 	indexName: string;
 	path: keyof T;
-	query: T[keyof T];
+	query: any;
 	limit?: number;
 	offset?: number;
 }
