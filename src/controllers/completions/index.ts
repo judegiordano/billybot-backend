@@ -35,4 +35,27 @@ export const completionRouter = async function (app: FastifyInstance) {
 			}
 		}
 	);
+	app.post<{ Body: { prompt: string } }>(
+		"/completions/autocomplete",
+		{
+			preValidation: [app.restricted],
+			schema: {
+				body: {
+					type: "object",
+					required: ["prompt"],
+					additionalProperties: false,
+					properties: {
+						prompt: { type: "string" }
+					}
+				},
+				response: {
+					200: { $ref: "openaiCompletionArray#" }
+				}
+			}
+		},
+		async (req) => {
+			const { prompt } = req.body;
+			return await openAiCompletions.searchPrompt(prompt);
+		}
+	);
 };
