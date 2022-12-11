@@ -12,3 +12,4 @@ export { bets } from "./bet";
 export { connectFourGames } from "./connect-four-games";
 export { openAiImages } from "./openai-images";
 export { openAiCompletions } from "./openai-completions";
+export { funFacts } from "./fun-fact";
