@@ -4,7 +4,6 @@ import { STOCK_API_KEY } from "@config";
 import { NotFoundError } from "@errors";
 import { mongoose, stockApiClient } from "@services";
 import type { IStockApiResponse } from "@types";
-import { StockApiResponse } from "@types";
 
 class Stocks extends mongoose.Repository<IStock> {
 	constructor() {
@@ -45,14 +44,13 @@ class Stocks extends mongoose.Repository<IStock> {
 
 	public async price(symbol: string) {
 		try {
-			const { data } = await stockApiClient.get<IStockApiResponse>(symbol, {
+			const { data } = await stockApiClient.get<IStockApiResponse>("quote", {
 				params: {
-					function: "GLOBAL_QUOTE",
 					symbol,
-					apikey: STOCK_API_KEY
+					token: STOCK_API_KEY
 				}
 			});
-			const price = parseFloat(data[StockApiResponse.quote][StockApiResponse.price]);
+			const price = data.c;
 			const currency = "USD";
 			return { symbol, price, currency } as IStock;
 		} catch (error) {

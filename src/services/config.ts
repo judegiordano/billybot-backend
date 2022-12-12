@@ -20,7 +20,7 @@ export const REFRESH_TOKEN_QUEUE = process.env.REFRESH_TOKEN_QUEUE as string;
 export const NOTIFICATION_QUEUE = process.env.NOTIFICATION_QUEUE as string;
 // static urls
 export const DISCORD_API = "https://discord.com/api";
-export const STOCK_API_URL = "https://www.alphavantage.co/query";
+export const STOCK_API_URL = "https://finnhub.io/api/v1";
 export const DASHBOARD_URL = IS_LOCAL ? "http://localhost:3000" : "https://billybot.vercel.app";
 export const DASHBOARD_DOMAIN = IS_LOCAL ? "localhost" : "billybot.vercel.app";
 export const API_URL = `${process.env.API_URL}/api/v${VERSION}`;

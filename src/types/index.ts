@@ -6,8 +6,6 @@ export {
 	BadRequestError
 } from "./errors";
 
-export { StockApiResponse } from "./values";
-
 export type JwtPayload = { is_valid: boolean; stage: string };
 
 export type Dictionary<T> = { [key: string]: Partial<T> };
@@ -66,7 +64,5 @@ export type FifoOptions = {
 };
 
 export interface IStockApiResponse {
-	"Global Quote": {
-		"05. price": string;
-	};
+	c: number;
 }
