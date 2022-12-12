@@ -6,6 +6,8 @@ export {
 	BadRequestError
 } from "./errors";
 
+export { StockApiResponse } from "./values";
+
 export type JwtPayload = { is_valid: boolean; stage: string };
 
 export type Dictionary<T> = { [key: string]: Partial<T> };
@@ -62,3 +64,9 @@ export type FifoOptions = {
 	MessageDeduplicationId: string;
 	MessageDelay?: number;
 };
+
+export interface IStockApiResponse {
+	"Global Quote": {
+		"05. price": string;
+	};
+}

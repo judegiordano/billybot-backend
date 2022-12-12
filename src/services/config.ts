@@ -12,6 +12,7 @@ export const MONGO_URI = process.env.MONGO_URI as string;
 export const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID as string;
 export const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET as string;
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY as string;
+export const STOCK_API_KEY = process.env.STOCK_API_KEY as string;
 // resources
 export const MEDIA_BUCKET = process.env.MEDIA_BUCKET as string;
 export const OPENAI_BUCKET = process.env.OPENAI_BUCKET as string;
@@ -19,7 +20,7 @@ export const REFRESH_TOKEN_QUEUE = process.env.REFRESH_TOKEN_QUEUE as string;
 export const NOTIFICATION_QUEUE = process.env.NOTIFICATION_QUEUE as string;
 // static urls
 export const DISCORD_API = "https://discord.com/api";
-export const STOCK_API_URL = "https://finance.yahoo.com/quote";
+export const STOCK_API_URL = "https://www.alphavantage.co/query";
 export const DASHBOARD_URL = IS_LOCAL ? "http://localhost:3000" : "https://billybot.vercel.app";
 export const DASHBOARD_DOMAIN = IS_LOCAL ? "localhost" : "billybot.vercel.app";
 export const API_URL = `${process.env.API_URL}/api/v${VERSION}`;

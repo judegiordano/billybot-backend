@@ -40,3 +40,4 @@ jobs:
           DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          STOCK_API_KEY: ${{ secrets.STOCK_API_KEY }}

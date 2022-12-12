@@ -1,8 +1,10 @@
-import { IStock } from "btbot-types";
+import type { IStock } from "btbot-types";
 
-import { mongoose } from "@services";
-import { stockApiClient } from "@src/services";
-import { NotFoundError } from "@src/types/errors";
+import { STOCK_API_KEY } from "@config";
+import { NotFoundError } from "@errors";
+import { mongoose, stockApiClient } from "@services";
+import type { IStockApiResponse } from "@types";
+import { StockApiResponse } from "@types";
 
 class Stocks extends mongoose.Repository<IStock> {
 	constructor() {
@@ -43,21 +45,15 @@ class Stocks extends mongoose.Repository<IStock> {
 
 	public async price(symbol: string) {
 		try {
-			const { data } = await stockApiClient.get<string>(symbol);
-
-			const priceString = data
-				.split(`"${symbol}":{"sourceInterval"`)[1]
-				.split("regularMarketPrice")[1]
-				// eslint-disable-next-line prettier/prettier
-				.split("fmt\":\"")[1]
-				// eslint-disable-next-line prettier/prettier
-				.split("\"")[0];
-
-			const price = parseFloat(priceString.replace(",", ""));
-
-			const currencyMatch = data.match(/Currency in ([A-Za-z]{3})/);
-			const currency = (currencyMatch ? currencyMatch[1] : null) as string;
-
+			const { data } = await stockApiClient.get<IStockApiResponse>(symbol, {
+				params: {
+					function: "GLOBAL_QUOTE",
+					symbol,
+					apikey: STOCK_API_KEY
+				}
+			});
+			const price = parseFloat(data[StockApiResponse.quote][StockApiResponse.price]);
+			const currency = "USD";
 			return { symbol, price, currency } as IStock;
 		} catch (error) {
 			throw new NotFoundError(`Stock ticker symbol \`${symbol}\` not found!`);
