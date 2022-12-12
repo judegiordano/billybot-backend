@@ -62,3 +62,7 @@ export type FifoOptions = {
 	MessageDeduplicationId: string;
 	MessageDelay?: number;
 };
+
+export interface IStockApiResponse {
+	c: number;
+}

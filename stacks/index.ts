@@ -17,7 +17,8 @@ export default function main(app: App) {
 			REGION: app.region,
 			DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID ?? "client_id",
 			DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET ?? "client_secret",
-			OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? "xxxxxxxxxxxx"
+			OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? "xxxxxxxxxxxx",
+			STOCK_API_KEY: process.env.STOCK_API_KEY ?? "xxxxxxxxxxxx"
 		}
 	});
 	new ApiStack(app, "api");
