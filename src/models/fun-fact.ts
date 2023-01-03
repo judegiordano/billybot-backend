@@ -24,6 +24,10 @@ class FunFacts extends mongoose.Repository<IFunFact> {
 		if (!fact) throw new BadRequestError("error generating daily fun fact");
 		return super.insertOne({ fact });
 	}
+
+	public async getLatestFact() {
+		return super.read({}, { sort: { created_at: -1 }, limit: 1 });
+	}
 }
 
 export const funFacts = new FunFacts();
