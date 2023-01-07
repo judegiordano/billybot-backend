@@ -17,7 +17,7 @@ class FunFacts extends mongoose.Repository<IFunFact> {
 	public async newFact() {
 		const response = await OpenAIClient.createCompletion({
 			model: OpenAiCompletionModel.davinci,
-			prompt: "tell me a fun fact",
+			prompt: "tell me a true fun fact",
 			max_tokens: 2048
 		});
 		const fact = response.data.choices[0].text?.trim();
