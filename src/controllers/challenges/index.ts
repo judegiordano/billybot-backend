@@ -88,6 +88,8 @@ export const challengeRouter = async function (app: FastifyInstance) {
 				server_id,
 				is_active: true
 			});
+			if (!challenge.is_betting_active)
+				throw new BadRequestError("Betting has been closed on this challenge");
 			const participantExists = await challenges.exists({
 				server_id,
 				is_active: true,
@@ -208,9 +210,63 @@ export const challengeRouter = async function (app: FastifyInstance) {
 					{ server_id, user_id: newFool },
 					{ is_fool: true, is_mayor: false }
 				),
-				challenges.assertUpdateOne({ server_id, is_active: true }, { is_active: false })
+				challenges.assertUpdateOne(
+					{ server_id, is_active: true },
+					{ is_active: false, is_betting_active: false }
+				)
 			]);
 			return { new_mayor_id: newMayor, new_fool_id: newFool, results };
+		}
+	);
+	app.put<{ Body: { server_id: string; author_id: string } }>(
+		"/challenges/close",
+		{
+			preValidation: [app.restricted],
+			schema: {
+				body: {
+					type: "object",
+					required: ["server_id", "author_id"],
+					additionalProperties: false,
+					properties: {
+						server_id: { type: "string" },
+						author_id: { type: "string" }
+					},
+					response: {
+						200: {
+							type: "object",
+							properties: {
+								server_id: { type: "string" },
+								is_betting_active: { type: "boolean" },
+								participants: { $ref: "participantArray#" }
+							}
+						}
+					}
+				}
+			}
+		},
+		async (req) => {
+			const { server_id, author_id } = req.body;
+			const challenge = await challenges.read({
+				server_id,
+				is_active: true,
+				is_betting_active: true
+			});
+			if (!challenge) throw new BadRequestError("No challenge with open bets found");
+			let found = false;
+			challenge.participants.forEach((participant) => {
+				if (participant.user_id == author_id) {
+					found = true;
+				}
+			});
+			if (!found)
+				throw new BadRequestError("Must be part of the current challenge to close betting");
+			const closeBetUpdate = await challenges.assertUpdateOne(
+				{ server_id, is_active: true, is_betting_active: true },
+				{ is_betting_active: false }
+			);
+
+			const { is_betting_active, participants } = closeBetUpdate;
+			return { server_id, is_betting_active, participants };
 		}
 	);
 	app.get<{
