@@ -236,8 +236,14 @@ export const challengeRouter = async function (app: FastifyInstance) {
 							type: "object",
 							properties: {
 								server_id: { type: "string" },
-								is_betting_active: { type: "boolean" },
-								participants: { $ref: "participantArray#" }
+								bets_aggregate: {
+									type: "array",
+									items: {
+										_id: { type: "string" },
+										bets: { $ref: "betArray#" },
+										count: { type: "number" }
+									}
+								}
 							}
 						}
 					}
@@ -260,13 +266,31 @@ export const challengeRouter = async function (app: FastifyInstance) {
 			});
 			if (!found)
 				throw new BadRequestError("Must be part of the current challenge to close betting");
-			const closeBetUpdate = await challenges.assertUpdateOne(
+			const { participants } = await challenges.assertUpdateOne(
 				{ server_id, is_active: true, is_betting_active: true },
 				{ is_betting_active: false }
 			);
 
-			const { is_betting_active, participants } = closeBetUpdate;
-			return { server_id, is_betting_active, participants };
+			const bets_aggregate = await bets.aggregate([
+				{
+					$match: {
+						challenge: challenge._id
+					}
+				},
+				{
+					$group: {
+						_id: "$participant_id",
+						bets: {
+							$push: "$$ROOT"
+						},
+						count: {
+							$sum: 1
+						}
+					}
+				}
+			]);
+
+			return { server_id, participants, bets_aggregate };
 		}
 	);
 	app.get<{
