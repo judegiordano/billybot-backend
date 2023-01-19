@@ -258,12 +258,10 @@ export const challengeRouter = async function (app: FastifyInstance) {
 				is_betting_active: true
 			});
 			if (!challenge) throw new BadRequestError("No challenge with open bets found");
-			let found = false;
-			challenge.participants.forEach((participant) => {
-				if (participant.user_id == author_id) {
-					found = true;
-				}
-			});
+			const found = challenge.participants.find(
+				(participant) => participant.user_id === author_id
+			);
+
 			if (!found)
 				throw new BadRequestError("Must be part of the current challenge to close betting");
 			const { participants } = await challenges.assertUpdateOne(
@@ -271,24 +269,7 @@ export const challengeRouter = async function (app: FastifyInstance) {
 				{ is_betting_active: false }
 			);
 
-			const bets_aggregate = await bets.aggregate([
-				{
-					$match: {
-						challenge: challenge._id
-					}
-				},
-				{
-					$group: {
-						_id: "$participant_id",
-						bets: {
-							$push: "$$ROOT"
-						},
-						count: {
-							$sum: 1
-						}
-					}
-				}
-			]);
+			const bets_aggregate = await bets.getBetsAggregate(challenge._id);
 
 			return { server_id, participants, bets_aggregate };
 		}
