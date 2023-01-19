@@ -258,10 +258,7 @@ export const challengeRouter = async function (app: FastifyInstance) {
 				is_betting_active: true
 			});
 			if (!challenge) throw new BadRequestError("No challenge with open bets found");
-			const found = challenge.participants.find(
-				(participant) => participant.user_id === author_id
-			);
-
+			const found = challenge.participants.find(({ user_id }) => user_id === author_id);
 			if (!found)
 				throw new BadRequestError("Must be part of the current challenge to close betting");
 			const { participants } = await challenges.assertUpdateOne(
