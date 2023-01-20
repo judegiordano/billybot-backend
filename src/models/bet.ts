@@ -3,6 +3,8 @@ import { mongoose } from "@services";
 
 import { challenges } from "./challenge";
 
+export type BetAggregate = [{ _id: string; bets: IBet[]; count: number }];
+
 class Bets extends mongoose.Repository<IBet> {
 	constructor() {
 		super("Bet", {
@@ -27,6 +29,28 @@ class Bets extends mongoose.Repository<IBet> {
 				required: true
 			}
 		});
+	}
+
+	public async getBetsAggregate(challenge_id: string) {
+		const results = super.aggregate<BetAggregate>([
+			{
+				$match: {
+					challenge: challenge_id
+				}
+			},
+			{
+				$group: {
+					_id: "$participant_id",
+					bets: {
+						$push: "$$ROOT"
+					},
+					count: {
+						$sum: 1
+					}
+				}
+			}
+		]);
+		return results;
 	}
 }
 

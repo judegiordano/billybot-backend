@@ -88,6 +88,8 @@ export const challengeRouter = async function (app: FastifyInstance) {
 				server_id,
 				is_active: true
 			});
+			if (!challenge.is_betting_active)
+				throw new BadRequestError("Betting has been closed on this challenge");
 			const participantExists = await challenges.exists({
 				server_id,
 				is_active: true,
@@ -208,9 +210,65 @@ export const challengeRouter = async function (app: FastifyInstance) {
 					{ server_id, user_id: newFool },
 					{ is_fool: true, is_mayor: false }
 				),
-				challenges.assertUpdateOne({ server_id, is_active: true }, { is_active: false })
+				challenges.assertUpdateOne(
+					{ server_id, is_active: true },
+					{ is_active: false, is_betting_active: false }
+				)
 			]);
 			return { new_mayor_id: newMayor, new_fool_id: newFool, results };
+		}
+	);
+	app.put<{ Body: { server_id: string; author_id: string } }>(
+		"/challenges/close",
+		{
+			preValidation: [app.restricted],
+			schema: {
+				body: {
+					type: "object",
+					required: ["server_id", "author_id"],
+					additionalProperties: false,
+					properties: {
+						server_id: { type: "string" },
+						author_id: { type: "string" }
+					},
+					response: {
+						200: {
+							type: "object",
+							properties: {
+								server_id: { type: "string" },
+								bets_aggregate: {
+									type: "array",
+									items: {
+										_id: { type: "string" },
+										bets: { $ref: "betArray#" },
+										count: { type: "number" }
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		async (req) => {
+			const { server_id, author_id } = req.body;
+			const challenge = await challenges.read({
+				server_id,
+				is_active: true,
+				is_betting_active: true
+			});
+			if (!challenge) throw new BadRequestError("No challenge with open bets found");
+			const found = challenge.participants.find(({ user_id }) => user_id === author_id);
+			if (!found)
+				throw new BadRequestError("Must be part of the current challenge to close betting");
+			const { participants } = await challenges.assertUpdateOne(
+				{ server_id, is_active: true, is_betting_active: true },
+				{ is_betting_active: false }
+			);
+
+			const bets_aggregate = await bets.getBetsAggregate(challenge._id);
+
+			return { server_id, participants, bets_aggregate };
 		}
 	);
 	app.get<{

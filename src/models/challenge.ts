@@ -32,6 +32,11 @@ class Challenges extends mongoose.Repository<IChallenge> {
 				type: Boolean,
 				required: true,
 				default: true
+			},
+			is_betting_active: {
+				type: Boolean,
+				required: true,
+				default: true
 			}
 		});
 	}
