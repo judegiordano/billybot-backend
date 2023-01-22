@@ -39,7 +39,7 @@ export const challengeRouter = async function (app: FastifyInstance) {
 				throw new BadRequestError("The mayor cannot challenge themselves");
 			const lastChallenge = await challenges.read(
 				{ server_id, is_active: false },
-				{ sort: { updated_at: -1 } },
+				{ sort: { created_at: -1 } },
 				{ updated_at: 1 }
 			);
 			if (lastChallenge && diffInDays(new Date(lastChallenge?.updated_at), new Date()) < 7) {
