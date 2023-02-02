@@ -1,6 +1,5 @@
 import axios from "axios";
 import { ColorCodes } from "btbot-types";
-import type FormData from "form-data";
 import type { IEmbed, IWebhook } from "btbot-types";
 
 import { DASHBOARD_URL, DISCORD_API } from "@config";
@@ -41,15 +40,6 @@ export async function postSuccessEmbed(
 					timestamp: new Date().toISOString()
 				}
 			]
-		}
-	});
-}
-
-export async function postGoodMorningEmbed(webhook: IWebhook, formData: FormData) {
-	return webhooks.post(`${webhook.webhook_id}/${webhook.webhook_token}`, formData, {
-		headers: {
-			"Content-Type": "multipart/form-data",
-			...formData.getHeaders()
 		}
 	});
 }
