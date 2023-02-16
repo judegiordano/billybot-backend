@@ -139,7 +139,7 @@ export async function funFact() {
 	const { fact } = await funFacts.newFact();
 	await Promise.all(
 		randomShitHooks.map((webhook: IWebhook) => {
-			const content = `Fun Fact of the Day!\n\n${fact}`;
+			const content = `Fun Factoid of the Day!\n\n${fact}`;
 			return discord.postContent(webhook, content);
 		})
 	);
