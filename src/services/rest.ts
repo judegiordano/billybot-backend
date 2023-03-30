@@ -3,7 +3,7 @@ import { ColorCodes } from "btbot-types";
 import type FormData from "form-data";
 import type { IEmbed, IWebhook } from "btbot-types";
 
-import { DASHBOARD_URL, DISCORD_API } from "@config";
+import { BOT_TOKEN, DASHBOARD_URL, DISCORD_API } from "@config";
 import { discordApi } from "./request";
 
 export const webhooks = axios.create({
@@ -50,6 +50,39 @@ export async function postGoodMorningEmbed(webhook: IWebhook, formData: FormData
 		headers: {
 			"Content-Type": "multipart/form-data",
 			...formData.getHeaders()
+		}
+	});
+}
+
+export async function getDiscordGuildMembers(server_id: string) {
+	return discordApi.get(`/guilds/${server_id}/members`, {
+		params: { limit: 1000 },
+		headers: {
+			Authorization: `Bot ${BOT_TOKEN}`
+		}
+	});
+}
+
+export async function addDiscordRoleToGuildMember(
+	server_id: string,
+	member_id: string,
+	role_id: string
+) {
+	return discordApi.put(`/guilds/${server_id}/members/${member_id}/roles/${role_id}`, {
+		headers: {
+			Authorization: `Bot ${BOT_TOKEN}`
+		}
+	});
+}
+
+export async function removeDiscordRoleFromGuildMember(
+	server_id: string,
+	member_id: string,
+	role_id: string
+) {
+	return discordApi.delete(`/guilds/${server_id}/members/${member_id}/roles/${role_id}`, {
+		headers: {
+			Authorization: `Bot ${BOT_TOKEN}`
 		}
 	});
 }

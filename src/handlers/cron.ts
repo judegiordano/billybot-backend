@@ -4,6 +4,7 @@ import FormData from "form-data";
 import { discord, mongoose } from "@services";
 import { oauthQueue } from "@aws/queues";
 import { users, webhooks, servers, mediaFiles, clients, funFacts } from "@models";
+import { IDiscordGuildMember, Discord } from "@types";
 
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();
@@ -148,4 +149,86 @@ export async function funFact() {
 		headers: { "Content-Type": "application/json" },
 		body: "operations complete"
 	};
+}
+
+// update discord roles
+export async function roleUpdate() {
+	await mongoose.createConnection();
+	const [{ data: guildMembers }, newNoblemen, newSerfs] = await Promise.all([
+		discord.getDiscordGuildMembers(Discord.BOY_TOWN_SERVER_ID) as Promise<{
+			data: IDiscordGuildMember[];
+		}>,
+		users.list(
+			{ server_id: Discord.BOY_TOWN_SERVER_ID },
+			{ sort: { billy_bucks: -1, username: 1 }, limit: 3 }
+		),
+		users.list(
+			{ server_id: Discord.BOY_TOWN_SERVER_ID },
+			{ sort: { billy_bucks: 1, username: -1 }, limit: 3 }
+		)
+	]);
+	const currentRolesIds = guildMembers.reduce(
+		(acc, user) => {
+			if (user.roles.includes(Discord.NOBLEMEN_ROLE_ID)) {
+				acc.noblemen.push(user.user.id);
+			}
+			if (user.roles.includes(Discord.SERFS_ROLE_ID)) {
+				acc.serfs.push(user.user.id);
+			}
+			return acc;
+		},
+		{ noblemen: [] as string[], serfs: [] as string[] }
+	);
+	const newNoblemenIds = newNoblemen.map((user: { user_id: string }) => user.user_id);
+	const newSerfsIds = newSerfs.map((user: { user_id: string }) => user.user_id);
+	// remove noblemen role only from users who currently have it but should not
+	const removeNoblemen = currentRolesIds.noblemen
+		.filter((id) => {
+			return !newNoblemenIds.includes(id);
+		})
+		.map((id) =>
+			discord.removeDiscordRoleFromGuildMember(
+				Discord.BOY_TOWN_SERVER_ID,
+				id,
+				Discord.NOBLEMEN_ROLE_ID
+			)
+		);
+	// add noblemen role only to users who currently do not have it but should
+	const addNoblemen = newNoblemenIds
+		.filter((id) => {
+			return !currentRolesIds.noblemen.includes(id);
+		})
+		.map((id) =>
+			discord.addDiscordRoleToGuildMember(
+				Discord.BOY_TOWN_SERVER_ID,
+				id,
+				Discord.NOBLEMEN_ROLE_ID
+			)
+		);
+	// remove serfs role only from users who currently have it but should not
+	const removeSerfs = currentRolesIds.serfs
+		.filter((id) => {
+			return !newSerfsIds.includes(id);
+		})
+		.map((id) =>
+			discord.removeDiscordRoleFromGuildMember(
+				Discord.BOY_TOWN_SERVER_ID,
+				id,
+				Discord.SERFS_ROLE_ID
+			)
+		);
+	// add serfs role only to users who currently do not have it but should
+	const addSerfs = newSerfsIds
+		.filter((id) => {
+			return !currentRolesIds.serfs.includes(id);
+		})
+		.map((id) =>
+			discord.addDiscordRoleToGuildMember(
+				Discord.BOY_TOWN_SERVER_ID,
+				id,
+				Discord.SERFS_ROLE_ID
+			)
+		);
+	const operations = removeNoblemen.concat(addNoblemen, removeSerfs, addSerfs);
+	if (operations.length > 0) await Promise.all(operations);
 }

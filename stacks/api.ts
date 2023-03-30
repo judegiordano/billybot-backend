@@ -103,6 +103,16 @@ export class ApiStack extends Stack {
 			}
 		});
 
+		new Cron(this, "role-update-cron", {
+			// fires every 1 min
+			schedule: "rate(1 minute)",
+			job: {
+				function: {
+					handler: "src/handlers/cron.roleUpdate"
+				}
+			}
+		});
+
 		const api = new Api(this, "api", {
 			routes: {
 				$default: "src/handlers/index.run"
