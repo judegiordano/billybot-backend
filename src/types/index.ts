@@ -6,6 +6,8 @@ export {
 	BadRequestError
 } from "./errors";
 
+export { Discord } from "./values";
+
 export type JwtPayload = { is_valid: boolean; stage: string };
 
 export type Dictionary<T> = { [key: string]: Partial<T> };
@@ -65,4 +67,9 @@ export type FifoOptions = {
 
 export interface IStockApiResponse {
 	c: number;
+}
+
+export interface IDiscordGuildMember {
+	roles: string[];
+	user: { id: string };
 }

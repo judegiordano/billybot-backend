@@ -13,6 +13,7 @@ export const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID as string;
 export const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET as string;
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY as string;
 export const STOCK_API_KEY = process.env.STOCK_API_KEY as string;
+export const BOT_TOKEN = process.env.BOT_TOKEN as string;
 // resources
 export const MEDIA_BUCKET = process.env.MEDIA_BUCKET as string;
 export const OPENAI_BUCKET = process.env.OPENAI_BUCKET as string;
