@@ -276,7 +276,7 @@ class Users extends mongoose.Repository<IUser> {
 		]);
 		if (amount > sender.billy_bucks)
 			throw new BadRequestError(
-				`user ${sender.user_id} only has ${sender.billy_bucks} bucks!`
+				`user <@${sender.user_id}> only has ${sender.billy_bucks} bucks!`
 			);
 		const updatedUsers = await Promise.all([
 			super.assertUpdateOne(
