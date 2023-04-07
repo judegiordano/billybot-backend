@@ -163,7 +163,7 @@ export const challengeRouter = async function (app: FastifyInstance) {
 			const { newMayor, newFool } = await challenges.getNewFool(server_id, participant_id);
 
 			const prevFool = await users.read({ server_id, is_fool: true });
-			if (prevFool?.user_id !== newFool)
+			if (prevFool && prevFool?.user_id !== newFool)
 				await users.assertUpdateOne(
 					{ server_id, user_id: prevFool?.user_id },
 					{ is_fool: false }
