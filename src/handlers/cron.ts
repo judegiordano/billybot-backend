@@ -5,6 +5,7 @@ import { discord, mongoose } from "@services";
 import { oauthQueue } from "@aws/queues";
 import { users, webhooks, servers, mediaFiles, clients, funFacts } from "@models";
 import { IDiscordGuildMember, Discord } from "@types";
+import { IS_LOCAL } from "@config";
 
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();
@@ -153,6 +154,7 @@ export async function funFact() {
 
 // update discord roles
 export async function roleUpdate() {
+	if (IS_LOCAL) return;
 	await mongoose.createConnection();
 	const [{ data: guildMembers }, newNoblemen, newSerfs] = await Promise.all([
 		discord.getDiscordGuildMembers(Discord.BOY_TOWN_SERVER_ID) as Promise<{
