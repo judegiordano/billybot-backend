@@ -2,7 +2,7 @@ import { ClientConnectionStatus, IClient, IServerSettings, IWebhook } from "btbo
 
 import { discord, mongoose } from "@services";
 import { oauthQueue } from "@aws/queues";
-import { users, webhooks, servers, mediaFiles, clients, funFacts } from "@models";
+import { users, webhooks, servers, clients, funFacts } from "@models";
 import { IDiscordGuildMember, Discord } from "@types";
 import { IS_LOCAL } from "@config";
 
