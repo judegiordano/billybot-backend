@@ -79,20 +79,6 @@ export class ApiStack extends Stack {
 			}
 		});
 
-		new Cron(this, "good-morning-cron", {
-			// fires at 9:00am MON (UTC -> EST)
-			schedule: "cron(0 13 ? * MON *)",
-			job: {
-				function: {
-					handler: "src/handlers/cron.goodMorning",
-					permissions: [mediaBucket],
-					environment: {
-						MEDIA_BUCKET: mediaBucket.bucketName
-					}
-				}
-			}
-		});
-
 		new Cron(this, "fun-fact-cron", {
 			// fires at 2:00pm daily (UTC -> EST)
 			schedule: "cron(0 18 * * ? *)",
