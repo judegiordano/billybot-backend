@@ -39,7 +39,7 @@ class BlackjackGames extends mongoose.Repository<IBlackJack> {
 			},
 			status: {
 				type: String,
-				default: `${BlackjackReacts.hit} \`!hit\`\n${BlackjackReacts.stand} \`!stand\`\n${BlackjackReacts.doubleDown} \`!doubledown\``
+				default: ""
 			},
 			won: {
 				type: Boolean,

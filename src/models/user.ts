@@ -356,8 +356,7 @@ class Users extends mongoose.Repository<IUser> {
 		const { server_id, webhook_id, webhook_token, username, avatar_url } = webhook;
 		const entrants = await super.list({ server_id, has_lottery_ticket: true });
 		if (entrants.length <= 0) {
-			const content =
-				"No lottery entrants this week!\nRun ```!buylottoticket``` to buy a ticket for next week's lottery!";
+			const content = "No lottery entrants this week!";
 			return discord.webhooks.post(`${webhook_id}/${webhook_token}`, {
 				content,
 				username,
