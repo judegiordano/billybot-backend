@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 
 import type { INBAGame, INBATeam } from "@types";
-import { getNbaSchedule } from "@services";
+import { config, getNbaSchedule } from "@services";
 import { BadRequestError, NotFoundError } from "@errors";
 
 export const nbaRouter = async function (app: FastifyInstance) {
@@ -34,6 +34,7 @@ export const nbaRouter = async function (app: FastifyInstance) {
 			const { team } = req.query;
 			if (!team) throw new BadRequestError("Must specify a team name!");
 			const today = new Date();
+			if (!config.IS_LOCAL) today.setHours(today.getHours() - 5); // convert utc to est
 			const todayTime = today.getTime();
 			const todayYear = today.getFullYear();
 			const todayMonth = today.getMonth() + 1;
