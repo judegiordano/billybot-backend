@@ -25,3 +25,4 @@ export const STOCK_API_URL = "https://finnhub.io/api/v1";
 export const DASHBOARD_URL = IS_LOCAL ? "http://localhost:3000" : "https://billybot.vercel.app";
 export const DASHBOARD_DOMAIN = IS_LOCAL ? "localhost" : "billybot.vercel.app";
 export const API_URL = `${process.env.API_URL}/api/v${VERSION}`;
+export const NBA_API_URL = "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba";

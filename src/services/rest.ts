@@ -2,8 +2,9 @@ import axios from "axios";
 import { ColorCodes } from "btbot-types";
 import type { IEmbed, IWebhook } from "btbot-types";
 
+import type { INBASchedule } from "@types";
 import { BOT_TOKEN, DASHBOARD_URL, DISCORD_API } from "@config";
-import { discordApi } from "./request";
+import { discordApi, nbaApi } from "./request";
 
 export const webhooks = axios.create({
 	baseURL: `${DISCORD_API}/v8/webhooks`
@@ -75,4 +76,8 @@ export async function removeDiscordRoleFromGuildMember(
 			Authorization: `Bot ${BOT_TOKEN}`
 		}
 	});
+}
+
+export async function getNbaSchedule(year: string) {
+	return nbaApi.get<INBASchedule>(`/${year}/league/00_full_schedule_week.json`);
 }

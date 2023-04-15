@@ -73,3 +73,24 @@ export interface IDiscordGuildMember {
 	roles: string[];
 	user: { id: string };
 }
+
+export interface INBASchedule {
+	lscd: {
+		mscd: {
+			mon: string;
+			g: INBAGame[];
+		};
+	}[];
+}
+
+export interface INBAGame {
+	etm: string; // game start date/time string in ET ("2023-04-01T20:30:00")
+	stt: string; // game start time string in ET ("8:30 pm ET", or "Final" if done)
+	v: INBATeam; // visiting team
+	h: INBATeam; // home team
+}
+
+export interface INBATeam {
+	tc: string; // team city: ("Boston")
+	tn: string; // team name: ("Celtics")
+}
