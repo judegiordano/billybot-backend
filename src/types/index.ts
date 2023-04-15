@@ -84,15 +84,13 @@ export interface INBASchedule {
 }
 
 export interface INBAGame {
-	etm: string; // Game start date/time string in ET ("2023-04-01T20:30:00")
-	stt: string; // Game start time string in ET ("8:30 pm ET", or "Final" if done)
-	v: INBATeam; // Visiting team
-	h: INBATeam; // Home team
+	etm: string; // game start date/time string in ET ("2023-04-01T20:30:00")
+	stt: string; // game start time string in ET ("8:30 pm ET", or "Final" if done)
+	v: INBATeam; // visiting team
+	h: INBATeam; // home team
 }
 
 export interface INBATeam {
-	tid: number; // Team ID number: (1610612738)
-	tc: string; // Team city: ("Boston")
-	tn: string; // Team name: ("Celtics")
-	re: string; // Record ("40-40")
+	tc: string; // team city: ("Boston")
+	tn: string; // team name: ("Celtics")
 }

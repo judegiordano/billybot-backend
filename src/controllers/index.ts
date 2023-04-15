@@ -19,7 +19,7 @@ import { challengeRouter } from "./challenges";
 import { imageRouter } from "./image";
 import { completionRouter } from "./completions";
 import { funFactsRouter } from "./facts";
-import { celticsRouter } from "./celtics";
+import { nbaRouter } from "./nba";
 
 const routers = [
 	developerRouter,
@@ -39,7 +39,7 @@ const routers = [
 	imageRouter,
 	completionRouter,
 	funFactsRouter,
-	celticsRouter
+	nbaRouter
 ] as unknown as FastifyPluginCallback[];
 
 routers.map((router) => app.register(router, { prefix: `/api/v${config.VERSION}` }));
