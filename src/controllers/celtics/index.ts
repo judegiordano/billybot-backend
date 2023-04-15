@@ -37,6 +37,7 @@ export const celticsRouter = async function (app: FastifyInstance) {
 					)
 				);
 			}, [] as INBAGame[]);
+			if (celticsGames.length === 0) throw new NotFoundError(Celtics.NO_NEXT_GAME);
 
 			const { nextGameIndex } = celticsGames.reduce(
 				(acc, { etm }, i) => {
