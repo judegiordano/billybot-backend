@@ -85,6 +85,8 @@ export interface INBASchedule {
 
 export interface INBAGame {
 	etm: string; // game start date/time string in ET ("2023-04-01T20:30:00")
+	gdtutc: string; // game start time date in UTC ("2023-01-03")
+	utctm: string; // game start time in UTC ("00:00")
 	stt: string; // game start time string in ET ("8:30 pm ET", or "Final" if done)
 	v: INBATeam; // visiting team
 	h: INBATeam; // home team
