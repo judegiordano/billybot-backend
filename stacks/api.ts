@@ -79,15 +79,15 @@ export class ApiStack extends Stack {
 			}
 		});
 
-		new Cron(this, "fun-fact-cron", {
-			// fires at 2:00pm daily (UTC -> EST)
-			schedule: "cron(0 18 * * ? *)",
-			job: {
-				function: {
-					handler: "src/handlers/cron.funFact"
-				}
-			}
-		});
+		// new Cron(this, "fun-fact-cron", {
+		// 	// fires at 2:00pm daily (UTC -> EST)
+		// 	schedule: "cron(0 18 * * ? *)",
+		// 	job: {
+		// 		function: {
+		// 			handler: "src/handlers/cron.funFact"
+		// 		}
+		// 	}
+		// });
 
 		new Cron(this, "role-update-cron", {
 			// fires every 1 min
