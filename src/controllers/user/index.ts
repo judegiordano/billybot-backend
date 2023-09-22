@@ -157,7 +157,7 @@ export const userRouter = async function (app: FastifyInstance) {
 				req.query;
 			const filter = {
 				server_id,
-				...(username ? { username: { $regex: username, $options: "gi" } } : null),
+				...(username ? { username: { $regex: username, $options: "i" } } : null),
 				...(is_admin === "true" ? { is_admin } : null),
 				...(is_mayor === "true" ? { is_mayor } : null),
 				...(is_fool === "true" ? { is_fool } : null),
