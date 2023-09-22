@@ -4,10 +4,6 @@
   "main": "index.js",
   "author": "judegiordano <judegiordano@gmail.com>",
   "license": "MIT",
-  "engines": {
-    "node": "^14.15.0 || ^16.13.0 || ^18.15.0",
-    "yarn": "^1.22.0"
-  },
   "scripts": {
     "prepare": "npx husky install",
     "lint": "eslint --fix --ext .ts src scripts stacks",

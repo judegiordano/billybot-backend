@@ -13,22 +13,27 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 16
+      - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
-          cache: yarn
+          node-version: 18
 
-      - run: yarn install --frozen-lockfile
+      - name: use pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
-      - run: yarn lint
+      - run: pnpm install --frozen-lockfile
 
-      - run: yarn build
+      - run: pnpm lint
+
+      - run: pnpm build
 
       - name: Serverless Stack Deploy
         run: |
           set -euxo pipefail
-          yarn deploy prod
+          pnpm deploy prod
+
         env:
           STAGE: prod
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

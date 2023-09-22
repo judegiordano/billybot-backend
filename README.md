@@ -20,8 +20,8 @@
 
 7: `compose up` the necessary mongodb docker image provided in the dev container
 
-8: run `yarn install`
+8: run `pnpm install`
 
-9: run `yarn start local`
+9: run `pnpm start local`
 
 10: begin making requests either through curl or the team postman workspace (will have to request access)
