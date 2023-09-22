@@ -32,14 +32,14 @@ jobs:
       - name: Serverless Stack Deploy
         run: |
           set -euxo pipefail
-          pnpm deploy prod
+          pnpm sst deploy --stage prod
 
         env:
           STAGE: prod
+          VERSION: 2
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          VERSION: ${{ secrets.VERSION }}
           MONGO_URI: ${{ secrets.MONGO_URI }}
           DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
           DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}

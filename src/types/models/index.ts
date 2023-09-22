@@ -1,6 +1,5 @@
 import type { IModel } from "btbot-types";
 import { QueryOptions, PopulateOptions } from "mongoose";
-export type { AggregateOptions } from "mongodb";
 export type { FilterQuery, UpdateQuery, PipelineStage } from "mongoose";
 
 export type Projection = Record<string, 0 | 1>;
