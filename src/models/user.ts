@@ -391,7 +391,7 @@ class Users extends mongoose.Repository<IUser> {
 				fields: [
 					{
 						name: `+${jackpot}`,
-						value: `You win this week's lottery!\nYou now have ${updatedWinner.billy_bucks} BillyBucks!`
+						value: `You win this week's lottery!\nYou now have ${updatedWinner.billy_bucks} BillyBucks!\n\nYou are now also eligible to play a round of Deal or No Deal! Run \`/dealornodeal\` to play!`
 					}
 				]
 			},
@@ -505,7 +505,7 @@ class Users extends mongoose.Repository<IUser> {
 		if (!updated || updated.length <= 0 || !updated?.[0]?._id) return;
 		let content = "Happy Birthday!\n";
 		for (const user of updated as IUser[]) {
-			content += `<@${user.user_id}>\n`;
+			content += `< @${user.user_id} >\n`;
 		}
 		content += `\nEnjoy your free \`${server.settings.birthday_bucks}\` BillyBucks!`;
 		return discord.postContent(webhook, content);
