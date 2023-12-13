@@ -234,6 +234,10 @@ class Users extends mongoose.Repository<IUser> {
 			birthday: {
 				type: Date,
 				default: null
+			},
+			is_deal_or_no_deal_eligible: {
+				type: Boolean,
+				default: true
 			}
 		});
 	}
@@ -374,7 +378,8 @@ class Users extends mongoose.Repository<IUser> {
 						"metrics.lottery.overall_winnings": jackpot,
 						"metrics.lottery.wins": 1
 					},
-					has_lottery_ticket: false
+					has_lottery_ticket: false,
+					is_deal_or_no_deal_eligible: true
 				}
 			),
 			users.bulkUpdate({ server_id, has_lottery_ticket: true }, { has_lottery_ticket: false })

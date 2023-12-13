@@ -65,13 +65,20 @@ class DealOrNoDealGames extends mongoose.Repository<IDealOrNoDeal> {
 	public async openCase(server_id: string, user_id: string, case_num: number) {
 		const existingGame = await super.read({ server_id, user_id, is_complete: false });
 
-		// start a new game if there is no incomplete existing game
-		if (!existingGame)
+		// start a new game if there is no incomplete existing game and the user is eligible to play
+		if (!existingGame) {
+			const user = await users.assertRead({ server_id, user_id });
+			if (!user.is_deal_or_no_deal_eligible)
+				throw new BadRequestError(
+					"Sorry, you are not currently eligible to play Deal or No Deal! You must win the weekly lottery for a chance to play."
+				);
+			await users.updateOne({ server_id, user_id }, { is_deal_or_no_deal_eligible: false });
 			return super.insertOne({
 				server_id,
 				user_id,
 				selected_case: case_num
 			});
+		}
 
 		// assert user has not aleady opened the required number of cases to be offered a deal this round
 		if (existingGame.to_open === 0) return existingGame;
