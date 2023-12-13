@@ -4,6 +4,7 @@ import { chance } from "@helpers";
 import { mongoose } from "@services";
 import { BadRequestError } from "@errors";
 import { users } from "@models";
+import { IS_LOCAL } from "@config";
 
 const CASE_VALUES = [
 	1, 5, 10, 25, 50, 75, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2500, 5000
@@ -68,7 +69,7 @@ class DealOrNoDealGames extends mongoose.Repository<IDealOrNoDeal> {
 		// start a new game if there is no incomplete existing game and the user is eligible to play
 		if (!existingGame) {
 			const user = await users.assertRead({ server_id, user_id });
-			if (!user.is_deal_or_no_deal_eligible)
+			if (!user.is_deal_or_no_deal_eligible && !IS_LOCAL)
 				throw new BadRequestError(
 					"Sorry, you are not currently eligible to play Deal or No Deal! You must win the weekly lottery for a chance to play."
 				);
