@@ -115,6 +115,7 @@ class DealOrNoDealGames extends mongoose.Repository<IDealOrNoDeal> {
 	public async respondToOffer(server_id: string, user_id: string, is_deal: boolean) {
 		const game = await super.read({ server_id, user_id, is_complete: false });
 		if (!game) return null;
+
 		// if the player accepts the deal, increment their bucks and end the game
 		if (is_deal) {
 			await users.updateOne({ server_id, user_id }, { $inc: { billy_bucks: game.offer } });
@@ -125,6 +126,22 @@ class DealOrNoDealGames extends mongoose.Repository<IDealOrNoDeal> {
 				}
 			);
 		}
+
+		// if the player rejects the deal when are only two cases left, the player wins the value in their own case and the game is over
+		const opened = game.cases.filter((c) => c.is_open).length;
+		if (game.cases.length - opened <= 2) {
+			await users.updateOne(
+				{ server_id, user_id },
+				{ $inc: { billy_bucks: game.cases[game.selected_case - 1].value } }
+			);
+			return super.updateOne(
+				{ server_id, user_id, is_complete: false },
+				{
+					is_complete: true
+				}
+			);
+		}
+
 		// if the player rejects the deal, start of the next round of opening cases
 		return super.updateOne(
 			{ server_id, user_id, is_complete: false },
