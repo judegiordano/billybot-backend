@@ -128,7 +128,7 @@ class DealOrNoDealGames extends mongoose.Repository<IDealOrNoDeal> {
 			);
 		}
 
-		// if the player rejects the deal when are only two cases left, the player wins the value in their own case and the game is over
+		// if the player rejects the deal when there are only two cases left, the player wins the value in their own case and the game is over
 		const opened = game.cases.filter((c) => c.is_open).length;
 		if (game.cases.length - opened <= 2) {
 			await users.updateOne(
