@@ -13,3 +13,4 @@ export { connectFourGames } from "./connect-four-games";
 export { openAiImages } from "./openai-images";
 export { openAiCompletions } from "./openai-completions";
 export { funFacts } from "./fun-fact";
+export { dealOrNoDealGames } from "./deal-or-no-deal";
