@@ -1,5 +1,5 @@
 import { IConnectFour, RouletteColor } from "btbot-types";
-import type { IBlackJack, ISportsBet } from "btbot-types";
+import type { IBlackJack } from "btbot-types";
 
 import { chance } from ".";
 

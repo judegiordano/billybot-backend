@@ -215,7 +215,6 @@ export async function roleUpdate() {
 }
 
 export async function paySportsBettingWinners() {
-	// if (IS_LOCAL) return;
 	await mongoose.createConnection();
 	const generalWebhooks = await webhooks.list(
 		{
@@ -239,7 +238,12 @@ export async function paySportsBettingWinners() {
 		server_id: { $in: serverIds },
 		is_complete: false
 	});
-	if (!activeBets || activeBets.length === 0) return;
+	if (!activeBets || activeBets.length === 0)
+		return {
+			statusCode: 200,
+			headers: { "Content-Type": "application/json" },
+			body: "no active bets found"
+		};
 
 	// group active bets by sport key to minimize number of requests to odds api
 	const activeBetsGroupedBySportKey = activeBets.reduce((acc, bet) => {
@@ -259,7 +263,12 @@ export async function paySportsBettingWinners() {
 	// flatten game results matrix into single array
 	const gameResults = [] as ISportsBetGameResult[];
 	gameResultsMatrix.forEach((games) => gameResults.push(...games));
-	if (gameResults.length === 0) return;
+	if (gameResults.length === 0)
+		return {
+			statusCode: 200,
+			headers: { "Content-Type": "application/json" },
+			body: "active bets found, but no completed game results found"
+		};
 
 	// use game results to determine winning and losing bets
 	const { winningBets, losingBets } = gameResults.reduce(
