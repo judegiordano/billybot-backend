@@ -130,7 +130,7 @@ export const sportsBettingRouter = async function (app: FastifyInstance) {
 			if (bet_amount < 1)
 				throw new BadRequestError("Bet amount must be at least 1 BillyBuck!");
 			await servers.assertExists({ server_id });
-			const { billy_bucks } = await users.assertHasBucks(user_id, server_id, bet_amount);
+			await users.assertHasBucks(user_id, server_id, bet_amount);
 			const existingBet = await sportsBetting.read({ server_id, user_id, game_id });
 			if (existingBet)
 				throw new BadRequestError(
@@ -140,29 +140,34 @@ export const sportsBettingRouter = async function (app: FastifyInstance) {
 			if (!games || games.length === 0)
 				throw new BadRequestError("Game not found! Be sure to provide a valid Game ID.");
 			const game = games[0];
-			if (new Date(game.commence_time) < new Date())
+			const { commence_time } = game;
+			if (new Date(commence_time) < new Date())
 				throw new BadRequestError("Too late to place a bet! The game has already started.");
 			const team = bet_on_home_team ? game.home_team : game.away_team;
 			const odds =
 				game.bookmakers[0].markets[0].outcomes.find((o) => o.name === team)?.price ?? 100;
-			const [bet] = await Promise.all([
-				sportsBetting.betOnGame(
+			const [bet, user] = await Promise.all([
+				sportsBetting.betOnGame({
 					server_id,
 					user_id,
 					sport_key,
 					game_id,
-					game.commence_time,
+					commence_time,
 					team,
 					bet_amount,
-					odds,
-					billy_bucks - bet_amount
-				),
+					odds
+				}),
 				users.assertUpdateOne(
 					{ server_id, user_id },
 					{ $inc: { billy_bucks: -bet_amount } }
 				)
 			]);
-			return bet;
+			return {
+				bet_amount: bet.bet_amount,
+				team: bet.team,
+				odds: bet.odds,
+				bucks: user.billy_bucks
+			};
 		}
 	);
 
