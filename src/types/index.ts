@@ -1,5 +1,3 @@
-import { ISportsBet } from "btbot-types";
-
 export {
 	CommonError,
 	NotFoundError,
