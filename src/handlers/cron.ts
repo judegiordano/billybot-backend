@@ -216,33 +216,13 @@ export async function roleUpdate() {
 
 export async function paySportsBettingWinners() {
 	await mongoose.createConnection();
-	const generalWebhooks = await webhooks.list(
-		{
-			channel_name: "general"
-		},
-		{
-			populate: [{ path: "server" }]
-		}
-	);
-	if (generalWebhooks.length <= 0) {
-		return {
-			statusCode: 200,
-			headers: { "Content-Type": "application/json" },
-			body: "no webhooks found for general"
-		};
-	}
 
-	// get active bets for all servers registered with webhook
-	const serverIds = generalWebhooks.map((webhook: IWebhook) => webhook.server_id);
-	const activeBets = await sportsBetting.list({
-		server_id: { $in: serverIds },
-		is_complete: false
-	});
+	const activeBets = await sportsBetting.list({ is_complete: false });
 	if (!activeBets || activeBets.length === 0)
 		return {
 			statusCode: 200,
 			headers: { "Content-Type": "application/json" },
-			body: "no active bets found"
+			body: "done: no active bets found"
 		};
 
 	// group active bets by sport key to minimize number of requests to odds api
@@ -267,7 +247,7 @@ export async function paySportsBettingWinners() {
 		return {
 			statusCode: 200,
 			headers: { "Content-Type": "application/json" },
-			body: "active bets found, but no completed game results found"
+			body: "done: active bets found, but no completed game results found"
 		};
 
 	// use game results to determine winning and losing bets
@@ -306,7 +286,15 @@ export async function paySportsBettingWinners() {
 		})();
 	});
 
-	// notify all servers with winning bets
+	// notify each discord server with winners that has a webhook
+	const generalWebhooks = await webhooks.list(
+		{
+			channel_name: "general"
+		},
+		{
+			populate: [{ path: "server" }]
+		}
+	);
 	const postToDiscord = generalWebhooks.map((webhook: IWebhook) => {
 		const winningBetsInThisServer = winningBets.filter(
 			(bet) => bet.server_id === webhook.server_id
@@ -314,9 +302,9 @@ export async function paySportsBettingWinners() {
 		if (winningBetsInThisServer.length === 0) return;
 		let msg = "Congratulations to the following winning sport bettors!\n\n";
 		winningBetsInThisServer.forEach((bet) => {
-			const { user_id, bet_amount, odds } = bet;
+			const { user_id, bet_amount, odds, team } = bet;
 			const winnings = calculateSportsBettingPayout(bet_amount, odds);
-			msg += `<@${user_id}>: +${winnings} BillyBucks\n`;
+			msg += `<@${user_id}>: +${winnings} BillyBucks for betting ${bet_amount} BillyBucks on the ${team} at ${odds}\n`;
 		});
 		return discord.postContent(webhook, msg);
 	});
