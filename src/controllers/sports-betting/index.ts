@@ -142,7 +142,6 @@ export const sportsBettingRouter = async function (app: FastifyInstance) {
 			const game = games[0];
 			if (new Date(game.commence_time) < new Date())
 				throw new BadRequestError("Too late to place a bet! The game has already started.");
-
 			const team = bet_on_home_team ? game.home_team : game.away_team;
 			const odds =
 				game.bookmakers[0].markets[0].outcomes.find((o) => o.name === team)?.price ?? 100;

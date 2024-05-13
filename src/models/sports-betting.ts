@@ -92,10 +92,6 @@ class SportsBetting extends mongoose.Repository<ISportsBet> {
 		);
 		return data.filter((game) => game.completed);
 	}
-
-	public calculatePayout(bet_amount: number, odds: number) {
-		return odds > 0 ? bet_amount * (odds / 100) : bet_amount / (Math.abs(odds) / 100);
-	}
 }
 
 export const sportsBetting = new SportsBetting();

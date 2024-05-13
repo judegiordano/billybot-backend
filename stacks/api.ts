@@ -99,6 +99,16 @@ export class ApiStack extends Stack {
 			}
 		});
 
+		new Cron(this, "sports-betting-cron", {
+			// fires every day at 11:00am (UTC -> EST)
+			schedule: "cron(0 15 * * ? *)",
+			job: {
+				function: {
+					handler: "src/handlers/cron.paySportsBettingWinners"
+				}
+			}
+		});
+
 		const api = new Api(this, "api", {
 			routes: {
 				$default: "src/handlers/index.run"

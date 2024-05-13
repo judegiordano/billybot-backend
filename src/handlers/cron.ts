@@ -1,10 +1,18 @@
-import { ClientConnectionStatus, IClient, IServerSettings, IWebhook } from "btbot-types";
+import {
+	ClientConnectionStatus,
+	IClient,
+	IServerSettings,
+	ISportsBet,
+	ISportsBetGameResult,
+	IWebhook
+} from "btbot-types";
 
 import { discord, mongoose } from "@services";
 import { oauthQueue } from "@aws/queues";
-import { users, webhooks, servers, clients, funFacts } from "@models";
+import { users, webhooks, servers, clients, funFacts, sportsBetting } from "@models";
 import { IDiscordGuildMember, Discord } from "@types";
 import { IS_LOCAL } from "@config";
+import { calculateSportsBettingPayout } from "@helpers";
 
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();
@@ -204,4 +212,111 @@ export async function roleUpdate() {
 		);
 	const operations = removeNoblemen.concat(addNoblemen, removeSerfs, addSerfs);
 	if (operations.length > 0) await Promise.all(operations);
+}
+
+export async function paySportsBettingWinners() {
+	// if (IS_LOCAL) return;
+	await mongoose.createConnection();
+	const generalWebhooks = await webhooks.list(
+		{
+			channel_name: "general"
+		},
+		{
+			populate: [{ path: "server" }]
+		}
+	);
+	if (generalWebhooks.length <= 0) {
+		return {
+			statusCode: 200,
+			headers: { "Content-Type": "application/json" },
+			body: "no webhooks found for general"
+		};
+	}
+
+	// get active bets for all servers registered with webhook
+	const serverIds = generalWebhooks.map((webhook: IWebhook) => webhook.server_id);
+	const activeBets = await sportsBetting.list({
+		server_id: { $in: serverIds },
+		is_complete: false
+	});
+	if (!activeBets || activeBets.length === 0) return;
+
+	// group active bets by sport key to minimize number of requests to odds api
+	const activeBetsGroupedBySportKey = activeBets.reduce((acc, bet) => {
+		if (!acc[bet.sport_key]) acc[bet.sport_key] = [];
+		acc[bet.sport_key].push(bet);
+		return acc;
+	}, {} as Record<string, ISportsBet[]>);
+
+	// get game results for each sport with active bets (1 request per sport for max efficiency)
+	const gameResultsMatrix = await Promise.all(
+		Object.keys(activeBetsGroupedBySportKey).map((sportKey) => {
+			const gameIds = activeBetsGroupedBySportKey[sportKey].map((bet) => bet.game_id);
+			return sportsBetting.getGameResults(sportKey, gameIds);
+		})
+	);
+
+	// flatten game results matrix into single array
+	const gameResults = [] as ISportsBetGameResult[];
+	gameResultsMatrix.forEach((games) => gameResults.push(...games));
+	if (gameResults.length === 0) return;
+
+	// use game results to determine winning and losing bets
+	const { winningBets, losingBets } = gameResults.reduce(
+		(acc, game) => {
+			const bet = activeBets.find((bet) => bet.game_id === game.id);
+			if (!bet) return acc;
+			const winningIndex =
+				parseInt(game.scores[0].score) > parseInt(game.scores[1].score) ? 0 : 1;
+			const winningTeam = game.scores[winningIndex].name;
+			const isWon = bet.team === winningTeam;
+			if (isWon) acc.winningBets.push(bet);
+			else acc.losingBets.push(bet);
+			return acc;
+		},
+		{ winningBets: [] as ISportsBet[], losingBets: [] as ISportsBet[] }
+	);
+
+	// for winnings bets: pay the user, update metrics, and mark bet as complete
+	const handleWinningBets = winningBets.map((bet) => {
+		const { _id, server_id, user_id, bet_amount, odds } = bet;
+		const winnings = calculateSportsBettingPayout(bet_amount, odds);
+		return (async () => {
+			users.assertUpdateOne({ server_id, user_id }, { $inc: { billy_bucks: winnings } });
+			users.updateSportsBettingMetrics(bet, winnings);
+			sportsBetting.assertUpdateOne({ _id }, { is_complete: true, is_won: true });
+		})();
+	});
+
+	// for losing bets: update metrics and mark bet as complete
+	const handleLosingBets = losingBets.map((bet) => {
+		const { _id } = bet;
+		return (async () => {
+			users.updateSportsBettingMetrics(bet);
+			sportsBetting.assertUpdateOne({ _id }, { is_complete: true, is_won: false });
+		})();
+	});
+
+	// notify all servers with winning bets
+	const postToDiscord = generalWebhooks.map((webhook: IWebhook) => {
+		const winningBetsInThisServer = winningBets.filter(
+			(bet) => bet.server_id === webhook.server_id
+		);
+		if (winningBetsInThisServer.length === 0) return;
+		let msg = "Congratulations to the following winning sport bettors!\n\n";
+		winningBetsInThisServer.forEach((bet) => {
+			const { user_id, bet_amount, odds } = bet;
+			const winnings = calculateSportsBettingPayout(bet_amount, odds);
+			msg += `<@${user_id}>: +${winnings} BillyBucks\n`;
+		});
+		return discord.postContent(webhook, msg);
+	});
+
+	await Promise.all([...handleWinningBets, ...handleLosingBets, ...postToDiscord]);
+
+	return {
+		statusCode: 200,
+		headers: { "Content-Type": "application/json" },
+		body: "done"
+	};
 }

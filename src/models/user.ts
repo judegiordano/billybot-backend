@@ -4,6 +4,7 @@ import type {
 	IEngagementMetrics,
 	IServer,
 	IServerSettings,
+	ISportsBet,
 	IUser,
 	IWebhook
 } from "btbot-types";
@@ -14,6 +15,7 @@ import {
 	getRouletteResult,
 	buildBlackJackMetrics,
 	buildConnectFourMetrics,
+	buildSportsBettingMetrics,
 	chance
 } from "@helpers";
 import { UnauthorizedError, BadRequestError } from "@errors";
@@ -210,6 +212,29 @@ class Users extends mongoose.Repository<IUser> {
 							default: 0
 						},
 						overall_losings: {
+							type: Number,
+							default: 0
+						}
+					},
+					sports_betting: {
+						required: false,
+						bets: {
+							type: Number,
+							default: 0
+						},
+						wins: {
+							type: Number,
+							default: 0
+						},
+						losses: {
+							type: Number,
+							default: 0
+						},
+						total_amount_bet: {
+							type: Number,
+							default: 0
+						},
+						total_amount_won: {
 							type: Number,
 							default: 0
 						}
@@ -446,6 +471,12 @@ class Users extends mongoose.Repository<IUser> {
 	public async updateConnectFourMetrics(game: IConnectFour, user_id: string) {
 		const { server_id } = game;
 		const { $inc } = buildConnectFourMetrics(game, user_id);
+		return super.updateOne({ server_id, user_id }, { $inc }) as Promise<IUser>;
+	}
+
+	public async updateSportsBettingMetrics(bet: ISportsBet, winnings?: number) {
+		const { server_id, user_id, bet_amount } = bet;
+		const { $inc } = buildSportsBettingMetrics(bet_amount, winnings);
 		return super.updateOne({ server_id, user_id }, { $inc }) as Promise<IUser>;
 	}
 
