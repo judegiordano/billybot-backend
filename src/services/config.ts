@@ -14,6 +14,7 @@ export const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET as string
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY as string;
 export const STOCK_API_KEY = process.env.STOCK_API_KEY as string;
 export const BOT_TOKEN = process.env.BOT_TOKEN as string;
+export const ODDS_API_KEY = process.env.ODDS_API_KEY as string;
 // resources
 export const MEDIA_BUCKET = process.env.MEDIA_BUCKET as string;
 export const OPENAI_BUCKET = process.env.OPENAI_BUCKET as string;
@@ -26,3 +27,4 @@ export const DASHBOARD_URL = IS_LOCAL ? "http://localhost:3000" : "https://billy
 export const DASHBOARD_DOMAIN = IS_LOCAL ? "localhost" : "billybot.vercel.app";
 export const API_URL = `${process.env.API_URL}/api/v${VERSION}`;
 export const NBA_API_URL = "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba";
+export const ODDS_API_URL = "https://api.the-odds-api.com/v4";
