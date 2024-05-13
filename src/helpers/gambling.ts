@@ -72,7 +72,7 @@ export function buildSportsBettingMetrics(bet_amount: number, winnings = 0) {
 }
 
 export function calculateSportsBettingPayout(bet_amount: number, odds: number) {
-	return (
+	return Math.round(
 		bet_amount + (odds > 0 ? bet_amount * (odds / 100) : bet_amount / (Math.abs(odds) / 100))
 	);
 }

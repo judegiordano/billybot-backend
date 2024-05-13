@@ -277,7 +277,7 @@ export async function paySportsBettingWinners() {
 		{ winningBets: [] as ISportsBet[], losingBets: [] as ISportsBet[] }
 	);
 
-	// for winnings bets: pay the user, update metrics, and mark bet as complete
+	// for winning bets: pay the user, update metrics, and mark bet as complete
 	const handleWinningBets = winningBets.map((bet) => {
 		const { _id, server_id, user_id, bet_amount, odds } = bet;
 		const winnings = calculateSportsBettingPayout(bet_amount, odds);
