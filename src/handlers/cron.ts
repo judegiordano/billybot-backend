@@ -3,7 +3,6 @@ import {
 	IClient,
 	IServerSettings,
 	ISportsBet,
-	ISportsBetGameResult,
 	IWebhook
 } from "btbot-types";
 import _ from "lodash";
