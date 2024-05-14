@@ -15,7 +15,8 @@ import {
 	getRouletteResult,
 	buildBlackJackMetrics,
 	buildConnectFourMetrics,
-	buildSportsBettingMetrics,
+	buildSportsBettingBetPlacedMetrics,
+	buildSportsBettingPayoutMetrics,
 	chance
 } from "@helpers";
 import { UnauthorizedError, BadRequestError } from "@errors";
@@ -474,9 +475,15 @@ class Users extends mongoose.Repository<IUser> {
 		return super.updateOne({ server_id, user_id }, { $inc }) as Promise<IUser>;
 	}
 
-	public async updateSportsBettingMetrics(bet: ISportsBet, winnings?: number) {
+	public async updateSportsBettingBetPlacedMetrics(bet: ISportsBet) {
 		const { server_id, user_id, bet_amount } = bet;
-		const { $inc } = buildSportsBettingMetrics(bet_amount, winnings);
+		const { $inc } = buildSportsBettingBetPlacedMetrics(bet_amount);
+		return super.updateOne({ server_id, user_id }, { $inc }) as Promise<IUser>;
+	}
+
+	public async updateSportsBettingPayoutMetrics(bet: ISportsBet, winnings?: number) {
+		const { server_id, user_id } = bet;
+		const { $inc } = buildSportsBettingPayoutMetrics(winnings);
 		return super.updateOne({ server_id, user_id }, { $inc }) as Promise<IUser>;
 	}
 

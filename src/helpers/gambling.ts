@@ -61,11 +61,17 @@ export function buildConnectFourMetrics(game: IConnectFour, user_id: string) {
 	return { $inc };
 }
 
-export function buildSportsBettingMetrics(bet_amount: number, winnings = 0) {
+export function buildSportsBettingBetPlacedMetrics(bet_amount: number) {
 	const $inc = {
 		"metrics.gambling.sports_betting.bets": 1,
+		"metrics.gambling.sports_betting.total_amount_bet": bet_amount
+	};
+	return { $inc };
+}
+
+export function buildSportsBettingPayoutMetrics(winnings = 0) {
+	const $inc = {
 		[`metrics.gambling.sports_betting.${winnings > 0 ? "wins" : "losses"}`]: 1,
-		"metrics.gambling.sports_betting.total_amount_bet": bet_amount,
 		"metrics.gambling.sports_betting.total_amount_won": winnings
 	};
 	return { $inc };

@@ -272,7 +272,7 @@ export async function paySportsBettingWinners() {
 		const winnings = calculateSportsBettingPayout(bet_amount, odds);
 		return (async () => {
 			users.assertUpdateOne({ server_id, user_id }, { $inc: { billy_bucks: winnings } });
-			users.updateSportsBettingMetrics(bet, winnings);
+			users.updateSportsBettingPayoutMetrics(bet, winnings);
 			sportsBetting.assertUpdateOne({ _id }, { is_complete: true, is_won: true });
 		})();
 	});
@@ -281,7 +281,7 @@ export async function paySportsBettingWinners() {
 	const handleLosingBets = losingBets.map((bet) => {
 		const { _id } = bet;
 		return (async () => {
-			users.updateSportsBettingMetrics(bet);
+			users.updateSportsBettingPayoutMetrics(bet);
 			sportsBetting.assertUpdateOne({ _id }, { is_complete: true, is_won: false });
 		})();
 	});

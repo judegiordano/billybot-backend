@@ -40,7 +40,8 @@ export {
 	getRouletteResult,
 	buildBlackJackMetrics,
 	buildConnectFourMetrics,
-	buildSportsBettingMetrics,
+	buildSportsBettingBetPlacedMetrics,
+	buildSportsBettingPayoutMetrics,
 	calculateSportsBettingPayout
 } from "./gambling";
 export { renderTemplate } from "./email-templates";

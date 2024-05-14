@@ -162,6 +162,7 @@ export const sportsBettingRouter = async function (app: FastifyInstance) {
 					{ $inc: { billy_bucks: -bet_amount } }
 				)
 			]);
+			await users.updateSportsBettingBetPlacedMetrics(bet);
 			return {
 				bet_amount: bet.bet_amount,
 				team: bet.team,
