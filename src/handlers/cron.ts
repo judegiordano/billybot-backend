@@ -6,6 +6,7 @@ import {
 	ISportsBetGameResult,
 	IWebhook
 } from "btbot-types";
+import _ from "lodash";
 
 import { discord, mongoose } from "@services";
 import { oauthQueue } from "@aws/queues";
@@ -241,8 +242,7 @@ export async function paySportsBettingWinners() {
 	);
 
 	// flatten game results matrix into single array
-	const gameResults = [] as ISportsBetGameResult[];
-	gameResultsMatrix.forEach((games) => gameResults.push(...games));
+	const gameResults = _.flatten(gameResultsMatrix);
 	if (gameResults.length === 0)
 		return {
 			statusCode: 200,
