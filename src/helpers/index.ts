@@ -39,7 +39,10 @@ export {
 	spinColor,
 	getRouletteResult,
 	buildBlackJackMetrics,
-	buildConnectFourMetrics
+	buildConnectFourMetrics,
+	buildSportsBettingBetPlacedMetrics,
+	buildSportsBettingPayoutMetrics,
+	calculateSportsBettingPayout
 } from "./gambling";
 export { renderTemplate } from "./email-templates";
 export { slugify };

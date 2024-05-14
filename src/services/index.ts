@@ -7,5 +7,5 @@ export { getNbaSchedule } from "./rest";
 export * as password from "./password";
 export * as oauth from "./oauth";
 export * as cookie from "./cookie";
-export { discordApi, test, stockApiClient } from "./request";
+export { discordApi, test, stockApiClient, oddsApiClient } from "./request";
 export { notifications } from "./mailer";

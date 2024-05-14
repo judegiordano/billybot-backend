@@ -19,6 +19,7 @@ export default function main(app: App) {
 			DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET ?? "client_secret",
 			OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? "xxxxxxxxxxxx",
 			STOCK_API_KEY: process.env.STOCK_API_KEY ?? "xxxxxxxxxxxx",
+			ODDS_API_KEY: process.env.ODDS_API_KEY ?? "xxxxxxxxxxxx",
 			BOT_TOKEN: process.env.BOT_TOKEN ?? "xxxxxxxxxxxx"
 		}
 	});

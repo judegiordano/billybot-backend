@@ -96,3 +96,14 @@ export interface INBATeam {
 	tc: string; // team city: ("Boston")
 	tn: string; // team name: ("Celtics")
 }
+
+export interface ISportsBetParams {
+	server_id: string;
+	user_id: string;
+	sport_key: string;
+	game_id: string;
+	commence_time: string;
+	team: string;
+	bet_amount: number;
+	odds: number;
+}

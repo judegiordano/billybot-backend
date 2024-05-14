@@ -109,3 +109,4 @@ export const discordApi = new RestApi(`${config.DISCORD_API}/v8`);
 export const stockApiClient = new RestApi(config.STOCK_API_URL);
 export const test = new RestApi("https://jsonplaceholder.typicode.com");
 export const nbaApi = new RestApi(config.NBA_API_URL);
+export const oddsApiClient = new RestApi(config.ODDS_API_URL);

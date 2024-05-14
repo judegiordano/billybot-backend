@@ -21,6 +21,7 @@ import { completionRouter } from "./completions";
 import { funFactsRouter } from "./facts";
 import { nbaRouter } from "./nba";
 import { dealOrNoDealRouter } from "./deal-or-no-deal";
+import { sportsBettingRouter } from "./sports-betting";
 
 const routers = [
 	developerRouter,
@@ -41,7 +42,8 @@ const routers = [
 	completionRouter,
 	funFactsRouter,
 	nbaRouter,
-	dealOrNoDealRouter
+	dealOrNoDealRouter,
+	sportsBettingRouter
 ] as unknown as FastifyPluginCallback[];
 
 routers.map((router) => app.register(router, { prefix: `/api/v${config.VERSION}` }));

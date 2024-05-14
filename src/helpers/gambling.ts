@@ -52,7 +52,6 @@ export function buildConnectFourMetrics(game: IConnectFour, user_id: string) {
 	const { to_move, wager } = game;
 	const won = to_move === user_id;
 	const draw = !to_move;
-
 	const $inc = {
 		"metrics.gambling.connect_four.games": 1,
 		[`metrics.gambling.connect_four.${won ? "wins" : draw ? "draws" : "losses"}`]: 1,
@@ -60,4 +59,26 @@ export function buildConnectFourMetrics(game: IConnectFour, user_id: string) {
 		...(!won && !draw ? { "metrics.gambling.connect_four.overall_losings": wager } : {})
 	};
 	return { $inc };
+}
+
+export function buildSportsBettingBetPlacedMetrics(bet_amount: number) {
+	const $inc = {
+		"metrics.gambling.sports_betting.bets": 1,
+		"metrics.gambling.sports_betting.total_amount_bet": bet_amount
+	};
+	return { $inc };
+}
+
+export function buildSportsBettingPayoutMetrics(winnings = 0) {
+	const $inc = {
+		[`metrics.gambling.sports_betting.${winnings > 0 ? "wins" : "losses"}`]: 1,
+		"metrics.gambling.sports_betting.total_amount_won": winnings
+	};
+	return { $inc };
+}
+
+export function calculateSportsBettingPayout(bet_amount: number, odds: number) {
+	return Math.round(
+		bet_amount + (odds > 0 ? bet_amount * (odds / 100) : bet_amount / (Math.abs(odds) / 100))
+	);
 }
