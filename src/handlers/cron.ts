@@ -303,7 +303,9 @@ export async function paySportsBettingWinners() {
 		winningBetsInThisServer.forEach((bet) => {
 			const { user_id, bet_amount, odds, team } = bet;
 			const winnings = calculateSportsBettingPayout(bet_amount, odds);
+			const profit = winnings - bet_amount;
 			msg += `<@${user_id}>: +${winnings} BillyBucks for betting ${bet_amount} BillyBucks on the ${team} at ${odds}\n`;
+			msg += `(bet of ${bet_amount} returned plus ${profit} in winnings)\n\n`;
 		});
 		return discord.postContent(webhook, msg);
 	});
