@@ -42,7 +42,8 @@ export {
 	buildConnectFourMetrics,
 	buildSportsBettingBetPlacedMetrics,
 	buildSportsBettingPayoutMetrics,
-	calculateSportsBettingPayout
+	calculateSportsBettingPayout,
+	showPlusSignIfPositive
 } from "./gambling";
 export { renderTemplate } from "./email-templates";
 export { slugify };

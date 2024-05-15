@@ -12,7 +12,7 @@ import { oauthQueue } from "@aws/queues";
 import { users, webhooks, servers, clients, funFacts, sportsBetting } from "@models";
 import { IDiscordGuildMember, Discord } from "@types";
 import { IS_LOCAL } from "@config";
-import { calculateSportsBettingPayout } from "@helpers";
+import { calculateSportsBettingPayout, showPlusSignIfPositive } from "@helpers";
 
 export async function pickLotteryWinner() {
 	await mongoose.createConnection();
@@ -304,8 +304,10 @@ export async function paySportsBettingWinners() {
 			const { user_id, bet_amount, odds, team } = bet;
 			const winnings = calculateSportsBettingPayout(bet_amount, odds);
 			const profit = winnings - bet_amount;
-			msg += `<@${user_id}>: +${winnings} BillyBucks for betting ${bet_amount} BillyBucks on the ${team} at ${odds}\n`;
-			msg += `(bet of ${bet_amount} returned plus ${profit} in winnings)\n\n`;
+			msg += `<@${user_id}>: +${winnings} BillyBucks for betting ${bet_amount} BillyBucks on the ${team} at ${showPlusSignIfPositive(
+				odds
+			)}\n`;
+			msg += `(bet of ${bet_amount} + ${profit} in winnings)\n\n`;
 		});
 		return discord.postContent(webhook, msg);
 	});

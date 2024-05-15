@@ -82,3 +82,7 @@ export function calculateSportsBettingPayout(bet_amount: number, odds: number) {
 		bet_amount + (odds > 0 ? bet_amount * (odds / 100) : bet_amount / (Math.abs(odds) / 100))
 	);
 }
+
+export function showPlusSignIfPositive(num: number) {
+	return num > 0 ? `+${num}` : `${num}`;
+}
