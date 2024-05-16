@@ -250,10 +250,10 @@ export async function paySportsBettingWinners() {
 		};
 
 	// use game results to determine winning and losing bets
-	const { winningBets, losingBets } = gameResults.reduce(
-		(acc, game) => {
-			const bet = activeBets.find((bet) => bet.game_id === game.id);
-			if (!bet) return acc;
+	const { winningBets, losingBets } = activeBets.reduce(
+		(acc, bet) => {
+			const game = gameResults.find((game) => game.id === bet.game_id);
+			if (!game) return acc;
 			const winningIndex =
 				parseInt(game.scores[0].score) > parseInt(game.scores[1].score) ? 0 : 1;
 			const winningTeam = game.scores[winningIndex].name;
