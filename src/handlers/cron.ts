@@ -236,7 +236,7 @@ export async function paySportsBettingWinners() {
 	const gameResultsMatrix = await Promise.all(
 		Object.keys(activeBetsGroupedBySportKey).map((sportKey) => {
 			const gameIds = activeBetsGroupedBySportKey[sportKey].map((bet) => bet.game_id);
-			return sportsBetting.getGameResults(sportKey, gameIds);
+			return sportsBetting.getGameResults(sportKey, [...new Set(gameIds)]);
 		})
 	);
 
