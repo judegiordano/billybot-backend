@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { SportKey } from "btbot-types";
+import { IServer, IUser, SportKey } from "btbot-types";
 
 import { sportsBetting, servers, users } from "@models";
 import { BadRequestError } from "@errors";
@@ -162,7 +162,6 @@ export const sportsBettingRouter = async function (app: FastifyInstance) {
 					{ $inc: { billy_bucks: -bet_amount } }
 				)
 			]);
-			await users.updateSportsBettingBetPlacedMetrics(bet);
 			return {
 				bet_amount: bet.bet_amount,
 				team: bet.team,
@@ -229,9 +228,38 @@ export const sportsBettingRouter = async function (app: FastifyInstance) {
 			return await sportsBetting.getGameResults(sport_key, game_ids);
 		}
 	);
+
+	app.get<{ Params: IServer }>(
+		"/sportsbetting/stats/:server_id",
+		{
+			schema: {
+				params: { $ref: "serverIdParams#" },
+				response: { 200: { $ref: "userArray#" } }
+			}
+		},
+		async (req) => {
+			const { server_id } = req.params;
+			await servers.assertExists({ server_id });
+			const allUsers = await users.list({ server_id });
+			const winners = allUsers
+				.sort((a, b) => getUserNetWinnings(b) - getUserNetWinnings(a))
+				.slice(0, 3);
+			const losers = allUsers
+				.sort((a, b) => getUserNetWinnings(a) - getUserNetWinnings(b))
+				.slice(0, 3);
+			return [...winners, ...losers];
+		}
+	);
 };
 
 const assertIsValidSport = (sport_key: string) => {
 	if (!Object.values(SportKey).includes(sport_key as SportKey))
 		throw new BadRequestError("Invalid sport!");
+};
+
+const getUserNetWinnings = (user: IUser) => {
+	return (
+		user.metrics.gambling.sports_betting.total_amount_won -
+		user.metrics.gambling.sports_betting.total_amount_bet
+	);
 };

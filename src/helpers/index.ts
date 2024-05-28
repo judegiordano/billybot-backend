@@ -40,7 +40,6 @@ export {
 	getRouletteResult,
 	buildBlackJackMetrics,
 	buildConnectFourMetrics,
-	buildSportsBettingBetPlacedMetrics,
 	buildSportsBettingPayoutMetrics,
 	calculateSportsBettingPayout,
 	showPlusSignIfPositive
