@@ -47,16 +47,14 @@ class OpenAiImage extends mongoose.Repository<IOpenAiImage> {
 		if (filename.length >= 1024) {
 			throw new BadRequestError("input prompt too long");
 		}
-		const response = await OpenAIClient.createImage({
+		const response = await OpenAIClient.images.generate({
 			prompt,
 			n: 1,
 			size: "1024x1024",
 			response_format: "b64_json"
 		});
-		const data = response.data.data[0].b64_json;
-		if (!data) {
-			throw new InternalServerError("no data found");
-		}
+		const data = response?.data?.[0]?.b64_json;
+		if (!data) throw new InternalServerError("The image could not be generated!");
 		const buffer = Buffer.from(data, "base64");
 		await openaiBucket.putObject(filename, buffer);
 		return super.insertOne({

@@ -1,9 +1,8 @@
 import type { IOpenAiCompletion } from "btbot-types";
-import { OpenAiCompletionModel } from "btbot-types";
 
 import { mongoose } from "@services";
 import { OpenAIClient } from "@helpers";
-import { BadRequestError } from "@src/types/errors";
+import { InternalServerError } from "@src/types/errors";
 
 class OpenAiCompletion extends mongoose.Repository<IOpenAiCompletion> {
 	constructor() {
@@ -38,13 +37,13 @@ class OpenAiCompletion extends mongoose.Repository<IOpenAiCompletion> {
 		server_id: string;
 		prompt: string;
 	}) {
-		const response = await OpenAIClient.createCompletion({
-			model: OpenAiCompletionModel.davinci,
-			prompt,
+		const completion = await OpenAIClient.chat.completions.create({
+			messages: [{ role: "system", content: prompt }],
+			model: "gpt-4",
 			max_tokens: 2048
 		});
-		const output = response.data.choices[0].text?.trim();
-		if (!output) throw new BadRequestError("The response could not be generated!");
+		const output = completion?.choices?.[0].message?.content?.trim();
+		if (!output) throw new InternalServerError("The response could not be generated!");
 
 		return super.insertOne({
 			user_id,

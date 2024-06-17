@@ -2,7 +2,7 @@ import slugify from "slugify";
 import Chance from "chance";
 import type { IUser } from "btbot-types";
 import { customAlphabet } from "nanoid";
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 import { OPENAI_API_KEY } from "@config";
 
 export function buildAvatarUrl(user: IUser) {
@@ -29,11 +29,7 @@ export const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 20);
 
 export const chance = new Chance();
 
-export const OpenAIClient = new OpenAIApi(
-	new Configuration({
-		apiKey: OPENAI_API_KEY
-	})
-);
+export const OpenAIClient = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 export {
 	spinColor,
