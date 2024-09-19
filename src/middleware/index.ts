@@ -55,6 +55,7 @@ export const schemas = plugin(async function (app: FastifyInstance) {
 			is_mayor: { type: "boolean" },
 			is_fool: { type: "boolean" },
 			birthday: { type: "string" },
+			is_deal_or_no_deal_eligible: { type: "boolean" },
 			metrics: {
 				type: "object",
 				properties: {
