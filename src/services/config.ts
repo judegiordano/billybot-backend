@@ -18,8 +18,8 @@ export const ODDS_API_KEY = process.env.ODDS_API_KEY as string;
 // resources
 export const MEDIA_BUCKET = process.env.MEDIA_BUCKET as string;
 export const OPENAI_BUCKET = process.env.OPENAI_BUCKET as string;
-export const REFRESH_TOKEN_QUEUE = process.env.REFRESH_TOKEN_QUEUE as string;
-export const NOTIFICATION_QUEUE = process.env.NOTIFICATION_QUEUE as string;
+export const REFRESH_TOKEN_QUEUE = ""; // disabled for now
+export const NOTIFICATION_QUEUE = ""; // disabled for now
 // static urls
 export const DISCORD_API = "https://discord.com/api";
 export const STOCK_API_URL = "https://finnhub.io/api/v1";
