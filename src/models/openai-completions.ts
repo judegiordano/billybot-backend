@@ -52,6 +52,14 @@ class OpenAiCompletion extends mongoose.Repository<IOpenAiCompletion> {
 			output
 		});
 	}
+
+	public async searchPrompt(prompt: string) {
+		return super.textSearch({
+			indexName: "openai_completions_prompt",
+			path: "prompt",
+			query: prompt
+		});
+	}
 }
 
 export const openAiCompletions = new OpenAiCompletion();

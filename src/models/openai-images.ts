@@ -65,6 +65,14 @@ class OpenAiImage extends mongoose.Repository<IOpenAiImage> {
 			permalink: openaiBucket.buildPublicUrl(filename).toString()
 		});
 	}
+
+	public async searchPrompt(prompt: string) {
+		return super.autoComplete({
+			indexName: "openai_images_prompt",
+			path: "prompt",
+			query: prompt
+		});
+	}
 }
 
 export const openAiImages = new OpenAiImage();

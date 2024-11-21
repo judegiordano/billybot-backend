@@ -19,7 +19,8 @@ import type {
 	Options,
 	PipelineStage,
 	AggregateOptions,
-	PaginationOptions
+	PaginationOptions,
+	AutoCompleteOptions
 } from "@interfaces";
 
 let cachedConnection: Connection | null = null;
@@ -211,5 +212,63 @@ export class Repository<T extends IModel> {
 			pages: Math.ceil(count / limit),
 			items
 		};
+	}
+
+	public async autoComplete(options: AutoCompleteOptions<T>) {
+		const skip = options.offset == undefined ? 0 : options.offset;
+		const limit = options.limit == undefined ? 100 : options.limit;
+		const pipeline: PipelineStage[] = [
+			{
+				$search: {
+					index: options.indexName,
+					autocomplete: {
+						path: options.path,
+						query: options.query,
+						fuzzy: {
+							// optional, but worth testing for bad spellers
+							maxEdits: 1, // up to 1 mispelled char
+							prefixLength: 2, // minimum correct letters before fixing
+							maxExpansions: 5 // max variations to search for
+						}
+					}
+				}
+			},
+			{
+				$skip: skip
+			},
+			{
+				$limit: limit
+			}
+		];
+		return this.aggregate<T[]>(pipeline);
+	}
+
+	public async textSearch(options: AutoCompleteOptions<T>) {
+		const skip = options.offset == undefined ? 0 : options.offset;
+		const limit = options.limit == undefined ? 100 : options.limit;
+		const pipeline: PipelineStage[] = [
+			{
+				$search: {
+					index: options.indexName,
+					text: {
+						path: options.path,
+						query: options.query,
+						fuzzy: {
+							// optional, but worth testing for bad spellers
+							maxEdits: 1, // up to 1 mispelled char
+							prefixLength: 2, // minimum correct letters before fixing
+							maxExpansions: 5 // max variations to search for
+						}
+					}
+				}
+			},
+			{
+				$skip: skip
+			},
+			{
+				$limit: limit
+			}
+		];
+		return this.aggregate<T[]>(pipeline);
 	}
 }

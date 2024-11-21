@@ -18,3 +18,11 @@ export interface Options<T extends IModel> extends QueryOptions {
 export interface PaginationOptions<T extends IModel> extends Options<T> {
 	page: number;
 }
+
+export interface AutoCompleteOptions<T> {
+	indexName: string;
+	path: keyof T;
+	query: any;
+	limit?: number;
+	offset?: number;
+}

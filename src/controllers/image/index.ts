@@ -30,7 +30,6 @@ export const imageRouter = async function (app: FastifyInstance) {
 				await users.assertExists({ user_id, server_id });
 				return await openAiImages.generate({ user_id, server_id, prompt });
 			} catch (error) {
-				console.log({ error });
 				throw new BadRequestError("The image could not be generated!");
 			}
 		}
@@ -55,14 +54,32 @@ export const imageRouter = async function (app: FastifyInstance) {
 			}
 		},
 		async (req) => {
-			try {
-				const { server_id, user_id } = req.query;
-				await users.assertExists({ user_id, server_id });
-				return await openAiImages.list({ user_id, server_id }, { sort: { created_at: 1 } });
-			} catch (error) {
-				console.log({ error });
-				throw new BadRequestError("The image could not be generated!");
+			const { server_id, user_id } = req.query;
+			await users.assertExists({ user_id, server_id });
+			return await openAiImages.list({ user_id, server_id }, { sort: { created_at: 1 } });
+		}
+	);
+	app.post<{ Body: { prompt: string } }>(
+		"/images/autocomplete",
+		{
+			preValidation: [app.restricted],
+			schema: {
+				body: {
+					type: "object",
+					required: ["prompt"],
+					additionalProperties: false,
+					properties: {
+						prompt: { type: "string" }
+					}
+				},
+				response: {
+					200: { $ref: "openaiImageArray#" }
+				}
 			}
+		},
+		async (req) => {
+			const { prompt } = req.body;
+			return await openAiImages.searchPrompt(prompt);
 		}
 	);
 };
