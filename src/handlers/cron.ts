@@ -1,15 +1,8 @@
-import {
-	ClientConnectionStatus,
-	IClient,
-	IServerSettings,
-	ISportsBet,
-	IWebhook
-} from "btbot-types";
+import { IServerSettings, ISportsBet, IWebhook } from "btbot-types";
 import _ from "lodash";
 
 import { discord, mongoose } from "@services";
-import { oauthQueue } from "@aws/queues";
-import { users, webhooks, servers, clients, funFacts, sportsBetting } from "@models";
+import { users, webhooks, servers, funFacts, sportsBetting } from "@models";
 import { IDiscordGuildMember, Discord } from "@types";
 import { IS_LOCAL } from "@config";
 import { calculateSportsBettingPayout, showPlusSignIfPositive } from "@helpers";
@@ -60,34 +53,6 @@ export async function happyBirthday() {
 		};
 	}
 	await Promise.all(generalWebhooks.map((webhook: IWebhook) => users.wishBirthday(webhook)));
-	return {
-		statusCode: 200,
-		headers: { "Content-Type": "application/json" },
-		body: "done"
-	};
-}
-
-// refresh client tokens
-export async function refreshOauthTokens() {
-	await mongoose.createConnection();
-	const connectedAccounts = await clients.list({
-		auth_state: { $ne: null },
-		"auth_state.refresh_token": { $ne: null },
-		connection_status: ClientConnectionStatus.connected
-	});
-	if (connectedAccounts.length === 0) {
-		return {
-			statusCode: 200,
-			headers: { "Content-Type": "application/json" },
-			body: "no connected accounts"
-		};
-	}
-	const operations = connectedAccounts.map((client: IClient) => {
-		const { _id, auth_state } = client;
-		const { refresh_token } = auth_state as { refresh_token: string };
-		return oauthQueue.sendTokenQueueMessage({ _id, refresh_token });
-	});
-	await Promise.all(operations);
 	return {
 		statusCode: 200,
 		headers: { "Content-Type": "application/json" },

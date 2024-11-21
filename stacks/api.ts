@@ -1,13 +1,4 @@
-import {
-	Stack,
-	App,
-	StackProps,
-	Api,
-	Function,
-	Cron,
-	Bucket,
-	Queue
-} from "@serverless-stack/resources";
+import { Stack, App, StackProps, Api, Function, Cron, Bucket } from "@serverless-stack/resources";
 
 export class ApiStack extends Stack {
 	constructor(scope: App, id: string, props?: StackProps) {
@@ -29,23 +20,23 @@ export class ApiStack extends Stack {
 			}
 		});
 
-		const tokenQueue = new Queue(this, "refresh-token-queue", {
-			consumer: "src/handlers/queue.refreshTokenConsumer",
-			cdk: {
-				queue: {
-					fifo: true
-				}
-			}
-		});
+		// const tokenQueue = new Queue(this, "refresh-token-queue", {
+		// 	consumer: "src/handlers/queue.refreshTokenConsumer",
+		// 	cdk: {
+		// 		queue: {
+		// 			fifo: true
+		// 		}
+		// 	}
+		// });
 
-		const notificationQueue = new Queue(this, "email-notification-queue", {
-			consumer: "src/handlers/queue.notificationQueueConsumer",
-			cdk: {
-				queue: {
-					fifo: true
-				}
-			}
-		});
+		// const notificationQueue = new Queue(this, "email-notification-queue", {
+		// 	consumer: "src/handlers/queue.notificationQueueConsumer",
+		// 	cdk: {
+		// 		queue: {
+		// 			fifo: true
+		// 		}
+		// 	}
+		// });
 
 		new Cron(this, "lottery-cron", {
 			// fires at 12:00pm FRI (UTC -> EST)
@@ -65,19 +56,19 @@ export class ApiStack extends Stack {
 			job: "src/handlers/cron.happyBirthday"
 		});
 
-		new Cron(this, "refresh-oauth", {
-			// fires every 5 days
-			schedule: "rate(5 days)",
-			job: {
-				function: {
-					handler: "src/handlers/cron.refreshOauthTokens",
-					permissions: [tokenQueue],
-					environment: {
-						REFRESH_TOKEN_QUEUE: tokenQueue.cdk.queue.queueUrl
-					}
-				}
-			}
-		});
+		// new Cron(this, "refresh-oauth", {
+		// 	// fires every 5 days
+		// 	schedule: "rate(5 days)",
+		// 	job: {
+		// 		function: {
+		// 			handler: "src/handlers/cron.refreshOauthTokens",
+		// 			permissions: [],
+		// 			environment: {
+		// 				REFRESH_TOKEN_QUEUE: ""
+		// 			}
+		// 		}
+		// 	}
+		// });
 
 		// new Cron(this, "fun-fact-cron", {
 		// 	// fires at 2:00pm daily (UTC -> EST)
@@ -115,7 +106,7 @@ export class ApiStack extends Stack {
 			},
 			defaults: {
 				function: {
-					permissions: [notificationQueue, openaiBucket],
+					permissions: [openaiBucket],
 					environment: {
 						MEDIA_BUCKET: mediaBucket.bucketName,
 						OPENAI_BUCKET: openaiBucket.bucketName
@@ -141,8 +132,6 @@ export class ApiStack extends Stack {
 		const functions = this.getAllFunctions();
 		functions.map((fn) => {
 			fn.addEnvironment("API_URL", api.url);
-			fn.addEnvironment("NOTIFICATION_QUEUE", notificationQueue.cdk.queue.queueUrl);
-			fn.addEnvironment("REFRESH_TOKEN_QUEUE", tokenQueue.cdk.queue.queueUrl);
 		});
 	}
 }
